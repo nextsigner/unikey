@@ -1,1 +1,1 @@
-Se sube todo el proyecto unikey.pro
+Se elimina build_win
