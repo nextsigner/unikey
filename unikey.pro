@@ -14,7 +14,10 @@ win32:{
 
 SOURCES += \
         main.cpp \
-        ul.cpp
+        row.cpp \
+        ul.cpp \
+        unikargsproc.cpp \
+        unikqprocess.cpp
 
 RESOURCES += qml.qrc
 
@@ -30,4 +33,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ul.h
+    row.h \
+    ul.h \
+    unikargsproc.h \
+    unikqprocess.h
