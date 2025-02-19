@@ -9,6 +9,7 @@ Window {
     height: 480
     title: "UniKey"
     color: c1
+    //opacity: unik?1.0:0.5
 
     property int fs: Screen.width*0.02
 
@@ -33,7 +34,12 @@ Window {
                     color: app.c2
                 }
                 Text{
-                    text: '<b>Directorio actual:</b> '+unik.currentFolderPath()
+                    text: '<b>Carpeta actual:</b> '+(unik?unik.currentFolderPath():'...')
+                    font.pixelSize: app.fs
+                    color: app.c2
+                }
+                Text{
+                    text: '<b>Parámetros recibidos:</b> '+(unik?uap.getArgs():'...')
                     font.pixelSize: app.fs
                     color: app.c2
                 }

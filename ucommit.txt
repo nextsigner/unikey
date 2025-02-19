@@ -1,1 +1,1 @@
-Se compila con ul
+Se crea .gitignore

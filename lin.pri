@@ -21,7 +21,7 @@
 
 # Para la configuración Release
 CONFIG(release, debug|release):{
-    DESTDIR = /home/ns/nsp/zool/build_lin
+    DESTDIR = $$PWD/build_lin
 }
 
 #Building Quazip from Ubuntu 16.10

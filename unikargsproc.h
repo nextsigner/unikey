@@ -50,10 +50,13 @@ public:
 signals:
 
 public slots:
-    void init();
-    void procArgs();
-    void procCfgArgs();
-    void procUSSArgs();
+    Q_INVOKABLE void init();
+    Q_INVOKABLE void procArgs();
+    Q_INVOKABLE void procCfgArgs();
+    Q_INVOKABLE void procUSSArgs();
+    Q_INVOKABLE QStringList getArgs(){
+        return  args;
+    }
 
 private:
     QSettings settings;

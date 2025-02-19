@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("unikLog", u.ukStd);
     //engine.rootContext()->setContextProperty("unikError", listaErrores);
-    engine.rootContext()->setContextProperty("uap", uap.args);
+    engine.rootContext()->setContextProperty("uap", &uap);
     //<--Set engine properties
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
