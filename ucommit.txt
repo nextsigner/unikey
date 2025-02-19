@@ -1,1 +1,1 @@
-Se crea .gitignore
+Se elimina unikey-
