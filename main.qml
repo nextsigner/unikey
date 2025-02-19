@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
+import QtQuick.Controls 2.12
 
 Window {
     id: app
@@ -9,12 +10,16 @@ Window {
     height: 480
     title: "UniKey"
     color: c1
-    //opacity: unik?1.0:0.5
-
     property int fs: Screen.width*0.02
-
     property color c1: 'black'
     property color c2: 'white'
+
+    Connections{
+        target: unik
+        onUkStdChanged:{
+            log.text+=''+unik.ukStd+'<br>'
+        }
+    }
 
     Item{
         id: xApp
@@ -26,6 +31,7 @@ Window {
             Column{
                 id: col
                 spacing: app.fs
+                width: xApp.width-app.fs
                 anchors.horizontalCenter: parent.horizontalCenter
                 Item{width: 1; height: app.fs}
                 Text{
@@ -39,9 +45,26 @@ Window {
                     color: app.c2
                 }
                 Text{
-                    text: '<b>Parámetros recibidos:</b> '+(unik?uap.getArgs():'...')
+                    text: '<b>Parámetros recibidos:</b> '+Qt.application.arguments.toString()
                     font.pixelSize: app.fs
                     color: app.c2
+                    width: col.width
+                    wrapMode: Text.WordWrap
+                }
+                Text{
+                    id: log
+                    text: '<b>Salida:</b><br>'
+                    color: app.c2
+                    width: col.width
+                    wrapMode: Text.WordWrap
+                }
+                Button{
+                    text: 'Probar'
+                    onClicked: {
+                        unik.cd('/home/ns/nsp')
+                        unik.log("adfafa")
+                        log.text+=''+unik.currentFolderPath()
+                    }
                 }
             }
         }

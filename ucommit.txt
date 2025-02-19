@@ -1,1 +1,1 @@
-Se elimina unikey-
+Se comienza a programar para que qml procese todos los parámetros.
