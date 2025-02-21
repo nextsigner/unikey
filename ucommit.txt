@@ -1,1 +1,1 @@
-Se agrega la detección de parametro -folder
+Se agregan las funciones para descargar proyectos git

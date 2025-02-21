@@ -255,6 +255,7 @@ public:
     Q_INVOKABLE bool fileExist(QByteArray fileName);
     Q_INVOKABLE QList<QString> getFileList(QByteArray folder);
     Q_INVOKABLE bool mkdir(const QString path);
+    Q_INVOKABLE bool isFolder(const QString &folder);
     Q_INVOKABLE QList<QString> getFolderFileList(const QByteArray folder);
     Q_INVOKABLE void log(QByteArray d);
     Q_INVOKABLE void log(QByteArray d, bool htmlEscaped);
@@ -269,13 +270,14 @@ public:
     Q_INVOKABLE bool isRPI();
 
     //Funciones Network
-    QByteArray getHttpFile(QByteArray url);
+    Q_INVOKABLE QByteArray getHttpFile(QByteArray url);
     void httpReadyRead();
-    bool downloadZipFile(QByteArray url, QByteArray ubicacion);
-    void getZipFileSizeForDownload(QByteArray url);
+    Q_INVOKABLE bool downloadZipFile(QByteArray url, QByteArray ubicacion);
+    Q_INVOKABLE bool downloadGit(QByteArray url, QByteArray branch, QByteArray localFolder);
+    Q_INVOKABLE void getZipFileSizeForDownload(QByteArray url);
     void setUZipFileSize();
 
-    void sendFile(QString file, QString phpReceiver);
+    Q_INVOKABLE void sendFile(QString file, QString phpReceiver);
     void uploadProgress(qint64 bytesSend, qint64 bytesTotal);
     void downloadProgress(qint64 bytesSend, qint64 bytesTotal);
     void sendFinished();

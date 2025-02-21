@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     UL u;
     u.setEngine(&engine);
 
-    //qmlRegisterType<UL>("unik.Unik", 1, 0, "Unik");
+    qmlRegisterType<UL>("unik.Unik", 1, 0, "Unik");
     //<--Register Types
     qmlRegisterType<UnikQProcess>("unik.UnikQProcess", 1, 0, "UnikQProcess");
 

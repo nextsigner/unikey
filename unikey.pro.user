@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.11.1, 2025-02-20T22:07:33. -->
+<!-- Written by QtCreator 4.11.1, 2025-02-21T13:34:35. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -287,8 +287,7 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/ns/nsp/unikey/unikey.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/ns/nsp/unikey/unikey.pro</value>
-    <value type="QString" key="RunConfiguration.Arguments">-folder=/home/ns/nsp/p100
-</value>
+    <value type="QString" key="RunConfiguration.Arguments">-ggit=https://github.com/nextsigner/qml-pacman2  -folder=/home/ns/nsp</value>
     <value type="bool" key="RunConfiguration.Arguments.multi">false</value>
     <value type="QString" key="RunConfiguration.OverrideDebuggerStartup"></value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
