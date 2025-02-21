@@ -1,1 +1,1 @@
-Se comienza a programar para que qml procese todos los parámetros.
+Se agrega la función para crear ejemplo de main.qml

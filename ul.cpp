@@ -66,6 +66,12 @@ bool UL::folderExist(const QByteArray folder)
 {
     return  QDir(folder.constData()).exists();
 }
+bool UL::fileExist(QByteArray fileName)
+{
+    QFile a(fileName);
+    return a.exists();
+}
+
 
 QList<QString> UL::getFileList(QByteArray folder)
 {
@@ -102,13 +108,18 @@ QList<QString> UL::getFolderFileList(const QByteArray folder)
 
 void UL::log(QByteArray d)
 {
+    log(d, false);
+}
+
+void UL::log(QByteArray d, bool htmlEscaped)
+{
     QString d2;
     d2.append(d);
     if(!_engine->rootContext()->property("setInitString").toBool()){
         initStdString.append(d2);
         initStdString.append("\n");
     }
-    setUkStd(d2);
+    setUkStd(d2, htmlEscaped);
 }
 
 void UL::sleep(int ms)

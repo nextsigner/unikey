@@ -202,8 +202,16 @@ public:
         return ukStd;
     }
     void setUkStd(const QString s){
+        setUkStd(s, false);
+    }
+
+    void setUkStd(const QString s, bool htmlEscaped){
         QString u="";
-        u.append(s.toHtmlEscaped());
+        if(htmlEscaped){
+            u.append(s.toHtmlEscaped());
+        }else{
+            u.append(s);
+        }
         u.append("\n");
         ukStd=u;
         if(debugLog){
@@ -244,10 +252,12 @@ public:
     Q_INVOKABLE bool setFile(QByteArray fileName, QByteArray fileData, QByteArray codec);
     Q_INVOKABLE QString getFile(QByteArray n);
     Q_INVOKABLE bool folderExist(const QByteArray folder);
+    Q_INVOKABLE bool fileExist(QByteArray fileName);
     Q_INVOKABLE QList<QString> getFileList(QByteArray folder);
     Q_INVOKABLE bool mkdir(const QString path);
     Q_INVOKABLE QList<QString> getFolderFileList(const QByteArray folder);
     Q_INVOKABLE void log(QByteArray d);
+    Q_INVOKABLE void log(QByteArray d, bool htmlEscaped);
     Q_INVOKABLE void sleep(int ms);
     Q_INVOKABLE QString getPath(int path);
     Q_INVOKABLE QString encData(QByteArray d, QString user, QString key);
