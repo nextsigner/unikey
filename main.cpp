@@ -38,6 +38,12 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("unik", &u);
     //<--Set engine properties
 
+    QByteArray documentsPath;
+    documentsPath.append(u.getPath(3).toUtf8());
+    documentsPath.append("/unik");
+    engine.rootContext()->setContextProperty("documentsPath", documentsPath);
+    //engine.rootContext()->setContextProperty("clipboard", &clipboard);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {

@@ -126,6 +126,8 @@ Window {
                             let cp = unik.currentFolderPath()
                             let fp=cp+'/main.qml'
                             unik.setProperty('fromUnikey', true)
+                            unik.setProperty("documentsPath", unik.getPath(3))
+                            unik.addImportPath(cp+'/modules')
                             engine.load(fp)
                         }
                     }
@@ -327,6 +329,8 @@ Window {
             }else{
                 unik.clearComponentCache()
                 unik.setProperty('unik', unik)
+                unik.setProperty("documentsPath", unik.getPath(3))
+                unik.addImportPath(cp+'/modules')
                 engine.load(fp)
                 app.close()
             }
