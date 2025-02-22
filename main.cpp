@@ -3,6 +3,7 @@
 
 #include "unikargsproc.h"
 #include "ul.h"
+#include "qmlclipboardadapter.h"
 
 
 int main(int argc, char *argv[])
@@ -13,6 +14,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     UL u;
     u.setEngine(&engine);
+    //Clipboard function for GNU/Linux, Windows and Macos
+#ifndef Q_OS_ANDROID
+    QmlClipboardAdapter clipboard;
+#endif
 
     qmlRegisterType<UL>("unik.Unik", 1, 0, "Unik");
     //<--Register Types
@@ -42,7 +47,7 @@ int main(int argc, char *argv[])
     documentsPath.append(u.getPath(3).toUtf8());
     documentsPath.append("/unik");
     engine.rootContext()->setContextProperty("documentsPath", documentsPath);
-    //engine.rootContext()->setContextProperty("clipboard", &clipboard);
+    engine.rootContext()->setContextProperty("clipboard", &clipboard);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
