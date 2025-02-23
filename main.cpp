@@ -37,6 +37,19 @@ int main(int argc, char *argv[])
     nv = QString(nv).replace("\n", "");
     app.setApplicationVersion(nv);
     //<--Set Unik Version
+    app.setApplicationDisplayName("unikey");
+    app.setApplicationName("unikey");
+    app.setOrganizationDomain("unikode.org");
+
+    //-->Set unikey exec path
+    QByteArray p="";
+    p.append(u.getPath(5));
+    u.log("Unikey exec path: "+p);
+    QByteArray pAppData="";
+    pAppData.append(u.getPath(4));
+    u.log("Unikey appData path: "+pAppData);
+    u.setFile(p+"/unikeyLocation", pAppData);
+    //<--Set unikey exec path
 
     //-->Set engine properties
     engine.rootContext()->setContextProperty("engine", &engine);

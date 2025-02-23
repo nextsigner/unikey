@@ -901,7 +901,11 @@ bool UL::downloadGit(QByteArray url, QByteArray branch, QByteArray localFolder)
             QString nfn3 = nfn2;//.replace(" ", "%20");
 
             if(nfn3.at(nfn3.size()-1)!="/"){
-                qInfo()<<"Destino de archivo: "<<nfn3;
+                //qInfo()<<"Destino de archivo: "<<nfn3;
+                QByteArray logStr="";
+                logStr.append("Destino de archivo: ");
+                logStr.append(nfn3);
+                log(logStr);
                 QFile nfile(nfn3);
                 if(!nfile.open(QIODevice::WriteOnly)){
                     qInfo()<<"Error al abrir archivo "<<nfn3;
@@ -968,7 +972,11 @@ bool UL::downloadGit(QByteArray url, QByteArray branch, QByteArray localFolder)
             QString nfn3 = nfn2.replace(" ", "%20");
 
             if(nfn3.at(nfn3.size()-1)!="/"){
-                qInfo()<<"Destino de archivo: "<<nfn3;
+                //qInfo()<<"Destino de archivo: "<<nfn3;
+                QByteArray logStr="";
+                logStr.append("Destino de archivo: ");
+                logStr.append(nfn3);
+                log(logStr);
                 QFile nfile(nfn3);
                 if(!nfile.open(QIODevice::WriteOnly)){
                     qInfo()<<"Error al abrir archivo "<<nfn3;
@@ -1045,7 +1053,11 @@ bool UL::downloadGit(QByteArray url, QByteArray branch, QByteArray localFolder)
             QString nfn3 = nfn2.replace(" ", "%20");
 
             if(nfn3.at(nfn3.size()-1)!="/"){
-                qInfo()<<"Destino de archivo: "<<nfn3;
+                //qInfo()<<"Destino de archivo: "<<nfn3;
+                QByteArray logStr="";
+                logStr.append("Destino de archivo: ");
+                logStr.append(nfn3);
+                log(logStr);
                 QFile nfile(nfn3);
                 if(!nfile.open(QIODevice::WriteOnly)){
                     qInfo()<<"Error al abrir archivo "<<nfn3;
@@ -1093,7 +1105,11 @@ bool UL::downloadGit(QByteArray url, QByteArray branch, QByteArray localFolder)
             QByteArray banfn3;
             banfn3.append(nfn3.at(nfn3.size()-1));
             if(banfn3!="/"){
-                qInfo()<<"Destino de archivo: "<<nfn3;
+                //qInfo()<<"Destino de archivo: "<<nfn3;
+                QByteArray logStr="";
+                logStr.append("Destino de archivo: ");
+                logStr.append(nfn3);
+                log(logStr);
                 QFile nfile(nfn3);
                 if(!nfile.open(QIODevice::WriteOnly)){
                     qInfo()<<"Error al abrir archivo "<<nfn3;
