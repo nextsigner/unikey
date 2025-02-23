@@ -1,1 +1,1 @@
-Se agrega el formulario para probar y guardar repositorios git
+Se agrega la opción de parámetro -nocfg

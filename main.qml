@@ -343,44 +343,52 @@ Window {
         c+='    }\n'
         c+='}\n'
         app.uExampleCode=c
-        showStatusData()
+        init()
     }
 
     Shortcut{
         sequence: 'Ctrl+R'
-        onActivated: showStatusData()
+        onActivated: init()
     }
     Shortcut{
         sequence: 'Esc'
         onActivated: Qt.quit()
     }
-    function showStatusData(){
+    function init(){
         let argsFinal=[]
         cp = unik.currentFolderPath()
         let fp=cp+'/main.qml'
         unik.log('Carpeta actual: '+cp)
 
-        let cAppData=unik.getPath(4)
-        unik.log('Carpeta de datos: '+cAppData)
-        let j
-        let cfgSeted=false
-        if(unik.fileExist(cAppData+'/unikey.cfg')){
-            unik.log('Procesando archivo de configuración de Unikey...')
-            try {
-                let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
-                j = JSON.parse(jsonString);
-                unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j.args, null, 2))
-                if(j.args && j.args['folder']){
-                    argsFinal.push('-folder='+j.args['folder'])
+        let argIndexNoCfg=getArgsIndex(Qt.application.arguments, 'nocfg')
+        unik.log('argIndexNoCfg: '+argIndexNoCfg)
+
+        if(argIndexNoCfg<0){
+            let cAppData=unik.getPath(4)
+            unik.log('Carpeta de datos: '+cAppData)
+            let j
+            let cfgSeted=false
+            if(unik.fileExist(cAppData+'/unikey.cfg')){
+                unik.log('Procesando archivo de configuración de Unikey...')
+                try {
+                    let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
+                    j = JSON.parse(jsonString);
+                    unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j, null, 2))
+                    unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j.args, null, 2))
+                    if(j.args && j.args['folder']){
+                        argsFinal.push('-folder='+j.args['folder'])
+                    }
+                    if(j.args && j.args['git']){
+                        argsFinal.push('-git='+j.args['git'])
+                    }
+                    cfgSeted=true
+                } catch (error) {
+                    console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/unikey.cfg', error);
                 }
-                if(j.args && j.args['git']){
-                    argsFinal.push('-git='+j.args['git'])
-                }
-                cfgSeted=true
-            } catch (error) {
-                console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/unikey.cfg', error);
             }
+
+        }else{
+            unik.log('Se omite la revisión del archivo unikey.cfg...')
         }
 
         if(argsFinal.length===0){
@@ -391,8 +399,8 @@ Window {
 
 
 
-        let argIndexGit=getArgsIndex('git')
-        let argIndexFolder=getArgsIndex('folder')
+        let argIndexGit=getArgsIndex(app.appArgs, 'git')
+        let argIndexFolder=getArgsIndex(app.appArgs, 'folder')
         if(argIndexFolder>=0){
             let a=app.appArgs[argIndexFolder]
             unik.log('Ejecutando Unikey con el argumento '+a)
@@ -509,12 +517,12 @@ Window {
             app.visibility="Maximized"
         }
     }
-    function getArgsIndex(arg){
-        let args=app.appArgs
+    function getArgsIndex(args, arg){
+        //let args=app.appArgs
         let ret=-1
         for(var i=0;i<args.length;i++){
             let a=args[i]
-            if(a.indexOf('-'+arg+'=')>=0){
+            if(a.indexOf('-'+arg+'=')>=0 || a.indexOf('-'+arg+'')>=0){
                 ret=i
                 break
             }
