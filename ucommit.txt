@@ -1,1 +1,1 @@
-Se agrega la opción de parámetro -nocfg
+Se realiza con éxito la descarga -git en Windows 64bit
