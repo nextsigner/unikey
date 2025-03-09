@@ -1,14 +1,21 @@
 QT += qml quick
 QT += sql network
-QT += widgets
+QT += widgets quick3d
+
 
 CONFIG += c++11
 
 win32:{
-    message("2Compilando en Windows")
+    message("Compilando en Windows")
+    #QT += webenginewidgets
+    #QT += webengine
+    QT += webchannel
     include(win.pri)
 } else {
     message("Compilando en GNU/Linux")
+    QT += webenginewidgets
+    QT += webengine
+    QT += webchannel
     include(lin.pri)
 }
 
