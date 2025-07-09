@@ -257,6 +257,15 @@ public:
     Q_INVOKABLE bool mkdir(const QString path);
     Q_INVOKABLE bool isFolder(const QString &folder);
     Q_INVOKABLE QList<QString> getFolderFileList(const QByteArray folder);
+    Q_INVOKABLE void restartApp();
+    Q_INVOKABLE void restartApp(QString args);
+    Q_INVOKABLE bool run(QString commandLine);
+    Q_INVOKABLE bool run(QString commandLine, bool waitingForFinished, int milliseconds);
+    Q_INVOKABLE void writeRun(QString data);
+    Q_INVOKABLE bool ejecutarLineaDeComandoAparte(QString lineaDeComando);
+    Q_INVOKABLE void salidaRun();
+    Q_INVOKABLE void salidaRunError();
+    Q_INVOKABLE void finalizaRun(int e);
     Q_INVOKABLE void log(QByteArray d);
     Q_INVOKABLE void log(QByteArray d, bool htmlEscaped);
     Q_INVOKABLE void sleep(int ms);

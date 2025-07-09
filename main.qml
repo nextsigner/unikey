@@ -24,7 +24,7 @@ Window {
 
     Settings{
         id: apps
-        fileName: unik?unik.getPath(4)+'/unikey_app.cfg':undefined
+        fileName: unik?unik.getPath(4)+'/unikey_app.cfg':''
         property string uGitRep: 'https://github.com/nextsigner/unikey-demo'
         property bool enableCheckBoxShowGitRep: false
     }
@@ -336,6 +336,7 @@ Window {
 
         let argIndexNoCfg=getArgsIndex(Qt.application.arguments, 'nocfg')
         unik.log('argIndexNoCfg: '+argIndexNoCfg)
+        //log.text='aaa: '+argIndexNoCfg
 
         if(argIndexNoCfg<0){
             let cAppData=unik.getPath(4)
@@ -344,8 +345,8 @@ Window {
             let cfgSeted=false
             if(unik.fileExist(cAppData+'/unikey.cfg')){
                 unik.log('Procesando archivo de configuración de Unikey...')
+                let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
                 try {
-                    let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
                     j = JSON.parse(jsonString);
                     unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j, null, 2))
                     unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j.args, null, 2))
@@ -357,6 +358,7 @@ Window {
                     }
                     cfgSeted=true
                 } catch (error) {
+                    unik.log('Falló la carga de unikey.cfg:\n'+jsonString)
                     console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/unikey.cfg', error);
                 }
             }

@@ -1,1 +1,1 @@
-Se compila v1.3.8.1 para Windows 64bit
+Se agregan funciones restartApp y rum

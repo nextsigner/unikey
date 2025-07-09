@@ -112,6 +112,139 @@ QList<QString> UL::getFolderFileList(const QByteArray folder)
     return  ret;
 }
 
+void UL::restartApp()
+{
+
+#ifndef Q_OS_ANDROID
+#ifndef Q_OS_IOS
+    qApp->quit();
+    //QProcess::startDetached(qApp->arguments()[0], qApp->arguments());
+    QProcess::startDetached(qApp->arguments()[0], QStringList());
+#endif
+#else
+    //qApp->quit();
+    //QProcess::startDetached(qApp->arguments()[0], qApp->arguments());
+
+    auto activity = QtAndroid::androidActivity();
+    auto packageManager = activity.callObjectMethod("getPackageManager", "()Landroid/content/pm/PackageManager;");
+
+    auto activityIntent = packageManager.callObjectMethod("getLaunchIntentForPackage",
+                                                          "(Ljava/lang/String;)Landroid/content/Intent;",
+                                                          activity.callObjectMethod("getPackageName",
+                                                                                    "()Ljava/lang/String;").object());
+
+    auto pendingIntent = QAndroidJniObject::callStaticObjectMethod("android/app/PendingIntent", "getActivity",
+                                                                   "(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;",
+                                                                   activity.object(), jint(0), activityIntent.object(),
+                                                                   QAndroidJniObject::getStaticField<jint>("android/content/Intent",
+                                                                                                           "FLAG_ACTIVITY_CLEAR_TOP"));
+
+    auto alarmManager = activity.callObjectMethod("getSystemService",
+                                                  "(Ljava/lang/String;)Ljava/lang/Object;",
+                                                  QAndroidJniObject::getStaticObjectField("android/content/Context",
+                                                                                          "ALARM_SERVICE",
+                                                                                          "Ljava/lang/String;").object());
+
+    alarmManager.callMethod<void>("set",
+                                  "(IJLandroid/app/PendingIntent;)V",
+                                  QAndroidJniObject::getStaticField<jint>("android/app/AlarmManager", "RTC"),
+                                  jlong(QDateTime::currentMSecsSinceEpoch() + 1500), pendingIntent.object());
+
+    qApp->quit();
+#endif
+    //emit restartingApp();
+}
+
+void UL::restartApp(QString args)
+{
+    qApp->quit();
+    QStringList al = args.split(",");
+    qDebug()<<"Restarting executable "<<qApp->applicationFilePath();
+#ifdef Q_OS_LINUX
+    QProcess::startDetached(qApp->applicationFilePath(), al);
+#else
+    QProcess::startDetached(qApp->arguments()[0], al);
+#endif
+}
+
+bool UL::run(QString commandLine){
+    return run(commandLine, false, 0);
+}
+
+bool UL::run(QString commandLine, bool waitingForFinished, int milliseconds)
+{
+#ifndef Q_OS_ANDROID
+    proc = new QProcess(this);
+    connect(proc, SIGNAL(readyReadStandardOutput()),this, SLOT(salidaRun()));
+    connect(proc, SIGNAL(readyReadStandardError()),this, SLOT(salidaRunError()));
+    proc->start(commandLine);
+    //proc->start("sh",QStringList() << "-c" << "ls");
+    if(waitingForFinished){
+        if (!proc->waitForFinished(milliseconds)){
+            qDebug() << "timeout .. ";
+        }
+    }
+    if(proc->isOpen()){
+        setRunCL(true);
+        QString msg;
+        msg.append("Run: ");
+        msg.append(commandLine);
+        setUkStd(msg);
+        return true;
+    }else{
+        QString msg;
+        msg.append("No Run: ");
+        msg.append(commandLine);
+        setUkStd(msg);
+        setRunCL(false);
+    }
+#endif
+    return false;
+}
+
+void UL::writeRun(QString data)
+{
+    proc->write(data.toUtf8());
+}
+
+bool UL::ejecutarLineaDeComandoAparte(QString lineaDeComando)
+{
+#ifndef Q_OS_ANDROID
+    proc = new QProcess(this);
+    connect(proc, SIGNAL(readyReadStandardOutput()),this, SLOT(salidaRun()));
+    connect(proc, SIGNAL(readyReadStandardError()),this, SLOT(salidaRunError()));
+    proc->startDetached(lineaDeComando);
+    if(proc->isOpen()){
+        setRunCL(true);
+        qInfo()<<"Ejecutando "<<lineaDeComando;
+        return true;
+    }else{
+        qInfo()<<"No se està ejecutando "<<lineaDeComando;
+        setRunCL(false);
+    }
+#endif
+    return false;
+}
+
+void UL::salidaRun()
+{
+    log(proc->readAllStandardOutput());
+}
+
+void UL::salidaRunError()
+{
+    log(proc->readAllStandardError());
+}
+
+void UL::finalizaRun(int e)
+{
+    QByteArray s;
+    s.append("command line finished with status ");
+    s.append(QString::number(e));
+    log(s);
+    proc->close();
+}
+
 void UL::log(QByteArray d)
 {
     log(d, false);
