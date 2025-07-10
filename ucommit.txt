@@ -1,1 +1,1 @@
-Se agregan funciones restartApp y rum
+Se agrega qmlmesssagelogger

@@ -4,6 +4,7 @@
 #include "unikargsproc.h"
 #include "ul.h"
 #include "qmlclipboardadapter.h"
+#include "qmlerrorlogger.h"
 
 
 int main(int argc, char *argv[])
@@ -61,6 +62,13 @@ int main(int argc, char *argv[])
     documentsPath.append("/unik");
     engine.rootContext()->setContextProperty("documentsPath", documentsPath);
     engine.rootContext()->setContextProperty("clipboard", &clipboard);
+
+
+    // Crear una instancia de nuestro logger
+    QmlErrorLogger logger;
+
+    // Exponer la instancia al contexto raíz de QML
+    engine.rootContext()->setContextProperty("qmlErrorLogger", &logger);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

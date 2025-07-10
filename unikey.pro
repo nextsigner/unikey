@@ -21,6 +21,7 @@ win32:{
 
 SOURCES += \
         main.cpp \
+        qmlerrorlogger.cpp \
         row.cpp \
         ul.cpp \
         unikargsproc.cpp \
@@ -41,6 +42,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     qmlclipboardadapter.h \
+    qmlerrorlogger.h \
     row.h \
     ul.h \
     unikargsproc.h \
