@@ -9,6 +9,9 @@ Rectangle{
     border.width: 1
     border.color: 'white'
     property bool dev: false
+    property bool resetApp: false
+    property bool setCfg: false
+    property bool isProbe: false
     property string curlPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
     property string app7ZipPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/7-Zip32/7z.exe':'7z'
     property real cPorc: 0
@@ -32,7 +35,7 @@ Rectangle{
         color: apps.backgroundColor
         border.width: 1
         border.color: apps.fontColor
-        parent: xApp
+        //parent: xApp
         anchors.centerIn: parent
         clip: true
         //visible: false
@@ -45,10 +48,10 @@ Rectangle{
             anchors.centerIn: parent
             z: parent.z-1
             visible: xProgresDialog.visible
-//            MouseArea{
-//                anchors.fill: parent
-//                onClicked: zpn.log('Para continuar, primero debes cerrar el cuadro de diálogo de la descarga.')
-//            }
+            //            MouseArea{
+            //                anchors.fill: parent
+            //                onClicked: zpn.log('Para continuar, primero debes cerrar el cuadro de diálogo de la descarga.')
+            //            }
         }
         Column{
             id: col
@@ -408,6 +411,7 @@ Rectangle{
         let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
     }
     function procMoveStdOut(data, folder){
+        //let mainPath=r.uZipFilePath
         log.lv('procMoveStdOut(...).data: '+data)
         log.lv('procMoveStdOut(...).folder: '+foder)
         let mainPath=folder+'/main.qml'
@@ -458,24 +462,55 @@ Rectangle{
             }
         }else{
             r.cPorc=100.00
-            txtLog.text='Cargando aplicación...'
-            let mainPath=r.uZipFilePath
+
+            var mainPath=r.uZipFilePath
             mainPath=mainPath.replace('.zip', '-main')
+            log.lv("Carpeta de archivos: "+mainPath)
             unik.deleteFile(r.uZipFilePath)
 
             let unikeyCfgPath=unik.getPath(4)+'/unikey.cfg'
-            unik.deleteFile(unikeyCfgPath)
-            let j={}
-            j.args={}
-            j.args.folder=mainPath
-            unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
-            if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
-            if(r.dev)log.lv('unikey.cfg: '+JSON.stringify(j, null, 2))
-            unik.restartApp()
+            if(r.setCfg){
+                unik.deleteFile(unikeyCfgPath)
+                let j={}
+                j.args={}
+                j.args.folder=mainPath
+                if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
+                if(r.dev)log.lv('unikey.cfg new data: '+JSON.stringify(j, null, 2))
+                unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
+                if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
+                if(r.dev)log.lv('unikey.cfg: '+JSON.stringify(j, null, 2))
+                if(r.resetApp){
+                    txtLog.text='Cargando aplicación...'
+                    unik.restartApp()
+                }else{
+                    log.lv("Se ha descargado todo el repositorio "+r.uUrl)
+                    log.lv("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
+                    log.lv("Para resetear presione Ctrl+R")
+                }
+            }else{
+                log.lv("\nAtención! Por la configuración de ZipManager NO se ha  modificado el archivo "+unikeyCfgPath)
+                if(r.resetApp && r.isProbe){
+                    mainPath=mainPath.replace('.zip', '-main')
+                    log.lv("Carpeta de archivos: "+mainPath)
+                    txtLog.text='Reseteando con parámetro: -folder='+mainPath
+                    unik.restartApp("-folder="+mainPath)
+                    r.isProbe=false
+                    return
+                }else if(r.resetApp){
+                    txtLog.text='Reseteando sin parámetro...'
+                    unik.restartApp()
+                }else{
+                    log.lv("Se ha descargado todo el repositorio "+r.uUrl)
+                    log.lv("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
+                    log.lv("Para resetear presione Ctrl+R")
+                }
+            }
+
+
             //unik.restartApp("-folder="+mainPath)
-//            Qt.application.arguments=[]
-//            unik.clearComponentCache()
-//            engine.load("qrc:/main.qml")
+            //            Qt.application.arguments=[]
+            //            unik.clearComponentCache()
+            //            engine.load("qrc:/main.qml")
 
             //if(r.dev)log.lv('unik.addImportPath(...): '+mainPath)
             //unik.addImportPath(mainPath+'/modules')

@@ -1,1 +1,1 @@
-Se programa ZipManager v1
+Se agregó botón install a main.qml de unikey

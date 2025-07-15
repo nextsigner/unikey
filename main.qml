@@ -26,6 +26,7 @@ Window {
     Settings{
         id: apps
         fileName: unik?unik.getPath(4)+'/unikey_app.cfg':''
+        property bool runFromGit: false
         property string uGitRep: 'https://github.com/nextsigner/unikey-demo'
         property bool enableCheckBoxShowGitRep: false
         property color fontColor: 'white'
@@ -36,6 +37,13 @@ Window {
         target: unik
         onUkStdChanged:{
             log.text+=''+unik.ukStd+'<br>'
+        }
+    }
+    Connections{
+        target: qmlErrorLogger
+        onMessagesChanged:{
+            app.visibility="Maximized"
+            log.text+=''+qmlErrorLogger.messages+'<br>'
         }
     }
 
@@ -153,41 +161,41 @@ Window {
                     Button{
                         id: botProbarGitRep
                         text: 'Probar'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            zipManager.version='1.1.2'
-                            zipManager.download('https://github.com/nextsigner/zoolv4')
-                            //zipManager.download('https://codeload.github.com/nextsigner/zoolv4/zip/main', 'github')
-                            //runProbe()
+                            runProbe()
                         }
                     }
                     Button{
                         id: botSaveGitRep
-                        text: 'Guardar'
-                        font.pixelSize: app.fs
+                        text: 'Instalar'
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
+                            runInstall()
+                            return
+                            apps.uGitRep=tiGitRep.text
+                            apps.runFromGit=true
                             let cAppData=unik.getPath(4)
                             unik.log('Carpeta de datos: '+cAppData)
                             let j
-                            if(unik.fileExist(cAppData+'/unikey.cfg')){
-                                unik.log('Procesando archivo de configuración de Unikey...')
-                                try {
-                                    let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
-                                    j = JSON.parse(jsonString);
-                                    unik.log('Configuración actual de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                                    if(j.args){
-                                        j.args['git']=tiGitRep.text
-                                    }
-                                    unik.log('Configuración actual de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                                    unik.setFile(cAppData+'/unikey.cfg', JSON.stringify(j, null, 2))
-                                    unik.log('Se ha guardado el repositorio git en la configuración de Unikey.<br>Presiona el Ctrl+R si quieres que se reinicie Unikey con la nueva configuración')
 
-                                } catch (error) {
-                                    console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/unikey.cfg', error);
-                                }
-                            }
+                            unik.log('Procesando archivo de configuración de Unikey...')
+
+                            let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
+                            //j = JSON.parse(jsonString);
+                            j = {}
+                            j.args={}
+                            unik.log('Nueva configuración actual de unikey.cfg:\n'+JSON.stringify(j, null, 2))
+                            //if(j.args){
+                                j.args['git']=tiGitRep.text
+                            //}
+                            //unik.log('Configuración actual de unikey.cfg:\n'+JSON.stringify(j, null, 2))
+                            unik.setFile(cAppData+'/unikey.cfg', JSON.stringify(j, null, 2))
+                            unik.log('Se ha guardado el repositorio git en la configuración de Unikey.<br>Presiona el Ctrl+R si quieres que se reinicie Unikey con la nueva configuración')
+
+
                         }
                     }
                 }
@@ -196,7 +204,7 @@ Window {
                     Button{
                         id: botCrearMainQmlDeEjemplo
                         text: 'Crear un ejemplo'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         onClicked: {
@@ -221,7 +229,7 @@ Window {
                     Button{
                         id: botLanzarQml
                         text: 'Lanzar la aplicación'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         onClicked: {
@@ -236,7 +244,7 @@ Window {
                     Button{
                         id: botDeleteQmlFileExample
                         text: 'Eliminar main.qml de ejemplo'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         onClicked: {
@@ -273,7 +281,7 @@ Window {
                     }
                     Button{
                         text: 'Salir'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             Qt.quit()
@@ -282,7 +290,7 @@ Window {
                     Button{
                         //id: botDeleteQmlFileExample
                         text: 'Probar'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.fs*0.5
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         property int v: 0
@@ -344,7 +352,8 @@ Window {
 
     Shortcut{
         sequence: 'Ctrl+R'
-        onActivated: init()
+        onActivated: unik.restartApp()
+        //onActivated: init()
     }
     Shortcut{
         sequence: 'Esc'
@@ -373,13 +382,14 @@ Window {
                 let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
                 try {
                     j = JSON.parse(jsonString);
-                    unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                    unik.log('Configuración de unikey.cfg:\n'+JSON.stringify(j.args, null, 2))
-                    if(j.args && j.args['folder']){
-                        argsFinal.push('-folder='+j.args['folder'])
-                    }
+                    unik.log('Iniciando con configuración de unikey.cfg:\n'+JSON.stringify(j, null, 2))
+                    //unik.log('Iniciando con configuración de unikey.cfg:\n'+JSON.stringify(j.args, null, 2))
                     if(j.args && j.args['git']){
                         argsFinal.push('-git='+j.args['git'])
+                    }else{
+                        if(j.args && j.args['folder']){
+                            argsFinal.push('-folder='+j.args['folder'])
+                        }
                     }
                     cfgSeted=true
                 } catch (error) {
@@ -419,31 +429,17 @@ Window {
                 app.visibility="Maximized"
             }
         }
-        if(argIndexGit>=0){
+        if(argIndexGit>=0 && apps.runFromGit){
             let a=app.appArgs[argIndexGit]
             unik.log('Ejecutando Unikey con el argumento '+a)
             m0=a.split('=')
-            if(argIndexFolder>=0){
-                let a=app.appArgs[argIndexFolder]
-                //unik.log('Ejecutando Unikey con el argumento '+a)
-                m0=a.split('=')
-                unik.log('El repositorio git se descargará en la carpeta '+m0[1])
-                if(unik.folderExist(m0[1])){
-                    unik.log('Ingresando a la carpeta '+m0[1])
-                    unik.cd(m0[1])
-                    unik.log('Carpeta actual: '+unik.currentFolderPath())
-                    cp=m0[1]
-                    //fp=cp+'/main.qml'
-                }else{
-                    unik.log('La carpeta '+m0[1]+' no existe.')
-                    unik.log('Creando la carpeta '+m0[1]+'')
-                    unik.mkdir(m0[1])
-                    if(unik.folderExist(m0[1])){
-                        unik.log('La carpeta '+m0[1]+' fue creada con éxito.')
-                        cp=m0[1]
-                    }
-                }
-            }
+
+            zipManager.version='latest'
+            zipManager.resetApp=true
+            zipManager.setCfg=true
+            zipManager.download(m0[1])
+            return
+
             unik.log('Descargando '+a+' en la carpeta '+cp)
 
             //-->Download and Unzip
@@ -549,6 +545,30 @@ Window {
                 unik.log('Ten en cuenta que Unikey está programado para descargar desde la rama "main", no "master".')
                 app.visibility="Maximized"
             }*/
+        }else{
+            if(argIndexFolder>=0){
+                let a=app.appArgs[argIndexFolder]
+                //unik.log('Ejecutando Unikey con el argumento '+a)
+                m0=a.split('=')
+                unik.log('El repositorio git se descargará en la carpeta '+m0[1])
+                if(unik.folderExist(m0[1])){
+                    unik.log('Ingresando a la carpeta '+m0[1])
+                    unik.cd(m0[1])
+                    unik.addImportPath(m0[1]+'/modules')
+                    unik.log('Carpeta actual: '+unik.currentFolderPath())
+                    cp=m0[1]
+                    //fp=cp+'/main.qml'
+                }else{
+                    unik.log('La carpeta '+m0[1]+' no existe.')
+                    unik.log('Creando la carpeta '+m0[1]+'')
+                    unik.mkdir(m0[1])
+                    if(unik.folderExist(m0[1])){
+                        unik.log('La carpeta '+m0[1]+' fue creada con éxito.')
+                        cp=m0[1]
+                    }
+                }
+            }
+
         }
 
         //let t1=''
@@ -607,62 +627,18 @@ Window {
 
     function runProbe(){
         apps.uGitRep=tiGitRep.text
-
-        let cp=unik.getPath(2);
-        unik.log('Probando repositorio git "'+tiGitRep.text+'" en carpeta temporal: '+cp)
-        let url=tiGitRep.text.replace(/ /g, '')
-        let urlZip=getCodeloadZipUrl(url)
-        unik.log('Descargando desde '+urlZip)
-
-
-        let m0=tiGitRep.text.split('/')
-        let m1=m0[m0.length-1].replace('.git', '')
-        let repName=m1
-
-        let d = new Date(Date.now())
-        let ms = d.getTime()
-        let tempZipFileName='zip_'+ms+'.zip'
-        let tempZipFilePath=unik.getPath(2)+'/'+tempZipFileName
-        let zipFolderDestination=cp
-
-        unik.log('Se descargará '+tempZipFilePath+' en la carpeta '+zipFolderDestination)
-
-        let downloaded=unik.downloadZipFile(urlZip, tempZipFilePath)
-
-        if(downloaded){
-            let containerFolderName=unik.getZipContainerFolderName(tempZipFilePath).replace('/', '')
-            unik.log('Carpeta contenedora principal: '+containerFolderName)
-            let unziped=unik.unzipFile(tempZipFilePath, zipFolderDestination)
-            if(!unziped){
-                unik.log('Error! El archivo '+tempZipFilePath+' NO se ha descomprimido correctamente.')
-                unik.log('Este error puede estar provocado por un error de permisos de escritura o problemas de acceso a la ubicación en el dispositivo '+zipFolderDestination)
-                return
-            }else{
-                unik.log('Archivo descomprimido con éxito en '+zipFolderDestination)
-
-
-                unik.log('Bien! El repositorio '+tiGitRep.text+' se ha descargado con éxito!')
-
-                app.cp=zipFolderDestination+'/'+containerFolderName
-
-                let files=unik.getFolderFileList(app.cp)
-                //unik.log('files: '+files)
-                unik.log('Revisando la carpeta '+app.cp)
-                if(files.indexOf('main.qml')<0){
-                    unik.log('Tenemos un problema!\nEn la carpeta principal del repositorio descargado NO hay un archivo "main.qml"<br>Por este motivo no se podrá probar o ejecutar este repositorio con Unikey.')
-                }else{
-                    unik.cd(app.cp)
-                    //unik.clearComponentCache()
-                    //unik.setProperty('unik', unik)
-                    //unik.setProperty("documentsPath", unik.getPath(3))
-                    unik.addImportPath(app.cp+'/modules')
-                    url=app.cp+'/main.qml'
-                    unik.log('Cargando '+url)
-                    engine.load(url)
-                }
-            }
-        }else{
-            unik.log('Error! El repositorio git '+tiGitRep.text+' no se ha descargado correctamente.\nEl repositorio no existe o hay un problema con la conexión de internet.')
-        }
+        zipManager.version='prueba'
+        zipManager.isProbe=true
+        zipManager.resetApp=true
+        zipManager.setCfg=false
+        zipManager.download(tiGitRep.text)
+    }
+    function runInstall(){
+        apps.uGitRep=tiGitRep.text
+        zipManager.version='install'
+        zipManager.isProbe=false
+        zipManager.resetApp=true
+        zipManager.setCfg=true
+        zipManager.download(tiGitRep.text)
     }
 }

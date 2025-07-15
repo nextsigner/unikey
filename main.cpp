@@ -70,6 +70,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("documentsPath", documentsPath);
     engine.rootContext()->setContextProperty("clipboard", &clipboard);
 
+
+
     //-->Set Import Path
     QByteArray ip="";
     ip.append(qApp->applicationDirPath());
@@ -77,6 +79,17 @@ int main(int argc, char *argv[])
     engine.addImportPath(ip);
     engine.addImportPath("qrc:/modules");
     //<--Set Import Path
+
+    QDir::setCurrent(u.getPath(4));
+
+    engine.rootContext()->setContextProperty("argTitle", presetAppName);
+    for (int i = 0; i < argc; ++i) {
+        QString arg;
+        arg.append(argv[i]);
+        if(arg.contains("-title=")){
+            engine.rootContext()->setContextProperty("argTitle", arg);
+        }
+    }
 
 
     // Crear una instancia de nuestro logger
