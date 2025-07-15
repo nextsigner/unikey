@@ -15,6 +15,22 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     UL u;
     u.setEngine(&engine);
+
+    //-->Preset App Name
+    QByteArray presetFilePath="";
+    presetFilePath.append(qApp->applicationDirPath());
+    presetFilePath.append("/preset");
+
+    QString presetAppName="";
+    if(u.fileExist(presetFilePath)){
+        presetAppName.append(u.getFile(presetFilePath));
+        presetAppName=presetAppName.replace("\n", "");
+    }else{
+        presetAppName.append("unikey");    }
+
+    qDebug()<<"Runing "<<presetAppName<<"...";
+    //<--Preset App Name
+
     //Clipboard function for GNU/Linux, Windows and Macos
 #ifndef Q_OS_ANDROID
     QmlClipboardAdapter clipboard;
@@ -38,23 +54,14 @@ int main(int argc, char *argv[])
     nv = QString(nv).replace("\n", "");
     app.setApplicationVersion(nv);
     //<--Set Unik Version
-    app.setApplicationDisplayName("unikey");
-    app.setApplicationName("unikey");
+    app.setApplicationDisplayName(presetAppName);
+    app.setApplicationName(presetAppName);
     app.setOrganizationDomain("unikode.org");
-
-    //-->Set unikey exec path
-    QByteArray p="";
-    p.append(u.getPath(5));
-    u.log("Unikey exec path: "+p);
-    QByteArray pAppData="";
-    pAppData.append(u.getPath(4));
-    u.log("Unikey appData path: "+pAppData);
-    u.setFile(p+"/unikeyLocation", pAppData);
-    //<--Set unikey exec path
 
     //-->Set engine properties
     engine.rootContext()->setContextProperty("engine", &engine);
     engine.rootContext()->setContextProperty("unik", &u);
+    engine.rootContext()->setContextProperty("presetAppName", presetAppName);
     //<--Set engine properties
 
     QByteArray documentsPath;
@@ -62,6 +69,14 @@ int main(int argc, char *argv[])
     documentsPath.append("/unik");
     engine.rootContext()->setContextProperty("documentsPath", documentsPath);
     engine.rootContext()->setContextProperty("clipboard", &clipboard);
+
+    //-->Set Import Path
+    QByteArray ip="";
+    ip.append(qApp->applicationDirPath());
+    ip.append("/modules");
+    engine.addImportPath(ip);
+    engine.addImportPath("qrc:/modules");
+    //<--Set Import Path
 
 
     // Crear una instancia de nuestro logger

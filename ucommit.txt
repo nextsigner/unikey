@@ -1,1 +1,1 @@
-Se agrega qmlmesssagelogger
+Se programa ZipManager v1

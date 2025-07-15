@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import Qt.labs.settings 1.1
+import ZipManager 1.0
 
 Window {
     id: app
@@ -9,7 +10,7 @@ Window {
     //visibility: "Maximized"
     width: 640
     height: 480
-    title: "UniKey"
+    title: presetAppName
     color: c1
 
     property int fs: Screen.width*0.015
@@ -27,6 +28,8 @@ Window {
         fileName: unik?unik.getPath(4)+'/unikey_app.cfg':''
         property string uGitRep: 'https://github.com/nextsigner/unikey-demo'
         property bool enableCheckBoxShowGitRep: false
+        property color fontColor: 'white'
+        property color backgroundColor: 'black'
     }
 
     Connections{
@@ -42,7 +45,9 @@ Window {
         Flickable{
             contentWidth: parent.width
             contentHeight: col.height+app.fs
-            anchors.fill: parent
+            //anchors.fill: parent
+            width: parent.width
+            height: parent.height
             Column{
                 id: col
                 spacing: app.fs//*0.25
@@ -66,7 +71,7 @@ Window {
                     width: col.width
                     wrapMode: Text.WordWrap
                 }
-                Item{width: 1; height: app.fs*2}
+                Item{width: 1; height: app.fs*0.5}
                 Text{
                     text: '<b>Salida:</b>'
                     font.pixelSize: app.fs
@@ -92,19 +97,29 @@ Window {
                             id: log
                             color: app.c2
                             width: col.width-app.fs
+                            height: app.fs*6
                             wrapMode: Text.WordWrap
                             textFormat: Text.RichText
-                            font.pixelSize: app.fs
+                            font.pixelSize: app.fs*0.5
                             anchors.horizontalCenter: parent.horizontalCenter
                             onTextChanged: {
                                 if(log.contentHeight>flk.height){
                                     flk.contentY=log.contentHeight-flk.height
                                 }
                             }
+                            function lv(text){
+                                log.text+=text+'\n'
+                            }
                         }
                     }
                 }
 
+                ZipManager{
+                    id: zipManager
+                    visible: true
+                    dev: true
+                    //version: '1.1.1'
+                }
                 Row{
                     spacing: app.fs*0.25
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -140,7 +155,12 @@ Window {
                         text: 'Probar'
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
-                        onClicked: runProbe()
+                        onClicked: {
+                            zipManager.version='1.1.2'
+                            zipManager.download('https://github.com/nextsigner/zoolv4')
+                            //zipManager.download('https://codeload.github.com/nextsigner/zoolv4/zip/main', 'github')
+                            //runProbe()
+                        }
                     }
                     Button{
                         id: botSaveGitRep
@@ -280,6 +300,11 @@ Window {
         while(!unik){
             log.text+='.'
         }
+
+        zipManager.curlPath = Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
+        zipManager.app7ZipPath = Qt.platform.os==='windows'?unik.getPath(1)+'/7-Zip32/7z.exe':'7z'
+        zipManager.uFolder = unik.getPath(3)
+
         let c='import QtQuick 2.7\n'
         c+='import QtQuick.Controls 2.0\n'
         c+='import QtQuick.Window 2.0\n'

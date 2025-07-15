@@ -20,11 +20,11 @@ CONFIG(release, debug|release):{
     #message(Arch2 $$QMAKE_TARGET)
     equals(QT_ARCH, i386) {
         message(Compilando para Windows 32bit)
-        DESTDIR = C:\build_win
+        DESTDIR = F:\build_win_32
     }
     equals(QT_ARCH, x86_64) {
         message(Compilando para Windows 64bit)
-        DESTDIR = C:\build_win_64
+        DESTDIR = F:\zooldev\unikey-build
     }
 }
 
