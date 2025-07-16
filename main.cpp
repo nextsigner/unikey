@@ -10,10 +10,11 @@
 
 int main(int argc, char *argv[])
 {
+    QtWebEngine::initialize();
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+
     QGuiApplication app(argc, argv);
-    QtWebEngine::initialize();
     QQmlApplicationEngine engine;
     UL u;
     u.setEngine(&engine);
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
 
     QDir::setCurrent(u.getPath(4));
 
-    engine.rootContext()->setContextProperty("argTitle", presetAppName);
+    engine.rootContext()->setContextProperty("argtitle", presetAppName);
     for (int i = 0; i < argc; ++i) {
         QString arg;
         arg.append(argv[i]);

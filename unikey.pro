@@ -46,3 +46,14 @@ HEADERS += \
     ul.h \
     unikargsproc.h \
     unikqprocess.h
+
+
+# Define la ruta de tu imagen de origen
+LOGO_SOURCE = $$PWD/logo.png
+
+# Define el directorio de destino
+LOGO_DEST = $$DESTDIR
+
+# Añade una regla para copiar el archivo
+# Usa QMAKE_POST_LINK para que la copia se realice después de que el ejecutable haya sido enlazado
+QMAKE_POST_LINK += $$QMAKE_COPY \"$$replace(LOGO_SOURCE, /, $$QMAKE_DIR_SEP)\" \"$$replace(LOGO_DEST, /, $$QMAKE_DIR_SEP)\"

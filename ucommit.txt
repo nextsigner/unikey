@@ -1,1 +1,1 @@
-Se agrega función mkad()
+Se logra crear acceso directo en linux

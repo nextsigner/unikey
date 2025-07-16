@@ -817,7 +817,7 @@ Window {
 
     function getAdCode(exePath, args, wd){
         let m0=exePath.split('/')
-        let argsName=args.replace(/-/g, '_')
+        let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '')
         let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
         let c=''
         if(Qt.platform.os==='windows'){
@@ -854,7 +854,7 @@ Encoding=UTF-8
 Name='+fileName+'
 Comment=Creado por Unikey
 Exec='+exePath+' '+args+'
-Icon='+exePath.replace('/'+m0[m0.length-1], '')+'/logo.png
+Icon='+unik.getPath(1)+'/logo.png
 Categories=Application
 Type=Application
 Terminal=false'
@@ -864,11 +864,13 @@ Terminal=false'
     }
     function mkAd(exePath, args, wd){
         let m0=exePath.split('/')
-        let argsName=args.replace(/-/g, '_')
+        let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '_')
         let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
         let c=getAdCode(exePath, args, wd)
         if(Qt.platform.os==='linux'){
-            unik.setFile(unik.getPath(6)+'/'+fileName+'.desktop', c)
+            let desktopIconFilePath=unik.getPath(6)+'/'+fileName+'.desktop'
+             log.lv('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
+            unik.setFile(desktopIconFilePath, c)
         }else{
             unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
             c=''
