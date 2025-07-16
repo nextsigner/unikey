@@ -27,7 +27,7 @@ Window {
 
     Settings{
         id: apps
-        fileName: unik?unik.getPath(4)+'/unikey_app.cfg':''
+        fileName: unik?unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg':''
         property bool dev: false
         property bool runFromGit: false
         property bool runOut: true
@@ -70,7 +70,7 @@ Window {
                 anchors.horizontalCenter: parent.horizontalCenter
                 Item{width: 1; height: app.fs*0.1}
                 Text{
-                    text: '<h3>UniKey</h3>'
+                    text: '<h3>'+presetAppName+'</h3>'
                     font.pixelSize: app.fs
                     color: app.c2
                 }
@@ -166,7 +166,7 @@ Window {
                         onClicked: {
                             let cp = unik.currentFolderPath()
                             let fp=cp+'/main.qml'
-                            unik.setProperty('fromUnikey', true)
+                            unik.setProperty('from'+presetAppName, true)
                             unik.setProperty("documentsPath", unik.getPath(3))
                             unik.addImportPath(cp+'/modules')
                             engine.load(fp)
@@ -371,6 +371,16 @@ Window {
                     spacing: app.fs
                     anchors.right: parent.right
                     Button{
+                        text: 'Eliminar Configuración'
+                        font.pixelSize: app.fs
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: {
+                            let aname=(''+presetAppName).toLowerCase()
+                            unik.deleteFile(unik.getPath(4)+'/'+aname+'.cfg')
+                            log.lv('Archivo de configuración eliminado.')
+                        }
+                    }
+                    Button{
                         text: 'Salir'
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
@@ -420,7 +430,7 @@ Window {
         c+='    Shortcut{\n'
         c+='        sequence: "Esc"\n'
         c+='     onActivated: {\n'
-        c+='        if(unik.getProperty("fromUnikey")){\n'
+        c+='        if(unik.getProperty("from'+presetAppName+'")){\n'
         c+='            app.close()\n'
         c+='        }else{\n'
         c+='            Qt.quit()\n'
@@ -546,13 +556,15 @@ Window {
             log.lv('Carpeta de datos: '+cAppData)
             let j
             let cfgSeted=false
-            if(unik.fileExist(cAppData+'/unikey.cfg')){
-                log.lv('Procesando archivo de configuración de Unikey...')
-                let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
+            let aname=(''+presetAppName).toLowerCase()
+            if(unik.fileExist(cAppData+'/'+aname+'.cfg')){
+                log.lv('Procesando archivo de configuración de '+presetAppName+'...')
+                let jsonString = unik.getFile(cAppData+'/'+aname+'.cfg').replace(/\n/g, '')
                 try {
                     j = JSON.parse(jsonString);
-                    log.lv('Iniciando con configuración de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                    //log.lv('Iniciando con configuración de unikey.cfg:\n'+JSON.stringify(j.args, null, 2))
+                    let aname=(''+presetAppName).toLowerCase()
+                    log.lv('Iniciando con configuración de '+aname+'.cfg:\n'+JSON.stringify(j, null, 2))
+                    //log.lv('Iniciando con configuración de '+aname+'.cfg:\n'+JSON.stringify(j.args, null, 2))
                     if(j.args && j.args['git']){
                         argsFinal.push('-git='+j.args['git'])
                     }else{
@@ -562,13 +574,15 @@ Window {
                     }
                     cfgSeted=true
                 } catch (error) {
-                    log.lv('Falló la carga de unikey.cfg:\n'+jsonString)
-                    console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/unikey.cfg', error);
+                    let aname=(''+presetAppName).toLowerCase()
+                    log.lv('Falló la carga de '+aname+'.cfg:\n'+jsonString)
+                    console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/'+aname+'.cfg', error);
                 }
             }
 
         }else{
-            log.lv('Se omite la revisión del archivo unikey.cfg...')
+            let aname=(''+presetAppName).toLowerCase()
+            log.lv('Se omite la revisión del archivo '+aname+'.cfg...')
         }
 
         if(argsFinal.length===0){
@@ -583,7 +597,7 @@ Window {
         let argIndexFolder=getArgsIndex(app.appArgs, 'folder')
         if(argIndexFolder>=0){
             let a=app.appArgs[argIndexFolder]
-            log.lv('Ejecutando Unikey con el argumento '+a)
+            log.lv('Ejecutando '+presetAppName+' con el argumento '+a)
             let m0=a.split('=')
             log.lv('Chequeando si existe la carpeta '+m0[1])
             if(unik.folderExist(m0[1])){
@@ -600,7 +614,7 @@ Window {
         }
         if(argIndexGit>=0 && apps.runFromGit){
             let a=app.appArgs[argIndexGit]
-            log.lv('Ejecutando Unikey con el argumento '+a)
+            log.lv('Ejecutando '+presetAppName+' con el argumento '+a)
             m0=a.split('=')
 
             zipManager.version='latest'
@@ -657,7 +671,7 @@ Window {
                     log.lv('files: '+files.toString().split(','))
                     log.lv('Revisando la carpeta '+app.cp)
                     if(files.indexOf('main.qml')<0){
-                        log.lv('Tenemos un problema!\nEn la carpeta principal del repositorio descargado NO hay un archivo "main.qml"<br>Por este motivo no se podrá probar o ejecutar este repositorio con Unikey.')
+                        log.lv('Tenemos un problema!\nEn la carpeta principal del repositorio descargado NO hay un archivo "main.qml"<br>Por este motivo no se podrá probar o ejecutar este repositorio con '+presetAppName+'.')
                     }else{
                         unik.cd(app.cp)
                         fp=app.cp+'/main.qml'
@@ -763,7 +777,7 @@ Window {
             }
         }else{
             log.lv('Esta carpeta ['+fp.replace('/main.qml', '')+'] NO contiene un archivo main.qml')
-            log.lv('Es posible que estes viendo estos mensajes porque no tienes un archivo main.qml en esta carpeta.<br><br>El archivo main.qml es necesario para que Unikey inicie una aplicación del tipo QtQuick.')
+            log.lv('Es posible que estes viendo estos mensajes porque no tienes un archivo main.qml en esta carpeta.<br><br>El archivo main.qml es necesario para que '+presetAppName+' inicie una aplicación del tipo QtQuick.')
             if(!checkBoxShowGitRep.checked)botCrearMainQmlDeEjemplo.visible=true
             app.visibility="Maximized"
         }
@@ -852,7 +866,7 @@ Window {
 [Desktop Entry]
 Encoding=UTF-8
 Name='+fileName+'
-Comment=Creado por Unikey
+Comment=Creado por '+presetAppName+'
 Exec='+exePath+' '+args+'
 Icon='+unik.getPath(1)+'/logo.png
 Categories=Application

@@ -1,1 +1,1 @@
-Se logra crear acceso directo en linux
+Se prueba preset

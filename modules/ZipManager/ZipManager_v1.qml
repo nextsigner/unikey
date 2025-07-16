@@ -535,17 +535,19 @@ Rectangle{
             log.lv("Carpeta de archivos: "+mainPath)
             unik.deleteFile(r.uZipFilePath)
 
-            let unikeyCfgPath=unik.getPath(4)+'/unikey.cfg'
+            let aname=(''+presetAppName).toLowerCase()
+            let unikeyCfgPath=unik.getPath(4)+'/'+aname+'.cfg'
             if(r.setCfg){
                 unik.deleteFile(unikeyCfgPath)
                 let j={}
                 j.args={}
                 j.args.folder=mainPath
                 if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
-                if(r.dev)log.lv('unikey.cfg new data: '+JSON.stringify(j, null, 2))
+                let aname=(''+presetAppName).toLowerCase()
+                if(r.dev)log.lv(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
                 unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
                 if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
-                if(r.dev)log.lv('unikey.cfg: '+JSON.stringify(j, null, 2))
+                if(r.dev)log.lv(aname+'.cfg: '+JSON.stringify(j, null, 2))
                 if(r.resetApp){
                     txtLog.text='Cargando aplicación...'
 
