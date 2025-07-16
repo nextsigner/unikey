@@ -36,6 +36,7 @@ Window {
         property bool enableCheckBoxShowGitRep: false
         property color fontColor: 'white'
         property color backgroundColor: 'black'
+        property string uCtxUpdate: ''
     }
 
     Connections{
@@ -131,7 +132,8 @@ Window {
                 }
 
                 Row{
-                    spacing: app.fs
+                    spacing: app.fs*2
+                    anchors.horizontalCenter: parent.horizontalCenter
                     Button{
                         id: botCrearMainQmlDeEjemplo
                         text: 'Crear un ejemplo'
@@ -205,8 +207,25 @@ Window {
                         CheckBox{
                             id: checkBoxShowGitRep
                             checked: apps.enableCheckBoxShowGitRep
+                            anchors.verticalCenter: parent.verticalCenter
                             onCheckedChanged: {
                                 apps.enableCheckBoxShowGitRep=checked
+                            }
+                        }
+                    }
+                    Row{
+                        Text{
+                            text: '<b>Auto Actualizar</b><br><b>desde Git:</b>'
+                            color: 'white'
+                            font.pixelSize: app.fs
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        CheckBox{
+                            id: checkBoxAAG
+                            checked: apps.runFromGit
+                            anchors.verticalCenter: parent.verticalCenter
+                            onCheckedChanged: {
+                                apps.runFromGit=checked
                             }
                         }
                     }
@@ -220,6 +239,7 @@ Window {
                         CheckBox{
                             id: checkBoxRunOut
                             checked: apps.runOut
+                            anchors.verticalCenter: parent.verticalCenter
                             onCheckedChanged: {
                                 apps.runOut=checked
                             }
@@ -235,6 +255,7 @@ Window {
                         CheckBox{
                             id: checkBoxDev
                             checked: apps.dev
+                            anchors.verticalCenter: parent.verticalCenter
                             onCheckedChanged: {
                                 apps.dev=checked
                             }
@@ -378,6 +399,22 @@ Window {
                             let aname=(''+presetAppName).toLowerCase()
                             unik.deleteFile(unik.getPath(4)+'/'+aname+'.cfg')
                             log.lv('Archivo de configuración eliminado.')
+                        }
+                    }
+                    Button{
+                        text: 'Reiniciar cargando configuración'
+                        font.pixelSize: app.fs
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: {
+                            unik.restartApp()
+                        }
+                    }
+                    Button{
+                        text: 'Reiniciar sin cargar configuración'
+                        font.pixelSize: app.fs
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: {
+                            unik.restartApp('-nocfg')
                         }
                     }
                     Button{
@@ -616,118 +653,27 @@ Window {
             let a=app.appArgs[argIndexGit]
             log.lv('Ejecutando '+presetAppName+' con el argumento '+a)
             m0=a.split('=')
+            log.lv('Ejecutando auto actualización...')
+            log.lv('Última carpeta de archivos: '+apps.uFolder)
+            apps.uGitRep=m0[1]
+            tiGitRep.text=apps.uGitRep
+            log.lv('Descargando '+m0[1]+'...')
+            app.visible=true
+            app.visibility="Maximized"
 
-            zipManager.version='latest'
-            zipManager.resetApp=true
-            zipManager.setCfg=true
-            zipManager.download(m0[1])
-            return
-
-            log.lv('Descargando '+a+' en la carpeta '+cp)
-
-            //-->Download and Unzip
-            let url=m0[1].replace(/ /g, '')
-            let urlZip=getCodeloadZipUrl(url)
-            log.lv('Descargando desde '+urlZip)
-
-
-            //let m0=tiGitRep.text.split('/')
-            let m1=m0[m0.length-1].replace('.git', '')
-            let repName=m1
-
-            let d = new Date(Date.now())
-            let ms = d.getTime()
-            let tempZipFileName='zip_'+ms+'.zip'
-            let tempZipFilePath=unik.getPath(2)+'/'+tempZipFileName
-            //cp=tempZipFilePath
-            let zipFolderDestination=unik.getPath(4)
-
-            log.lv('Se descargará '+tempZipFilePath+' en la carpeta '+zipFolderDestination)
-
-            let downloaded=unik.downloadZipFile(urlZip, tempZipFilePath)
-
-            if(downloaded){
-                let containerFolderName=unik.getZipContainerFolderName(tempZipFilePath).replace('/', '')
-                log.lv('Carpeta contenedora principal: '+containerFolderName)
-                let unziped=unik.unzipFile(tempZipFilePath, zipFolderDestination)
-                if(!unziped){
-                    log.lv('Error! El archivo '+tempZipFilePath+' NO se ha descomprimido correctamente.')
-                    log.lv('Este error puede estar provocado por un error de permisos de escritura o problemas de acceso a la ubicación en el dispositivo '+zipFolderDestination)
-                    return
-                }else{
-                    log.lv('Archivo descomprimido con éxito en '+zipFolderDestination)
-
-
-                    log.lv('Bien! El repositorio '+tiGitRep.text+' se ha descargado con éxito!')
-
-                    //app.cp=zipFolderDestination+'/'+containerFolderName
-                    //app.cp=app.cp.replace(/ /g, '%20')
-
-                    cp=zipFolderDestination+'/'+containerFolderName
-                    cp=cp.replace(/ /g, '%20')
-
-                    let files=unik.getFolderFileList(cp)
-                    files=files.toString().split(',')
-                    log.lv('files: '+files.toString().split(','))
-                    log.lv('Revisando la carpeta '+app.cp)
-                    if(files.indexOf('main.qml')<0){
-                        log.lv('Tenemos un problema!\nEn la carpeta principal del repositorio descargado NO hay un archivo "main.qml"<br>Por este motivo no se podrá probar o ejecutar este repositorio con '+presetAppName+'.')
-                    }else{
-                        unik.cd(app.cp)
-                        fp=app.cp+'/main.qml'
-                    }
-                }
-            }else{
-                log.lv('Error! El repositorio git '+tiGitRep.text+' no se ha descargado correctamente.\nEl repositorio no existe o hay un problema con la conexión de internet.')
-            }
-            //<--Download and Unzip
-
-
-            /*let downloaded=unik.downloadGit(m0[1], 'main', cp)
-            let gp0=m0[1].split('/')
-            let gp=gp0[gp0.length-1]
-            if(downloaded){
-                log.lv('Listo. Se ha descargado '+a+' en la carpeta '+cp)
-                //Git Project
-
-                log.lv('Los archivos se descargaron en '+cp+'/'+gp)
-                let fl=unik.getFolderFileList(cp+'/'+gp)
-                log.lv('Archivos:\n ')
-                for(var i=0;i<fl.length;i++){
-                    if(fl[i]==='.' || fl[i]==='..' )continue
-                    if(unik.isFolder(cp+'/'+gp+'/'+fl[i])){
-                        log.lv('./'+fl[i])
-                        let fl2=unik.getFolderFileList(cp+'/'+gp+'/'+fl[i])
-                        for(var i2=0;i2<fl2.length;i2++){
-                            if(fl2[i2]==='.' || fl2[i2]==='..' )continue
-                            if(unik.isFolder(cp+'/'+gp+'/'+fl[i]+'/'+fl2[i2])){
-                                //log.lv('&nbsp;&nbsp;/'+fl[i]+'/'+fl2[i2])
-                                let fl3=unik.getFolderFileList(cp+'/'+gp+'/'+fl[i]+'/'+fl2[i2])
-                                for(var i3=0;i3<fl3.length;i3++){
-                                    if(fl3[i3]==='.' || fl3[i3]==='..' )continue
-                                    if(unik.isFolder(cp+'/'+gp+'/'+fl[i]+'/'+fl2[i2]+'/'+fl3[i3])){
-                                        log.lv('&nbsp;&nbsp;&nbsp;&nbsp;/'+fl[i]+'/'+fl2[i2]+'/'+fl3[i3])
-                                    }else{
-                                        log.lv('&nbsp;&nbsp;&nbsp;&nbsp;'+fl3[i3]+'\n')
-                                    }
-                                }
-                            }else{
-                                log.lv('&nbsp;&nbsp;'+fl2[i2]+'\n')
-                            }
-                        }
-                    }else{
-                        log.lv(''+fl[i]+'\n')
-                    }
-                }
-                unik.cd(cp+'/'+gp)
-                fp=cp+'/'+gp+'/main.qml'
-                //engine.load(fp)
-            }else{
-                log.lv('Error! Ocurrió un error al descargar '+m0[1])
-                log.lv('Hay un problema con la conexión de internet o el repositorio no existe.')
-                log.lv('Ten en cuenta que Unikey está programado para descargar desde la rama "main", no "master".')
-                app.visibility="Maximized"
-            }*/
+            zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
+        }else if(argIndexGit>=0 && !apps.runFromGit){
+            let a=app.appArgs[argIndexGit]
+            log.lv('Cargando url git desde configuración...')
+            apps.enableCheckBoxShowGitRep=true
+            m0=a.split('=')
+            //log.lv('Ejecutando auto actualización...')
+            apps.uGitRep=m0[1]
+            tiGitRep.text=apps.uGitRep
+            log.lv('Descargando '+m0[1]+'...')
+            app.visible=true
+            app.visibility="Maximized"
+            //zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
         }else{
             if(argIndexFolder>=0){
                 let a=app.appArgs[argIndexFolder]
