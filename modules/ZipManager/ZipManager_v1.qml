@@ -8,10 +8,12 @@ Rectangle{
     color: 'transparent'
     border.width: 1
     border.color: 'white'
+    signal responseRepExist(string res, string url)
     property bool dev: false
     property bool resetApp: false
     property bool setCfg: false
     property bool isProbe: false
+    property bool launch: true
     property string curlPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
     property string app7ZipPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/7-Zip32/7z.exe':'7z'
     property real cPorc: 0
@@ -58,8 +60,8 @@ Rectangle{
             spacing: app.fs*0.25
             anchors.centerIn: parent
             Text{
-                text: 'Descargando Archivo Zip'
-                font.pixelSize: app.fs*0.5
+                text: 'Estado de Descarga y Descompresión del Repositorio'
+                font.pixelSize: app.fs*0.65
                 color: apps.fontColor
             }
             Rectangle{
@@ -76,7 +78,7 @@ Rectangle{
                 }
                 Text{
                     text: '%'+r.cPorc
-                    font.pixelSize: app.fs*0.35
+                    font.pixelSize: app.fs*0.65
                     color: apps.fontColor
                     anchors.centerIn: parent
                     Rectangle{
@@ -92,7 +94,7 @@ Rectangle{
                 id: txtLog
                 width: xProgresDialog.width-app.fs*0.5
                 text: r.uStdOut
-                font.pixelSize: app.fs*0.35
+                font.pixelSize: app.fs*0.65
                 color: apps.fontColor
                 wrapMode: Text.WordWrap
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -101,7 +103,7 @@ Rectangle{
                 spacing: app.fs*0.25
                 Button{
                     text: 'Cancelar'
-                    font.pixelSize: app.fs*0.5
+                    font.pixelSize: app.fs
                     onClicked: {
                         //tCheckDownload.stop()
                         //tCheckMove.stop()
@@ -115,7 +117,7 @@ Rectangle{
                 Button{
                     id: btnIniciarReintentar
                     text: 'Inicar'
-                    font.pixelSize: app.fs*0.5
+                    font.pixelSize: app.fs
                     visible: false
                     onClicked: {
                         if(text==='Iniciar'){
@@ -134,13 +136,13 @@ Rectangle{
                         }
                     }
                 }
-                Button{
-                    text: 'Cerrar'
-                    font.pixelSize: app.fs*0.5
-                    onClicked: {
-                        //xProgresDialog.visible=false
-                    }
-                }
+//                Button{
+//                    text: 'Cerrar'
+//                    font.pixelSize: app.fs
+//                    onClicked: {
+//                        //xProgresDialog.visible=false
+//                    }
+//                }
             }
         }
     }
@@ -166,7 +168,7 @@ Rectangle{
         c+='        }\n'
         c+='        onLogDataChanged:{\n'
         c+='        '+onLogDataCode
-        c+='        unik.log(logData)\n'
+        c+='        if(r.dev)unik.log(logData)\n'
         c+='        }\n'
         c+='        Component.onCompleted:{\n'
         c+='        '+onCompleteCode
@@ -240,6 +242,38 @@ Rectangle{
         for(var i=0;i<xuqpCurl.children.length;i++){
             xuqpCurl.children[i].destroy(0)
         }
+    }
+    function mkUqpRepExist(url){
+        cleanUqpCurl()
+
+        let c=''
+
+        c=''
+        let onCompleteCode=c
+
+        c='uqpRepExist'
+        let idName=c
+
+        if(Qt.platform.os==='linux'){
+            c=''+r.curlPath+' -s -o /dev/null -w "%{http_code}" '+url+''
+        }else{
+            c=''+r.curlPath+' -s -o NUL -w "%%{http_code}" '+url+''
+        }
+        let cmd=c
+
+        c='        r.responseRepExist(logData, "'+url+'")\n'
+        let onLogDataCode=c
+
+
+        c='        //Nada\n'
+        let onFinishedCode=c
+
+
+        let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+
+        if(r.dev)log.lv('cf '+idName+': '+cf)
+
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
     function mkUqpCurl(url, folderPath, fileName){
         cleanUqpCurl()
@@ -481,7 +515,13 @@ Rectangle{
                 if(r.dev)log.lv('unikey.cfg: '+JSON.stringify(j, null, 2))
                 if(r.resetApp){
                     txtLog.text='Cargando aplicación...'
-                    unik.restartApp()
+
+                    //MODO INSTALL
+                    if(r.launch){
+                        unik.run(unik.getPath(0))
+                    }else{
+                        log.lv('No se lanza...')
+                    }
                 }else{
                     log.lv("Se ha descargado todo el repositorio "+r.uUrl)
                     log.lv("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
@@ -493,12 +533,27 @@ Rectangle{
                     mainPath=mainPath.replace('.zip', '-main')
                     log.lv("Carpeta de archivos: "+mainPath)
                     txtLog.text='Reseteando con parámetro: -folder='+mainPath
-                    unik.restartApp("-folder="+mainPath)
+
+                    //MODO PROBE
+                    if(r.launch){
+                        log.lv('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
+                        unik.run(unik.getPath(0)+' -nocfg -folder='+mainPath)
+                    }else{
+                        log.lv('\nr.launch: '+r.launch+'. En modo prueba NO  se lanza mainPath: '+mainPath)
+                    }
+
                     r.isProbe=false
                     return
                 }else if(r.resetApp){
                     txtLog.text='Reseteando sin parámetro...'
-                    unik.restartApp()
+                    if(r.launch){
+                        log.lv('<br>r.launch: '+r.launch+'. En modo 2 install NO CFG  se lanza mainPath: '+mainPath)
+                        unik.run(unik.getPath(0)+' -nocfg')
+                        //unik.restartApp()
+                    }else{
+                        log.lv('No se lanza...')
+                        //unik.run(unik.getPath(0))
+                    }
                 }else{
                     log.lv("Se ha descargado todo el repositorio "+r.uUrl)
                     log.lv("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
@@ -541,7 +596,12 @@ Rectangle{
         //c+='        log.lv("La carpeta '+folder+' ha sido vaciada.")\n'
         c+='    }\n'
         c+='    Component.onCompleted:{\n'
-        c+='        let cmd=\'rm -r -rf "'+folder+'/*"\'\n'
+        if(Qt.platform.os==='windows'){
+            c+='        let cmd=\'cmd.exe rmdir /S /Q "'+folder+'"\'\n'
+
+        }else{
+            c+='        let cmd=\'rm -r -rf "'+folder+'/*"\'\n'
+        }
         c+='        console.log("cmd clean: "+cmd)\n'
         c+='        log.lv("cmd clean: "+cmd)\n'
         c+='        run(cmd)\n'

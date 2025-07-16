@@ -1,1 +1,1 @@
-Se agregó botón install a main.qml de unikey
+Se agrega funcion run a ZipManager

@@ -5,10 +5,9 @@ QT += widgets quick3d
 
 CONFIG += c++11
 
-win32:{
+win64:{
     message("Compilando en Windows")
-    #QT += webenginewidgets
-    #QT += webengine
+    QT += webenginewidgets
     QT += webchannel
     include(win.pri)
 } else {
