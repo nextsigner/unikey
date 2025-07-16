@@ -262,7 +262,7 @@ public:
     Q_INVOKABLE bool run(QString commandLine);
     Q_INVOKABLE bool run(QString commandLine, bool waitingForFinished, int milliseconds);
     Q_INVOKABLE void writeRun(QString data);
-    Q_INVOKABLE bool ejecutarLineaDeComandoAparte(QString lineaDeComando);
+    Q_INVOKABLE bool runOut(QString lineaDeComando);
     Q_INVOKABLE void salidaRun();
     Q_INVOKABLE void salidaRunError();
     Q_INVOKABLE void finalizaRun(int e);

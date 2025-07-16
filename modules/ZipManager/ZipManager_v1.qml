@@ -9,6 +9,7 @@ Rectangle{
     border.width: 1
     border.color: 'white'
     signal responseRepExist(string res, string url)
+    signal responseRepVersion(string res, string url, string tipo)
     property bool dev: false
     property bool resetApp: false
     property bool setCfg: false
@@ -275,6 +276,36 @@ Rectangle{
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
+    function mkUqpRepVersion(url, tipo){
+        //cleanUqpCurl()
+
+        let c=''
+
+        c=''
+        let onCompleteCode=c
+
+        c='uqpRepVersion'
+        let idName=c
+
+        //https://raw.githubusercontent.com/nextsigner/zoolv4/main/version
+        let nUrl=url.replace('https://github.com', 'https://raw.githubusercontent.com')
+        c=''+r.curlPath+' -s '+nUrl+'/main/version'
+        let cmd=c
+
+        c='        r.responseRepVersion(logData, "'+url+'", "'+tipo+'")\n'
+        let onLogDataCode=c
+
+
+        c='        //Nada\n'
+        let onFinishedCode=c
+
+
+        let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+
+        if(r.dev)log.lv('cf '+idName+': '+cf)
+
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
+    }
     function mkUqpCurl(url, folderPath, fileName){
         cleanUqpCurl()
 
@@ -518,7 +549,11 @@ Rectangle{
 
                     //MODO INSTALL
                     if(r.launch){
-                        unik.run(unik.getPath(0))
+                        if(apps.runOut){
+                            unik.runOut(unik.getPath(0))
+                        }else{
+                            unik.run(unik.getPath(0))
+                        }
                     }else{
                         log.lv('No se lanza...')
                     }
@@ -537,7 +572,11 @@ Rectangle{
                     //MODO PROBE
                     if(r.launch){
                         log.lv('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
-                        unik.run(unik.getPath(0)+' -nocfg -folder='+mainPath)
+                        if(apps.runOut){
+                            unik.runOut(unik.getPath(0)+' -nocfg -folder='+mainPath)
+                        }else{
+                            unik.run(unik.getPath(0)+' -nocfg -folder='+mainPath)
+                        }
                     }else{
                         log.lv('\nr.launch: '+r.launch+'. En modo prueba NO  se lanza mainPath: '+mainPath)
                     }
@@ -548,11 +587,15 @@ Rectangle{
                     txtLog.text='Reseteando sin parámetro...'
                     if(r.launch){
                         log.lv('<br>r.launch: '+r.launch+'. En modo 2 install NO CFG  se lanza mainPath: '+mainPath)
-                        unik.run(unik.getPath(0)+' -nocfg')
+                        if(apps.runOut){
+                            unik.runOut(unik.getPath(0)+' -nocfg')
+                        }else{
+                            unik.run(unik.getPath(0)+' -nocfg')
+                        }
                         //unik.restartApp()
                     }else{
                         log.lv('No se lanza...')
-                        //unik.run(unik.getPath(0))
+                        //unik.runOut(unik.getPath(0))
                     }
                 }else{
                     log.lv("Se ha descargado todo el repositorio "+r.uUrl)

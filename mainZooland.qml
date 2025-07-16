@@ -29,6 +29,7 @@ Window {
         id: apps
         fileName: unik?unik.getPath(4)+'/unikey_app.cfg':''
         property bool runFromGit: false
+        property bool runOut: true
         property string uGitRep: 'https://github.com/nextsigner/unikey-demo'
         property bool enableCheckBoxShowGitRep: false
         property color fontColor: 'white'
@@ -207,6 +208,21 @@ Window {
                             }
                         }
                     }
+                    Row{
+                        Text{
+                            text: '<b>Supervisar desde aqui:</b>'
+                            color: 'white'
+                            font.pixelSize: app.fs
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        CheckBox{
+                            id: checkBoxRunOut
+                            checked: apps.runOut
+                            onCheckedChanged: {
+                                apps.runOut=checked
+                            }
+                        }
+                    }
                 }
                 Row{
                     spacing: app.fs*0.25
@@ -247,7 +263,7 @@ Window {
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            runProbe()
+                            zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
                         }
                     }
                     Button{
@@ -256,29 +272,7 @@ Window {
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            runInstall()
-                            return
-                            apps.uGitRep=tiGitRep.text
-                            apps.runFromGit=true
-                            let cAppData=unik.getPath(4)
-                            unik.log('Carpeta de datos: '+cAppData)
-                            let j
-
-                            unik.log('Procesando archivo de configuración de Unikey...')
-
-                            let jsonString = unik.getFile(cAppData+'/unikey.cfg').replace(/\n/g, '')
-                            //j = JSON.parse(jsonString);
-                            j = {}
-                            j.args={}
-                            unik.log('Nueva configuración actual de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                            //if(j.args){
-                                j.args['git']=tiGitRep.text
-                            //}
-                            //unik.log('Configuración actual de unikey.cfg:\n'+JSON.stringify(j, null, 2))
-                            unik.setFile(cAppData+'/unikey.cfg', JSON.stringify(j, null, 2))
-                            unik.log('Se ha guardado el repositorio git en la configuración de Unikey.<br>Presiona el Ctrl+R si quieres que se reinicie Unikey con la nueva configuración')
-
-
+                            zipManager.mkUqpRepVersion(tiGitRep.text, 'install')
                         }
                     }
                 }
@@ -287,6 +281,34 @@ Window {
                     visible: true
                     //dev: true
                     //version: '1.1.1'
+                    onResponseRepVersion:{
+                        //log.lv('onResponseRepVersion res: '+res)
+                        //log.lv('onResponseRepVersion url: '+url)
+                        //log.lv('onResponseRepVersion tipo: '+tipo)
+                        let nRes=res.replace('\n', '')
+                        let version=''
+                        if(tipo==='probe'){
+                            version='prueba'
+                            if(nRes.split('.').length>=3){
+                                zipManager.version=nRes
+                                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
+                            }else{
+                                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+                            }
+                            runProbe()
+                        }else{
+                            version='install'
+                            if(nRes.split('.').length>=3){
+                                zipManager.version=nRes
+                                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
+                            }else{
+                                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+                            }
+                            runInstall()
+
+                        }
+
+                    }
                     onResponseRepExist:{
                         if(res.indexOf('404')>=0){
                             tiGitRep.color='red'
@@ -391,9 +413,11 @@ Window {
     }
     function runReturnOrEnter(ctrl){
         if(!ctrl){
-            runProbe()
+            //runProbe()
+            zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
         }else{
-            runInstall()
+            //runInstall()
+            zipManager.mkUqpRepVersion(tiGitRep.text, 'install')
         }
 
     }
@@ -668,7 +692,7 @@ Window {
 
     function runProbe(){
         apps.uGitRep=tiGitRep.text
-        zipManager.version='prueba'
+        //zipManager.version='prueba'
         zipManager.isProbe=true
         zipManager.resetApp=true
         zipManager.setCfg=false
@@ -677,7 +701,7 @@ Window {
     }
     function runInstall(){
         apps.uGitRep=tiGitRep.text
-        zipManager.version='install'
+        //zipManager.version='install'
         zipManager.isProbe=false
         zipManager.resetApp=true
         zipManager.setCfg=true

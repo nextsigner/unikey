@@ -207,7 +207,7 @@ void UL::writeRun(QString data)
     proc->write(data.toUtf8());
 }
 
-bool UL::ejecutarLineaDeComandoAparte(QString lineaDeComando)
+bool UL::runOut(QString lineaDeComando)
 {
 #ifndef Q_OS_ANDROID
     proc = new QProcess(this);

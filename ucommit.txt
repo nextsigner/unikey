@@ -1,1 +1,1 @@
-Se agrega funcion run a ZipManager
+Se agrega función runOut()
