@@ -513,6 +513,7 @@ Window {
                     let aname=(''+presetAppName).toLowerCase()
                     unik.setFile(unik.getPath(4)+'/'+aname+'.cfg', JSON.stringify(j, null, 2))
                     apps.uFolder=tiFolder.text
+                    mkAd(unik.getPath(0), '-folder='+tiFolder.text, unik.getPath(4))
                     let cmd=unik.getPath(0)
                     if(checkBoxRunOut.checked){
                         log.lv('Lanzando aparte ['+cmd+']')
@@ -812,5 +813,89 @@ Window {
         zipManager.setCfg=true
         //zipManager.launch=false
         zipManager.download(tiGitRep.text)
+    }
+
+    function getAdCode(exePath, args, wd){
+        let m0=exePath.split('/')
+        let argsName=args.replace(/-/g, '_')
+        let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
+        let c=''
+        if(Qt.platform.os==='windows'){
+            c='Const TARGET_PATH = "'+exePath+'"
+            Const ARGUMENTS = "'+args+'"
+            Const SHORTCUT_PATH = "%USERPROFILE%\Desktop\\'+fileName+'.lnk"
+            Const DESCRIPTION = "Acceso directo a Zool con configuración deshabilitada"
+            Const WORKING_DIRECTORY = "'+wd+'\"
+            Const ICON_PATH = "'+exePath+'"
+
+            Set WshShell = WScript.CreateObject("WScript.Shell")
+
+            Dim strShortcutPath
+            strShortcutPath = WshShell.ExpandEnvironmentStrings(SHORTCUT_PATH)
+
+            Set oShellLink = WshShell.CreateShortcut(strShortcutPath)
+
+            oShellLink.TargetPath = TARGET_PATH
+            oShellLink.Arguments = ARGUMENTS
+            oShellLink.Description = DESCRIPTION
+            oShellLink.WorkingDirectory = WORKING_DIRECTORY
+            oShellLink.IconLocation = ICON_PATH
+
+            oShellLink.Save
+
+            WScript.Echo "Acceso directo \''+fileName+'\' creado en " & strShortcutPath & " con el parámetro " & ARGUMENTS & "."
+
+            Set oShellLink = Nothing
+            Set WshShell = Nothing'
+        }else{
+            c='#!/usr/bin/env xdg-open
+[Desktop Entry]
+Encoding=UTF-8
+Name='+fileName+'
+Comment=Creado por Unikey
+Exec='+exePath+' '+args+'
+Icon='+exePath.replace('/'+m0[m0.length-1], '')+'/logo.png
+Categories=Application
+Type=Application
+Terminal=false'
+        }
+
+        return c
+    }
+    function mkAd(exePath, args, wd){
+        let m0=exePath.split('/')
+        let argsName=args.replace(/-/g, '_')
+        let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
+        let c=getAdCode(exePath, args, wd)
+        if(Qt.platform.os==='linux'){
+            unik.setFile(unik.getPath(6)+'/'+fileName+'.desktop', c)
+        }else{
+            unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
+            c=''
+
+            c=''
+            let onCompleteCode=c
+
+            c='uqpRepExist'
+            let idName=c
+
+
+            c='wscript "'+unik.getPath(2)+'/'+fileName+'.vbs"'
+            let cmd=c
+
+            c='        log.lv(logData)\n'
+            let onLogDataCode=c
+
+
+            c='        //Nada\n'
+            let onFinishedCode=c
+
+
+            let cf=zipManager.getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+
+            if(app.dev)log.lv('cf '+idName+': '+cf)
+
+            let comp=Qt.createQmlObject(cf, zipManager.uqpsContainer, 'uqp-code-'+idName)
+        }
     }
 }

@@ -27,6 +27,7 @@ Rectangle{
     property string uZipFilePath: ''
     property string uUrl: ''
     property string uFolder: ''//unik.getPath(3)
+    property alias uqpsContainer: xuqpCurl
 
     Item{
         id: xuqpCurl

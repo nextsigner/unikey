@@ -1,1 +1,1 @@
-Se agrega función runMix()
+Se agrega función mkad()
