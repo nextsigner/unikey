@@ -1,1 +1,1 @@
-Se agrega función runOut()
+Se agrega función runMix()

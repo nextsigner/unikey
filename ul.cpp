@@ -270,7 +270,10 @@ QString UL::getPath(int path)
 {
     QString r=".";
     if(path==0){//App location Name
-        r = QFileInfo(QCoreApplication::applicationFilePath()).fileName();
+        r="";
+        r.append(qApp->applicationDirPath());
+        r.append("/");
+        r.append(QFileInfo(QCoreApplication::applicationFilePath()).fileName());
     }
 #ifdef Q_OS_WIN
     if(path==1){//App location
@@ -284,7 +287,8 @@ QString UL::getPath(int path)
 #endif
 #ifdef Q_OS_LINUX
     if(path==1){//App location
-        r = QDir::currentPath();
+        //r = QDir::currentPath();
+        r = qApp->applicationDirPath();
     }
 #endif
     if(path==2){//Temp location

@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QtWebEngine>
 
 #include "unikargsproc.h"
 #include "ul.h"
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
+    QtWebEngine::initialize();
     QQmlApplicationEngine engine;
     UL u;
     u.setEngine(&engine);
@@ -26,7 +28,7 @@ int main(int argc, char *argv[])
         presetAppName.append(u.getFile(presetFilePath));
         presetAppName=presetAppName.replace("\n", "");
     }else{
-        presetAppName.append("unikey");    }
+        presetAppName.append("UniKey");    }
 
     qDebug()<<"Runing "<<presetAppName<<"...";
     //<--Preset App Name

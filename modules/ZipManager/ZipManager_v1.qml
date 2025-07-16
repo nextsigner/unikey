@@ -17,7 +17,7 @@ Rectangle{
     property bool launch: true
     property string curlPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
     property string app7ZipPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/7-Zip32/7z.exe':'7z'
-    property real cPorc: 0
+    property real cPorc: 0.00
     property string uStdOut: ''
 
     property string version: ''
@@ -105,6 +105,7 @@ Rectangle{
                 Button{
                     text: 'Cancelar'
                     font.pixelSize: app.fs
+                    opacity: (r.uZipFilePath === '' && r.uUrl==='')?0.0:1.0
                     onClicked: {
                         //tCheckDownload.stop()
                         //tCheckMove.stop()
