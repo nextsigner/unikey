@@ -24,6 +24,7 @@ Window {
     property string uExampleCode: ''
 
     property bool enableQmlErrorLog: true
+    property string uLogData: ''
 
     Settings{
         id: apps
@@ -125,6 +126,7 @@ Window {
                                 }
                             }
                             function lv(text){
+                                app.uLogData+=text+'\n'
                                 log.text+=''+text+'<br>'
                             }
                         }
@@ -330,7 +332,7 @@ Window {
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                           runMix('probe')
+                            runMix('probe')
                         }
                     }
                     Button{
@@ -348,43 +350,6 @@ Window {
                     visible: true
                     dev: apps.dev
                     //version: '1.1.1'
-                    onResponseRepVersion:{
-                        //log.lv('onResponseRepVersion res: '+res)
-                        //log.lv('onResponseRepVersion url: '+url)
-                        //log.lv('onResponseRepVersion tipo: '+tipo)
-                        let nCtx=''
-                        let nRes=res.replace('\n', '')
-                        let version=''
-                        if(tipo==='probe'){
-                            version='prueba'
-                            if(nRes.split('.').length>=3){
-                                nCtx=nRes+'_'+url+'_'+tipo
-                                apps.uCtxUpdate=nCtx
-                                zipManager.version=nRes
-                                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
-                            }else{
-                                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
-                            }
-                            runProbe()
-                        }else{
-                            version='install'
-                            if(nRes.split('.').length>=3){
-                                nCtx=nRes+'_'+url+'_'+tipo
-                                if(apps.uCtxUpdate!==nCtx){
-                                    zipManager.version=nRes
-                                    apps.uCtxUpdate=nCtx
-                                }else{
-                                    log.lv('No se puede probar este repositorio '+url+' porque ya está instalada la versión '+nRes)
-                                }
-                                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
-                            }else{
-                                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
-                            }
-                            runInstall()
-
-                        }
-
-                    }
                     onResponseRepExist:{
                         if(res.indexOf('404')>=0){
                             tiGitRep.color='red'
@@ -396,6 +361,22 @@ Window {
                             log.lv('Para instalarlo presiona Ctrl+ENTER')
                         }
                     }
+                    onResponseRepVersion:{
+                        procRRV(res, url, tipo)
+                    }
+                    //                        onResponseRepExist:{
+                    //                            if(res.indexOf('404')>=0){
+                    //                                tiGitRep.color='red'
+                    //                                log.lv('El repositorio ['+url+'] no existe.')
+                    //                            }else{
+                    //                                tiGitRep.color=apps.fontColor
+                    //                                log.lv('El repositorio ['+url+'] está disponible en internet.')
+                    //                                log.lv('Para probarlo presiona ENTER')
+                    //                                log.lv('Para instalarlo presiona Ctrl+ENTER')
+                    //                            }
+                    //                        }
+                    //                    }
+
                 }
                 Row{
                     spacing: app.fs
@@ -415,6 +396,7 @@ Window {
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
+                            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
                             unik.restartApp()
                         }
                     }
@@ -423,6 +405,7 @@ Window {
                         font.pixelSize: app.fs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
+                            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
                             unik.restartApp('-nocfg')
                         }
                     }
@@ -489,9 +472,19 @@ Window {
     }
 
     Shortcut{
+        sequence: 'Ctrl+I'
+        onActivated: {
+            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
+            app.uLogData=''
+            init()
+        }
+    }
+    Shortcut{
         sequence: 'Ctrl+R'
-        onActivated: unik.restartApp()
-        //onActivated: init()
+        onActivated: {
+            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
+            unik.restartApp()
+        }
     }
     Shortcut{
         sequence: 'Esc'
@@ -838,7 +831,7 @@ Terminal=false'
         let c=getAdCode(exePath, args, wd)
         if(Qt.platform.os==='linux'){
             let desktopIconFilePath=unik.getPath(6)+'/'+fileName+'.desktop'
-             log.lv('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
+            log.lv('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
             unik.setFile(desktopIconFilePath, c)
         }else{
             unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
@@ -868,5 +861,78 @@ Terminal=false'
 
             let comp=Qt.createQmlObject(cf, zipManager.uqpsContainer, 'uqp-code-'+idName)
         }
+
+    }
+    //Procesar Response Repository Version
+    function procRRV(res, url, tipo){
+        //log.lv('onResponseRepVersion res: '+res)
+        //log.lv('onResponseRepVersion url: '+url)
+        //log.lv('onResponseRepVersion tipo: '+tipo)
+        let nCtx=''
+        let nRes=res.replace('\n', '')
+        let version=''
+        if(tipo==='probe'){
+            version='prueba'
+            if(nRes.split('.').length>=3){
+                nCtx=nRes+'_'+url+'_'+tipo
+                apps.uCtxUpdate=nCtx
+                version='probe_'+nRes
+                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
+            }else{
+                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+            }
+            zipManager.version=version
+            runProbe()
+        }else{
+            //Instalando...
+            version='install'
+            if(nRes.split('.').length>=3){
+                //Existe un dato de version
+                nCtx=nRes+'_'+url+'_'+tipo
+                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
+                //Check si el nuevo contexto es igual al anterior
+                if(apps.uCtxUpdate===nCtx){
+                    //Estamos en un contexto similar al anterior
+                    log.lv('No se puede instalar este repositorio '+url+' porque ya está instalada la versión '+nRes)
+
+                    //Check si existe carpeta del contexto similar
+                    //Si la carpeta no existe se reinstalará el mismo contexto
+                    let lastVersionInstaled='0.0.0.0'
+                    if(apps.uCtxUpdate.indexOf(url)>=0 && apps.uCtxUpdate.indexOf('_')>=0){
+                        let m100=apps.uCtxUpdate.split(url)
+                        lastVersionInstaled=m100[0]
+                        log.lv('La última versión de este repositorio '+url+' instalada fué '+lastVersionInstaled)
+                        //Check si la última version instalada es diferente a la última disponible
+                        if( lastVersionInstaled===nRes){
+                            //La última version instalada es igual
+                            //Se procede a ejecutar por carpeta
+                            let m101=url.replace('/main/version').split('/')
+                            let repName=m101[m101.length-1]
+                            let fullFolderToInstall=unik.getPath(4)+'/'+repName+'_'+nRes
+                            let fullFolderToInstall2=unik.getPath(4)+'/'+repName+'_'+nRes+'/'+repName+'-main'
+                            let fullFileMainToInstall=unik.getPath(4)+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
+                            if(unik.folderExist(fullFolderToInstall) && unik.folderExist(fullFolderToInstall2) && unik.fileExist(fullFileMainToInstall)){
+                                unik.runOut(unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2)
+                                return
+                            }
+                        }else{
+                            //La última version instalada NO es igual
+                            //Se continua hacia runInstall()                                    }
+
+                        }
+                    }
+                }else{
+                    //Estamos en un nuevo contexto
+                    version=nRes
+                    apps.uCtxUpdate=nCtx
+                }
+            }else{
+                //Repositorio sin version
+                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+            }
+            zipManager.version=version
+            runInstall()
+        }
+
     }
 }
