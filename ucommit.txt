@@ -1,1 +1,1 @@
-Se crea uLogData para guardar en archivo log
+Se agrega funcion cancelar() en zipManager

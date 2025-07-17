@@ -108,13 +108,7 @@ Rectangle{
                     font.pixelSize: app.fs
                     opacity: (r.uZipFilePath === '' && r.uUrl==='')?0.0:1.0
                     onClicked: {
-                        //tCheckDownload.stop()
-                        //tCheckMove.stop()
-                        //t7Zip.stop()
-                        //t7ZipFinished.stop()
-                        cleanUqpCurl()
-                        r.cPorc=0.00
-                        r.uStdOut='Cancelado.'
+                        cancelar()
                     }
                 }
                 Button{
@@ -147,6 +141,16 @@ Rectangle{
 //                    }
 //                }
             }
+        }
+    }
+    Timer{
+        id: tCancel
+        running: false
+        repeat: false
+        interval: 1500
+        onTriggered: {
+            r.uStdOut='Cancelado.'
+            txtLog.text='Cancelado.'
         }
     }
     Component.onCompleted: {
@@ -245,6 +249,7 @@ Rectangle{
         for(var i=0;i<xuqpCurl.children.length;i++){
             xuqpCurl.children[i].destroy(0)
         }
+        r.uStdOut=''
     }
     function mkUqpRepExist(url){
         cleanUqpCurl()
@@ -558,6 +563,11 @@ Rectangle{
                         }else{
                             unik.run(unik.getPath(0))
                         }
+                        if(!apps.dev){
+                            app.close()
+                        }else{
+                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                        }
                     }else{
                         log.lv('No se lanza...')
                     }
@@ -581,6 +591,11 @@ Rectangle{
                         }else{
                             unik.run(unik.getPath(0)+' -nocfg -folder='+mainPath)
                         }
+                        if(!apps.dev){
+                            app.close()
+                        }else{
+                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                        }
                     }else{
                         log.lv('\nr.launch: '+r.launch+'. En modo prueba NO  se lanza mainPath: '+mainPath)
                     }
@@ -596,7 +611,11 @@ Rectangle{
                         }else{
                             unik.run(unik.getPath(0)+' -nocfg')
                         }
-                        //unik.restartApp()
+                        if(!apps.dev){
+                            app.close()
+                        }else{
+                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                        }
                     }else{
                         log.lv('No se lanza...')
                         //unik.runOut(unik.getPath(0))
@@ -657,5 +676,12 @@ Rectangle{
         c+='}\n'
         //log.lv(c)
         let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
+    }
+    function cancelar(){
+        cleanUqpCurl()
+        r.cPorc=0.00
+        r.uStdOut='Cancelado.'
+        //txtLog.text='Cancelado.'
+        tCancel.restart()
     }
 }

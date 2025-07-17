@@ -347,6 +347,8 @@ Window {
                 }
                 ZipManager{
                     id: zipManager
+                    width: !apps.dev?xApp.width-app.fs:app.fs*20
+                    parent: !apps.dev?col:colSplash
                     visible: true
                     dev: apps.dev
                     //version: '1.1.1'
@@ -423,6 +425,33 @@ Window {
             }
         }
     }
+    Rectangle{
+        color: apps.backgroundColor
+        anchors.fill: parent
+        visible: apps.dev
+        Column{
+            spacing: app.fs*0.5
+            width: parent.width*0.6
+            anchors.centerIn: parent
+            Text{
+                text: '<h3>'+presetAppName+'</h3>'
+                font.pixelSize: app.fs
+                color: app.c2
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            Column{
+                id: colSplash
+                spacing: app.fs*0.5
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            Text{
+                text: 'Presionar Ctrl+d para ver más detalles'
+                font.pixelSize: app.fs*0.5
+                color: app.c2
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+        }
+    }
     Component.onCompleted: {
         while(!unik){
             log.text+='.'
@@ -472,7 +501,13 @@ Window {
     }
 
     Shortcut{
-        sequence: 'Ctrl+I'
+        sequence: 'Ctrl+d'
+        onActivated: {
+            apps.dev=!apps.dev
+        }
+    }
+    Shortcut{
+        sequence: 'Ctrl+i'
         onActivated: {
             unik.setFile(unik.getPath(4)+'/log', app.uLogData)
             app.uLogData=''
@@ -488,7 +523,14 @@ Window {
     }
     Shortcut{
         sequence: 'Esc'
-        onActivated: Qt.quit()
+        onActivated: {
+            if(zipManager.uStdOut!=='Cancelado.'){
+                zipManager.cancelar()
+                zipManager.uStdOut='Cancelado.'
+            }else{
+                Qt.quit()
+            }
+        }
     }
     Shortcut{
         sequence: 'Enter'
@@ -530,12 +572,22 @@ Window {
                         log.lv('Código QML: '+c+'')
                     }
                     apps.uFolder=tiFolder.text
-                    let cmd=unik.getPath(0)+' -nocfg -folder='+tiFolder.text
+                    var cmd=unik.getPath(0)+' -nocfg -folder='+tiFolder.text
                     if(checkBoxRunOut.checked){
                         log.lv('Lanzando aparte ['+cmd+']')
                         unik.runOut(cmd)
+                        if(!apps.dev){
+                            app.close()
+                        }else{
+                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                        }
                     }else{
                         unik.run(cmd)
+                        if(!apps.dev){
+                            app.close()
+                        }else{
+                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                        }
                     }
                 }else{
                     log.lv('Error! La carpeta ['+tiFolder.text+'] no existe!.')
@@ -569,6 +621,11 @@ Window {
                         unik.runOut(cmd)
                     }else{
                         unik.run(cmd)
+                    }
+                    if(!apps.dev){
+                        app.close()
+                    }else{
+                        log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                     }
                 }else{
                     log.lv('Error! La carpeta ['+tiFolder.text+'] no existe!.')
@@ -913,6 +970,11 @@ Terminal=false'
                             let fullFileMainToInstall=unik.getPath(4)+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
                             if(unik.folderExist(fullFolderToInstall) && unik.folderExist(fullFolderToInstall2) && unik.fileExist(fullFileMainToInstall)){
                                 unik.runOut(unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2)
+                                if(!apps.dev){
+                                    app.close()
+                                }else{
+                                    log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                                }
                                 return
                             }
                         }else{
