@@ -352,11 +352,14 @@ Window {
                         //log.lv('onResponseRepVersion res: '+res)
                         //log.lv('onResponseRepVersion url: '+url)
                         //log.lv('onResponseRepVersion tipo: '+tipo)
+                        let nCtx=''
                         let nRes=res.replace('\n', '')
                         let version=''
                         if(tipo==='probe'){
                             version='prueba'
                             if(nRes.split('.').length>=3){
+                                nCtx=nRes+'_'+url+'_'+tipo
+                                apps.uCtxUpdate=nCtx
                                 zipManager.version=nRes
                                 log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
                             }else{
@@ -366,7 +369,13 @@ Window {
                         }else{
                             version='install'
                             if(nRes.split('.').length>=3){
-                                zipManager.version=nRes
+                                nCtx=nRes+'_'+url+'_'+tipo
+                                if(apps.uCtxUpdate!==nCtx){
+                                    zipManager.version=nRes
+                                    apps.uCtxUpdate=nCtx
+                                }else{
+                                    log.lv('No se puede probar este repositorio '+url+' porque ya está instalada la versión '+nRes)
+                                }
                                 log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
                             }else{
                                 log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
