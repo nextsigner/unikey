@@ -1,1 +1,1 @@
-Se prepara unikey.pro para multiples proyectos.
+Se corrigen path de curl y 7z para Windows

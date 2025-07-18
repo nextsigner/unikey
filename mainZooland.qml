@@ -496,8 +496,8 @@ Window {
             }
         }
 
-        zipManager.curlPath = Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
-        zipManager.app7ZipPath = Qt.platform.os==='windows'?unik.getPath(1)+'/7-Zip32/7z.exe':'7z'
+        zipManager.curlPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
+        zipManager.app7ZipPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
         zipManager.uFolder = unik.getPath(3)
         tiGitRep.focus=true
         tiGitRep.selectAll()
