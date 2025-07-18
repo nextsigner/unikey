@@ -14,6 +14,7 @@ Window {
     color: c1
 
     property int fs: Screen.width*0.015
+    property int botFs: fs*0.6
     property color c1: 'black'
     property color c2: 'white'
 
@@ -31,6 +32,7 @@ Window {
         fileName: unik?unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg':''
         property bool dev: false
         property bool runFromGit: false
+        property string runFromFolder: ''
         property bool runOut: true
         property string uGitRep: 'https://github.com/nextsigner/unikey-demo'
         property string uFolder: unik.getPath(3)
@@ -134,12 +136,12 @@ Window {
                 }
 
                 Row{
-                    spacing: app.fs*2
+                    spacing: app.botFs
                     anchors.horizontalCenter: parent.horizontalCenter
                     Button{
                         id: botCrearMainQmlDeEjemplo
                         text: 'Crear un ejemplo'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         onClicked: {
@@ -164,7 +166,7 @@ Window {
                     Button{
                         id: botLanzarQml
                         text: 'Lanzar la aplicación'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         onClicked: {
@@ -179,7 +181,7 @@ Window {
                     Button{
                         id: botDeleteQmlFileExample
                         text: 'Eliminar main.qml de ejemplo'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         visible: false
                         onClicked: {
@@ -329,7 +331,7 @@ Window {
                     Button{
                         id: botProbarGitRep
                         text: 'Probar'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             runMix('probe')
@@ -338,54 +340,78 @@ Window {
                     Button{
                         id: botSaveGitRep
                         text: 'Instalar'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             runMix('install')
                         }
                     }
                 }
-                ZipManager{
-                    id: zipManager
-                    width: !apps.dev?xApp.width-app.fs:app.fs*20
-                    parent: !apps.dev?col:colSplash
-                    visible: true
-                    dev: apps.dev
-                    //version: '1.1.1'
-                    onResponseRepExist:{
-                        if(res.indexOf('404')>=0){
-                            tiGitRep.color='red'
-                            log.lv('El repositorio ['+url+'] no existe.')
-                        }else{
-                            tiGitRep.color=apps.fontColor
-                            log.lv('El repositorio ['+url+'] está disponible en internet.')
-                            log.lv('Para probarlo presiona ENTER')
-                            log.lv('Para instalarlo presiona Ctrl+ENTER')
+                Column{
+                    id: colZM
+                    ZipManager{
+                        id: zipManager
+                        width: apps.dev?xApp.width-app.fs:xApp.width*0.6
+                        parent: apps.dev?colZM:colSplash
+                        visible: true
+                        dev: apps.dev
+                        //version: '1.1.1'
+                        onResponseRepExist:{
+                            if(res.indexOf('404')>=0){
+                                tiGitRep.color='red'
+                                log.lv('El repositorio ['+url+'] no existe.')
+                            }else{
+                                tiGitRep.color=apps.fontColor
+                                log.lv('El repositorio ['+url+'] está disponible en internet.')
+                                log.lv('Para probarlo presiona ENTER')
+                                log.lv('Para instalarlo presiona Ctrl+ENTER')
+                            }
                         }
-                    }
-                    onResponseRepVersion:{
-                        procRRV(res, url, tipo)
-                    }
-                    //                        onResponseRepExist:{
-                    //                            if(res.indexOf('404')>=0){
-                    //                                tiGitRep.color='red'
-                    //                                log.lv('El repositorio ['+url+'] no existe.')
-                    //                            }else{
-                    //                                tiGitRep.color=apps.fontColor
-                    //                                log.lv('El repositorio ['+url+'] está disponible en internet.')
-                    //                                log.lv('Para probarlo presiona ENTER')
-                    //                                log.lv('Para instalarlo presiona Ctrl+ENTER')
-                    //                            }
-                    //                        }
-                    //                    }
+                        onResponseRepVersion:{
+                            procRRV(res, url, tipo)
+                        }
+                        //                        onResponseRepExist:{
+                        //                            if(res.indexOf('404')>=0){
+                        //                                tiGitRep.color='red'
+                        //                                log.lv('El repositorio ['+url+'] no existe.')
+                        //                            }else{
+                        //                                tiGitRep.color=apps.fontColor
+                        //                                log.lv('El repositorio ['+url+'] está disponible en internet.')
+                        //                                log.lv('Para probarlo presiona ENTER')
+                        //                                log.lv('Para instalarlo presiona Ctrl+ENTER')
+                        //                            }
+                        //                        }
+                        //                    }
 
+                    }
                 }
                 Row{
-                    spacing: app.fs
+                    spacing: app.botFs
                     anchors.right: parent.right
                     Button{
+                        text: 'Restablecer Configuración por Defecto'
+                        font.pixelSize: app.botFs
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: false
+                        onClicked: {
+                            restoreDefaultCfg()
+                        }
+                        Timer{
+                            running: true
+                            repeat: true
+                            interval: 1000
+                            onTriggered: {
+                                    if(unik.fileExist(unik.getPath(1)+'/default.cfg')){
+                                        parent.visible=true
+                                    }else{
+                                        parent.visible=false
+                                    }
+                            }
+                        }
+                    }
+                    Button{
                         text: 'Eliminar Configuración'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             let aname=(''+presetAppName).toLowerCase()
@@ -395,7 +421,7 @@ Window {
                     }
                     Button{
                         text: 'Reiniciar cargando configuración'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             unik.setFile(unik.getPath(4)+'/log', app.uLogData)
@@ -404,7 +430,7 @@ Window {
                     }
                     Button{
                         text: 'Reiniciar sin cargar configuración'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             unik.setFile(unik.getPath(4)+'/log', app.uLogData)
@@ -413,7 +439,7 @@ Window {
                     }
                     Button{
                         text: 'Salir'
-                        font.pixelSize: app.fs
+                        font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             Qt.quit()
@@ -428,7 +454,7 @@ Window {
     Rectangle{
         color: apps.backgroundColor
         anchors.fill: parent
-        visible: apps.dev
+        visible: !apps.dev
         Column{
             spacing: app.fs*0.5
             width: parent.width*0.6
@@ -455,6 +481,19 @@ Window {
     Component.onCompleted: {
         while(!unik){
             log.text+='.'
+        }
+        let aname=(''+presetAppName).toLowerCase()
+        if(!unik.fileExist(unik.getPath(4)+'/'+aname+'.cfg')){
+            restoreDefaultCfg()
+        }
+
+        if(apps.runFromFolder!==""){
+            if(unik.folderExist(unik.getPath(4)+'/'+apps.runFromFolder) && unik.fileExist(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')){
+                unik.addImportPath(unik.getPath(4)+'/'+apps.runFromFolder+'/modules')
+                unik.cd(unik.getPath(4)+'/'+apps.runFromFolder)
+                engine.load(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')
+                return
+            }
         }
 
         zipManager.curlPath = Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
@@ -996,5 +1035,31 @@ Terminal=false'
             runInstall()
         }
 
+    }
+    function restoreDefaultCfg(){
+        /*
+        EJEMPLO DE JSON POR DEFECTO
+        {
+            "args":{
+                "git":"https://github.com/nextsigner/qml-pacman",
+                "dev": false,
+                "dep": false,
+                "runFromGit": true,
+                "runFromFolder": "zool"
+            }
+        }
+        */
+        let aname=(''+presetAppName).toLowerCase()
+        let js=unik.getFile(unik.getPath(1)+'/default.cfg')
+        let j=JSON.parse(js)
+        log.lv('Configuración por defecto: '+JSON.stringify(j, null, 2))
+        apps.dev=j.args['dev']
+        apps.runFromGit=j.args['runFromGit']
+        apps.runFromFolder=j.args['runFromFolder']
+        apps.runOut=j.args['dep']
+
+        let nCfgFilePath=unik.getPath(4)+'/'+aname+'.cfg'
+        log.lv('Definiendo configuración por defecto: '+nCfgFilePath)
+        unik.setFile(nCfgFilePath, JSON.stringify(j, null, 2))
     }
 }

@@ -1,1 +1,1 @@
-Se agrega funcion cancelar() en zipManager
+Se agrega boton Restaurar configuración por defecto

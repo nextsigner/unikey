@@ -62,7 +62,7 @@ Rectangle{
             spacing: app.fs*0.25
             anchors.centerIn: parent
             Text{
-                text: 'Estado de Descarga y Descompresión del Repositorio'
+                text: 'Estado de Descarga y Descompresión del Repositorio: '+r.uUrl
                 font.pixelSize: app.fs*0.65
                 color: apps.fontColor
             }
@@ -626,23 +626,7 @@ Rectangle{
                     log.lv("Para resetear presione Ctrl+R")
                 }
             }
-
-
-            //unik.restartApp("-folder="+mainPath)
-            //            Qt.application.arguments=[]
-            //            unik.clearComponentCache()
-            //            engine.load("qrc:/main.qml")
-
-            //if(r.dev)log.lv('unik.addImportPath(...): '+mainPath)
-            //unik.addImportPath(mainPath+'/modules')
-            //if(r.dev)log.lv('Cargando main.qml en '+mainPath)
-            //mainPath=mainPath+'/main.qml'
-
-            //unik.clearComponentCache()
-            //engine.load(mainPath)
-            //app.close()
         }
-
     }
     function unZip(zipfilePath, folder){
         mkUqp7Zip(zipfilePath, folder)
@@ -681,7 +665,8 @@ Rectangle{
         cleanUqpCurl()
         r.cPorc=0.00
         r.uStdOut='Cancelado.'
-        //txtLog.text='Cancelado.'
+        txtLog.text='Cancelado.'
         tCancel.restart()
+        log.lv('Se ha cancelado la descarga y la descompresión del repositorio '+r.uUrl)
     }
 }
