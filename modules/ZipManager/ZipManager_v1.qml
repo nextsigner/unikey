@@ -197,9 +197,9 @@ Rectangle{
                 if(r.dev)log.lv('From GitHub..')
                 let nfr=r.folderRoot.replace(r.version, '').replace('0.0.0.0', '')
                 nfr=nfr+m0[m0.length-1]+'_'+r.version
-                r.folderRoot=nfr
+                r.folderRoot='"'+nfr+'"'
             }
-            mkUqpCleanFolder(url, r.folderRoot)
+            mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
         }else{
             //downloadGitHub(url)
         }
@@ -226,7 +226,7 @@ Rectangle{
                 return
             }
             //btnIniciarReintentar.visible=false
-            r.uZipFilePath=folder+'/'+repName+'.zip'
+            r.uZipFilePath='"'+folder.replace(/\"/g, '')+'/'+repName+'.zip"'
             log.lv('r.uZipFilePath: '+r.uZipFilePath)
             if(unik.fileExist(uZipFilePath)){
                 //unik.deleteFile(r.uZipFilePath.replace('-main', ''))
@@ -324,7 +324,7 @@ Rectangle{
         c='uqpCurl'
         let idName=c
 
-        c=''+r.curlPath+' -# -L -o "'+folderPath+'/'+fileName+'" "'+url+'"'
+        c=''+r.curlPath+' -# -L -o "'+folderPath.replace(/\"/g, '')+'/'+fileName+'" "'+url+'"'
         let cmd=c
 
         c='        procCurlStdOut(logData)\n'
@@ -407,7 +407,7 @@ Rectangle{
         c='uqp7z'
         let idName=c
 
-        c=r.app7ZipPath+' x "'+zipFilePath+'" -o"'+folder+'" -aoa -bsp1'
+        c=r.app7ZipPath+' x "'+zipFilePath.replace(/\"/g, '')+'" -o"'+folder.replace(/\"/g, '')+'" -aoa -bsp1'
         let cmd=c
 
         c='        proc7ZipStdOut(logData)\n'
@@ -468,7 +468,7 @@ Rectangle{
         c+='        //No funciona porque mv no retorna nada procMoveStdOut(\'+logData+\', "'+fileNameOfFolder+'")\n'
         c+='    }\n'
         c+='    Component.onCompleted:{\n'
-        c+='        let cmd=\'mv "'+fileNameOfFolder+'" "'+fileNameOfFolder2+'"\'\n'
+        c+='        let cmd=\'mv "'+fileNameOfFolder.replace(/\"/g, '')+'" "'+fileNameOfFolder2.replace(/\"/g, '')+'"\'\n'
         c+='        console.log("cmd Move: "+cmd)\n'
         c+='        log.lv("cmd Move: "+cmd)\n'
         c+='        txtLog.text="Moviendo archivos...\\n"+cmd\n'
