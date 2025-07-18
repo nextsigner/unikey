@@ -5,9 +5,28 @@ QT += widgets quick3d
 
 CONFIG += c++11
 
+# mi_proyecto.pro
+
+# Define tu variable (ejemplo)
+PROYECTO = zool
+TARGET=$$PROYECTO
+equals(PROYECTO, "unikey") {
+    message("Cargando configuracion para unikey...")
+    include(unikey_config.pri)
+} else:equals(PROYECTO, "zool") {
+    message("Cargando configuracion para zool...")
+    include(zool_config.pri)
+} else:equals(PROYECTO, "unik") {
+    message("Cargando configuracion para unik...")
+    include(unik_config.pri)
+} else {
+    message("Valor desconocido para PROYECTO: $$PROYECTO. No se cargara ningun archivo de configuracion especifico.")
+}
+
+
 !linux:{
     message("Compilando en Windows")
-    QT += webengine widgets
+    QT += widgets
     QT += webchannel
     include(win.pri)
 } else {

@@ -28,12 +28,25 @@ CONFIG(release, debug|release):{
     }
 }
 
-RC_FILE = unikey.rc
 
 #Building Quazip from Windows 8.1
-INCLUDEPATH += C:\quazip
+INCLUDEPATH += $$PWD\quazip
 DEFINES+=QUAZIP_STATIC
-HEADERS += C:\quazip\*.h
-SOURCES += C:\quazip\*.cpp
-SOURCES += C:\quazip\*.c
+HEADERS += $$PWD\quazip\*.h
+SOURCES += $$PWD\quazip\*.cpp
+SOURCES += $$PWD\quazip\*.c
 
+equals(PROYECTO, "unikey") {
+    message("Cargando configuracion para unikey...")
+    DESTDIR = F:\zooldev\unikey-build
+    RC_FILE = $$PWD/res_$$PROYECTO/unikey.rc
+} else:equals(PROYECTO, "zool") {
+    message("Cargando configuracion para zool...")
+    DESTDIR = F:\zooldev\zool-win-64\build
+    RC_FILE = $$PWD/res_$$PROYECTO/zool.rc
+} else:equals(PROYECTO, "unik") {
+    message("Cargando configuracion para unik...")
+    include(unik_config.pri)
+} else {
+    message("Valor desconocido para PROYECTO: $$PROYECTO. No se cargara ningun archivo de configuracion especifico.")
+}
