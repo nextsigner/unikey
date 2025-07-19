@@ -1,6 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QtWebEngine>
+//#include <QtWebEngine>
 
 #include "unikargsproc.h"
 #include "ul.h"
@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    QtWebEngine::initialize();
+    //QtWebEngine::initialize();
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 

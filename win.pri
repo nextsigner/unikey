@@ -42,7 +42,8 @@ equals(PROYECTO, "unikey") {
     RC_FILE = $$PWD/res_$$PROYECTO/unikey.rc
 } else:equals(PROYECTO, "zool") {
     message("Cargando configuracion para zool...")
-    DESTDIR = F:\zooldev\zool-win-64\build
+    #DESTDIR = F:\zooldev\zool-win-64\build
+    DESTDIR = "F:\build 10\build"
     RC_FILE = $$PWD/res_$$PROYECTO/zool.rc
 } else:equals(PROYECTO, "unik") {
     message("Cargando configuracion para unik...")

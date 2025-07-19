@@ -1,1 +1,1 @@
-Se corrigen path de curl y 7z para Windows
+Se edita ZipManager_v1.qml

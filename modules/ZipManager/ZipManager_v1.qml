@@ -587,9 +587,9 @@ Rectangle{
                     if(r.launch){
                         log.lv('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
                         if(apps.runOut){
-                            unik.runOut(unik.getPath(0)+' -nocfg -folder='+mainPath)
+                            unik.runOut('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
                         }else{
-                            unik.run(unik.getPath(0)+' -nocfg -folder='+mainPath)
+                            unik.run('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
                         }
                         if(!apps.dev){
                             app.close()
