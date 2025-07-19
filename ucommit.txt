@@ -1,1 +1,1 @@
-Se edita ZipManager_v1.qml
+Se corrigen errores de rutas con espacios para Windows

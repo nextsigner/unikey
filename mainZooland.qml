@@ -483,7 +483,7 @@ Window {
             log.text+='.'
         }
         let aname=(''+presetAppName).toLowerCase()
-        if(!unik.fileExist(unik.getPath(4)+'/'+aname+'.cfg')){
+        if(!unik.fileExist('"'+unik.getPath(4).replace(/\"/g, '')+'/'+aname+'.cfg"')){
             restoreDefaultCfg()
         }
 
@@ -491,7 +491,7 @@ Window {
             if(unik.folderExist(unik.getPath(4)+'/'+apps.runFromFolder) && unik.fileExist(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')){
                 unik.addImportPath(unik.getPath(4)+'/'+apps.runFromFolder+'/modules')
                 unik.cd(unik.getPath(4)+'/'+apps.runFromFolder)
-                engine.load(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')
+                engine.load('"'+unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml"')
                 return
             }
         }

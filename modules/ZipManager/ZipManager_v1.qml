@@ -69,7 +69,7 @@ Rectangle{
             Rectangle{
                 id: xProgressBar
                 width: xProgresDialog.width-app.fs
-                height: app.fs
+                height: app.fs*1.5
                 color: 'transparent'
                 border.width: 1
                 border.color: apps.fontColor
@@ -541,7 +541,7 @@ Rectangle{
             unik.deleteFile(r.uZipFilePath)
 
             let aname=(''+presetAppName).toLowerCase()
-            let unikeyCfgPath=unik.getPath(4)+'/'+aname+'.cfg'
+            let unikeyCfgPath='"'+unik.getPath(4)+'/'+aname+'.cfg"'
             if(r.setCfg){
                 unik.deleteFile(unikeyCfgPath)
                 let j={}
