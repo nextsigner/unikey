@@ -1098,7 +1098,8 @@ Terminal=false'
             let j={}
             j.args={}
             //j.args['git']="https://github.com/nextsigner/unikey-apps"
-            j.args['git']="https://github.com/nextsigner/qml-pacman"
+            j.args['git']="https://github.com/nextsigner/qml-pacman
+"
             j.args['dev']=false
             j.args['runFromGit']=true
             j.args['runFromFolder']=""

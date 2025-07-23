@@ -1,1 +1,1 @@
-Se remueve mainZooland.qml
+Se retoca todo pero no funciona

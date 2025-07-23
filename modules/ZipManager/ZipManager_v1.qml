@@ -163,15 +163,15 @@ Rectangle{
         c+='    UnikQProcess{\n'
         c+='        id: '+idName+'\n'
         c+='        onFinished:{\n'
-        c+='        '+onFinishedCode
+        c+='        '+onFinishedCode+'\n'
         c+='        '+idName+'.destroy(0)\n'
         c+='        }\n'
         c+='        onLogDataChanged:{\n'
-        c+='        '+onLogDataCode
-        c+='        if(r.dev)unik.log(logData)\n'
+        c+='        '+onLogDataCode+'\n'
+        c+='        if(r.dev)r.log(logData)\n'
         c+='        }\n'
         c+='        Component.onCompleted:{\n'
-        c+='        '+onCompleteCode
+        c+='        '+onCompleteCode+'\n'
         c+='            let cmd=\''+cmd+'\'\n'
         c+='            if(r.dev)console.log("cmd '+idName+': "+cmd)\n'
         c+='            if(r.dev)r.log(cmd)\n'
@@ -271,6 +271,7 @@ Rectangle{
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+        console.log('cf:\n'+cf)
 
         if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
@@ -301,6 +302,7 @@ Rectangle{
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+        console.log('cf:\n'+cf)
 
         if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
@@ -330,6 +332,7 @@ Rectangle{
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+        console.log('cf:\n'+cf)
 
         if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
@@ -411,84 +414,16 @@ Rectangle{
 
 
         //c='        proc7ZipStdOut("finished")\n'
-        c+='       proc7ZipStdOut("finished", \''+url+'\',  \''+folderPath+'\', \''+fileName+'\')\n'
+        c+='       proc7ZipStdOut("finished", \''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
         let onFinishedCode=c
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+        console.log('cf:\n'+cf)
 
         if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
-        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
-
-        return
-        c='import QtQuick 2.0\n'
-        c+='import unik.UnikQProcess 1.0\n'
-        c+='Item{\n'
-        c+='UnikQProcess{\n'
-        c+='    id: uqp2\n'
-        c+='    onFinished:{\n'
-
-        c+='    }\n'
-        c+='    onLogDataChanged:{\n'
-
-        c+='    }\n'
-        c+='    Component.onCompleted:{\n'
-
-        c+='        if(r.dev)r.log("cmd 7-Zip: "+cmd)\n'
-        //c+='        xProgresDialog.visible=true\n'
-        c+='        run(cmd)\n'
-        c+='    }\n'
-        c+='}\n'
-        c+='}\n'
-        //r.log(c)
-        comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
-    }
-    function mkUqpMove(zipFilePath){
-        //r.log('zipFilePath: '+zipFilePath)
-        let fileNameOfFolder=zipFilePath.replace('.zip', '-main')
-        let fileNameOfFolder2=fileNameOfFolder.replace('-main', '')
-        if(r.folderDestination!==''){
-            fileNameOfFolder2=r.folderDestination
-        }
-        //unik.deleteFile(fileNameOfFolder2)
-        let c='import QtQuick 2.0\n'
-        c+='import unik.UnikQProcess 1.0\n'
-        c+='Item{\n'
-        c+='UnikQProcess{\n'
-        c+='    id: uqp3\n'
-        c+='    onFinished:{\n'
-        c+='        uqp3.destroy(0)\n'
-        c+='    }\n'
-        c+='    onLogDataChanged:{\n'
-        c+='        r.log("Move: "+logData)\n'
-        c+='        //No funciona porque mv no retorna nada procMoveStdOut(\'+logData+\', "'+fileNameOfFolder+'")\n'
-        c+='    }\n'
-        c+='    Component.onCompleted:{\n'
-        c+='        let cmd=\'mv "'+fileNameOfFolder.replace(/\"/g, '')+'" "'+fileNameOfFolder2.replace(/\"/g, '')+'"\'\n'
-        c+='        console.log("cmd Move: "+cmd)\n'
-        c+='        r.log("cmd Move: "+cmd)\n'
-        c+='        txtLog.text="Moviendo archivos...\\n"+cmd\n'
-        c+='        run(cmd)\n'
-        c+='        tCheckMove.folder="'+fileNameOfFolder2+'"\n'
-        c+='        tCheckMove.start()\n'
-        c+='    }\n'
-        c+='}\n'
-        c+='}\n'
-        //r.log(c)
-
-        let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
-    }
-    function procMoveStdOut(data, folder){
-        //let mainPath=r.uZipFilePath
-        r.log('procMoveStdOut(...).data: '+data)
-        r.log('procMoveStdOut(...).folder: '+foder)
-        let mainPath=folder+'/main.qml'
-        r.log('procMoveStdOut(...).mainPath: '+mainPath)
-        //engine.load(mainPath)
-        /*move "Z:/home/ns/Descargas/p400/zoolv4-main/*" "Z:/home/ns/Descargas/p400/"
-    let m0
-    rmdir "Z:/home/ns/Descargas/p400/zoolv4-main" /s /q*/
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)        
     }
     //function proc7ZipStdOut(data){
     function proc7ZipStdOut(data, url, folderPath, zipFileName){
@@ -631,7 +566,37 @@ Rectangle{
         mkUqp7Zip(zipfilePath, folder)
     }
     function mkUqpCleanFolder(url, folder){
-        let c='import QtQuick 2.0\n'
+        var c=''
+
+        let cmd=''
+        if(Qt.platform.os==='windows'){
+            cmd+='rmdir /S /Q "'+folder+'"'
+        }else{
+            cmd='rm -r -rf "'+folder+'/*"'
+        }
+
+        c=''
+        let onCompleteCode=c
+
+        c='uqpClean'
+        let idName=c
+
+        c='        //Nada'
+        let onLogDataCode=c
+
+
+        c='        downloadGitHub("'+url+'", "'+folder+'")'
+        let onFinishedCode=c
+
+
+        let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
+        console.log('cf:\n'+cf)
+
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
+        return
+        /*let c='import QtQuick 2.0\n'
         c+='import unik.UnikQProcess 1.0\n'
         c+='Item{\n'
         c+='UnikQProcess{\n'
@@ -656,7 +621,7 @@ Rectangle{
         c+='}\n'
         c+='}\n'
         //r.log(c)
-        let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
+        let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')*/
     }
     function cancelar(){
         cleanUqpCurl()
