@@ -8,8 +8,11 @@ Rectangle{
     color: 'transparent'
     border.width: 1
     border.color: 'white'
+    signal log(string data)
     signal responseRepExist(string res, string url)
     signal responseRepVersion(string res, string url, string tipo)
+    signal downloadFinished(string url, string folderPath, string zipFileName)
+    signal unzipFinished(string url, string folderPath, string zipFileName)
     property bool dev: false
     property bool resetApp: false
     property bool setCfg: false
@@ -143,16 +146,6 @@ Rectangle{
             }
         }
     }
-    Timer{
-        id: tCancel
-        running: false
-        repeat: false
-        interval: 1500
-        onTriggered: {
-            r.uStdOut='Cancelado.'
-            txtLog.text='Cancelado.'
-        }
-    }
     Component.onCompleted: {
         if(r.version===''){
             r.folderRoot=unik.getPath(4)+'/0.0.0.0'
@@ -181,7 +174,7 @@ Rectangle{
         c+='        '+onCompleteCode
         c+='            let cmd=\''+cmd+'\'\n'
         c+='            if(r.dev)console.log("cmd '+idName+': "+cmd)\n'
-        c+='            if(r.dev)log.lv(cmd)\n'
+        c+='            if(r.dev)r.log(cmd)\n'
         c+='            run(cmd)\n'
         c+='        }\n'
         c+='    }\n'
@@ -189,12 +182,12 @@ Rectangle{
         return c
     }
     function download(url, from){
-        if(r.dev)log.lv('download('+url+', '+from+')')
+        if(r.dev)r.log('download('+url+', '+from+')')
         if(from===undefined || from==='github'){
             let m0=url.split('/')
-            if(r.dev)log.lv('From GitHub m0: '+m0.toString())
+            if(r.dev)r.log('From GitHub m0: '+m0.toString())
             if(url.indexOf('github')>=0 && m0.length>3 && r.version!==''){
-                if(r.dev)log.lv('From GitHub..')
+                if(r.dev)r.log('From GitHub..')
                 let nfr=r.folderRoot.replace(r.version, '').replace('0.0.0.0', '')
                 nfr=nfr+m0[m0.length-1]+'_'+r.version
                 r.folderRoot='"'+nfr+'"'
@@ -227,7 +220,7 @@ Rectangle{
             }
             //btnIniciarReintentar.visible=false
             r.uZipFilePath='"'+folder.replace(/\"/g, '')+'/'+repName+'.zip"'
-            log.lv('r.uZipFilePath: '+r.uZipFilePath)
+            r.log('r.uZipFilePath: '+r.uZipFilePath)
             if(unik.fileExist(uZipFilePath)){
                 //unik.deleteFile(r.uZipFilePath.replace('-main', ''))
                 //unik.deleteFile(r.uZipFilePath)
@@ -279,7 +272,7 @@ Rectangle{
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
 
-        if(r.dev)log.lv('cf '+idName+': '+cf)
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
@@ -309,7 +302,7 @@ Rectangle{
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
 
-        if(r.dev)log.lv('cf '+idName+': '+cf)
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
@@ -327,22 +320,22 @@ Rectangle{
         c=''+r.curlPath+' -# -L -o "'+folderPath.replace(/\"/g, '')+'/'+fileName+'" "'+url+'"'
         let cmd=c
 
-        c='        procCurlStdOut(logData)\n'
+        c='        procCurlStdOut(logData, \''+url+'\',  \''+folderPath+'\', \''+fileName+'\')\n'
         let onLogDataCode=c
 
 
         c='        r.cPorc=99.99\n'
-        c+='        procCurlStdOut("finished")\n'
+        c+='       procCurlStdOut("finished", \''+url+'\',  \''+folderPath+'\', \''+fileName+'\')\n'
         let onFinishedCode=c
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
 
-        if(r.dev)log.lv('cf '+idName+': '+cf)
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
-    function procCurlStdOut(data){
+    function procCurlStdOut(data, url, folderPath, zipFileName){
         let d=data
         if(d.indexOf('#')>=0 && data!=="finished"){
             let s0="["+d+"]"
@@ -351,7 +344,7 @@ Rectangle{
             let m0=s2.split('%')
             let s3=m0[m0.length-2]
             if(!s3){
-                console.log('no s3:['+data+']')
+                //console.log('no s3:['+data+']')
                 /*if((''+data).indexOf('##')>=0 || (''+data).indexOf('#=#=#')>=0){
                     txtLog.text='Presione Iniciar.'
                     btnIniciarReintentar.text='Iniciar'
@@ -391,14 +384,17 @@ Rectangle{
             }
         }else{
             if(data==="finished"){
-                if(r.dev)log.lv('Descarga finalizada.')
-                mkUqp7Zip(r.uZipFilePath, r.uFolder)
+                if(r.dev)r.log('Descarga finalizada.')
+                r.downloadFinished(url, folderPath, zipFileName)
+                mkUqp7Zip(url, folderPath, zipFileName)
+                //mkUqp7Zip(r.uZipFilePath, r.uFolder)
             }else{
-                if(r.dev)log.lv('Log 111: ['+data+']')
+                if(r.dev)r.log('Log 111: ['+data+']')
             }
         }
     }
-    function mkUqp7Zip(zipFilePath, folder){
+    //function mkUqp7Zip(zipFilePath, folder){
+    function mkUqp7Zip(url, folderPath, zipFileName){
         let c=''
 
         c='\n'
@@ -407,20 +403,21 @@ Rectangle{
         c='uqp7z'
         let idName=c
 
-        c=r.app7ZipPath+' x "'+zipFilePath.replace(/\"/g, '')+'" -o"'+folder.replace(/\"/g, '')+'" -aoa -bsp1'
+        c=r.app7ZipPath+' x "'+r.uZipFilePath.replace(/\"/g, '')+'" -o"'+folderPath.replace(/\"/g, '')+'" -aoa -bsp1'
         let cmd=c
 
         c='        proc7ZipStdOut(logData)\n'
         let onLogDataCode=c
 
 
-        c='        proc7ZipStdOut("finished")\n'
+        //c='        proc7ZipStdOut("finished")\n'
+        c+='       proc7ZipStdOut("finished", \''+url+'\',  \''+folderPath+'\', \''+fileName+'\')\n'
         let onFinishedCode=c
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
 
-        if(r.dev)log.lv('cf '+idName+': '+cf)
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
 
@@ -438,17 +435,17 @@ Rectangle{
         c+='    }\n'
         c+='    Component.onCompleted:{\n'
 
-        c+='        if(r.dev)log.lv("cmd 7-Zip: "+cmd)\n'
+        c+='        if(r.dev)r.log("cmd 7-Zip: "+cmd)\n'
         //c+='        xProgresDialog.visible=true\n'
         c+='        run(cmd)\n'
         c+='    }\n'
         c+='}\n'
         c+='}\n'
-        //log.lv(c)
+        //r.log(c)
         comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
     }
     function mkUqpMove(zipFilePath){
-        //log.lv('zipFilePath: '+zipFilePath)
+        //r.log('zipFilePath: '+zipFilePath)
         let fileNameOfFolder=zipFilePath.replace('.zip', '-main')
         let fileNameOfFolder2=fileNameOfFolder.replace('-main', '')
         if(r.folderDestination!==''){
@@ -464,13 +461,13 @@ Rectangle{
         c+='        uqp3.destroy(0)\n'
         c+='    }\n'
         c+='    onLogDataChanged:{\n'
-        c+='        log.lv("Move: "+logData)\n'
+        c+='        r.log("Move: "+logData)\n'
         c+='        //No funciona porque mv no retorna nada procMoveStdOut(\'+logData+\', "'+fileNameOfFolder+'")\n'
         c+='    }\n'
         c+='    Component.onCompleted:{\n'
         c+='        let cmd=\'mv "'+fileNameOfFolder.replace(/\"/g, '')+'" "'+fileNameOfFolder2.replace(/\"/g, '')+'"\'\n'
         c+='        console.log("cmd Move: "+cmd)\n'
-        c+='        log.lv("cmd Move: "+cmd)\n'
+        c+='        r.log("cmd Move: "+cmd)\n'
         c+='        txtLog.text="Moviendo archivos...\\n"+cmd\n'
         c+='        run(cmd)\n'
         c+='        tCheckMove.folder="'+fileNameOfFolder2+'"\n'
@@ -478,22 +475,23 @@ Rectangle{
         c+='    }\n'
         c+='}\n'
         c+='}\n'
-        //log.lv(c)
+        //r.log(c)
 
         let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
     }
     function procMoveStdOut(data, folder){
         //let mainPath=r.uZipFilePath
-        log.lv('procMoveStdOut(...).data: '+data)
-        log.lv('procMoveStdOut(...).folder: '+foder)
+        r.log('procMoveStdOut(...).data: '+data)
+        r.log('procMoveStdOut(...).folder: '+foder)
         let mainPath=folder+'/main.qml'
-        log.lv('procMoveStdOut(...).mainPath: '+mainPath)
+        r.log('procMoveStdOut(...).mainPath: '+mainPath)
         //engine.load(mainPath)
         /*move "Z:/home/ns/Descargas/p400/zoolv4-main/*" "Z:/home/ns/Descargas/p400/"
     let m0
     rmdir "Z:/home/ns/Descargas/p400/zoolv4-main" /s /q*/
     }
-    function proc7ZipStdOut(data){
+    //function proc7ZipStdOut(data){
+    function proc7ZipStdOut(data, url, folderPath, zipFileName){
         let m0
         let m1
         if(data!=="finished"){
@@ -501,21 +499,22 @@ Rectangle{
                 m0=data.split('Extracting archive: ')
                 m1=m0[1].split(' ')
                 let m3=m1[0].split('.zip')
-                //log.lv('7Zip Archivo: '+m3[0]+'.zip')
+                //r.log('7Zip Archivo: '+m3[0]+'.zip')
                 r.cPorc=0.00
                 txtLog.text='Descomprimiendo: '+m3[0]+'.zip\nEspere unos segundos...'
             }else if(data.indexOf('Everything is Ok')>=0){
-                //log.lv('7Zip OK: '+data)
+                //r.log('7Zip OK: '+data)
                 m0=data.split('Size = ')
                 if(m0.length>1){
                     m1=m0[1].split('\n')
                     let t=parseInt(parseInt(m1[0])/1024/1024)
-                    //log.lv('7Zip OK Tamaño: ['+t+'Mb]')
+                    //r.log('7Zip OK Tamaño: ['+t+'Mb]')
                     txtLog.text='Descomprimido: '+t+'Mb.'
                 }else{
-                    //log.lv('7Zip ????: '+data)
+                    //r.log('7Zip ????: '+data)
                     //r.cPorc=100.00
                     r.uStdOut='Archivo descomprimido con éxito.'
+                    r.unzipFinished(url, folderPath, zipFileName)
                     //t7ZipFinished.start()
                 }
 
@@ -527,17 +526,17 @@ Rectangle{
                 let p2=parseFloat(p).toFixed(2)
                 r.cPorc=p2
                 //t7ZipFinished.restart()
-                //log.lv('7Zip PORC: ['+p2+']')
+                //r.log('7Zip PORC: ['+p2+']')
                 //txtLog.text='Descomprimido: '+t+'Mb.'
             }else{
-                log.lv('7Zip: '+data)
+                r.log('7Zip: '+data)
             }
         }else{
             r.cPorc=100.00
 
             var mainPath=r.uZipFilePath
             mainPath=mainPath.replace('.zip', '-main')
-            log.lv("Carpeta de archivos: "+mainPath)
+            r.log("Carpeta de archivos: "+mainPath)
             unik.deleteFile(r.uZipFilePath)
 
             let aname=(''+presetAppName).toLowerCase()
@@ -547,12 +546,12 @@ Rectangle{
                 let j={}
                 j.args={}
                 j.args.folder=mainPath
-                if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
+                if(r.dev)r.log('unikeyCfgPath: '+unikeyCfgPath)
                 let aname=(''+presetAppName).toLowerCase()
-                if(r.dev)log.lv(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
+                if(r.dev)r.log(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
                 unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
-                if(r.dev)log.lv('unikeyCfgPath: '+unikeyCfgPath)
-                if(r.dev)log.lv(aname+'.cfg: '+JSON.stringify(j, null, 2))
+                if(r.dev)r.log('unikeyCfgPath: '+unikeyCfgPath)
+                if(r.dev)r.log(aname+'.cfg: '+JSON.stringify(j, null, 2))
                 if(r.resetApp){
                     txtLog.text='Cargando aplicación...'
 
@@ -566,26 +565,26 @@ Rectangle{
                         if(!apps.dev){
                             app.close()
                         }else{
-                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                            r.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                         }
                     }else{
-                        log.lv('No se lanza...')
+                        r.log('No se lanza...')
                     }
                 }else{
-                    log.lv("Se ha descargado todo el repositorio "+r.uUrl)
-                    log.lv("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
-                    log.lv("Para resetear presione Ctrl+R")
+                    r.log("Se ha descargado todo el repositorio "+r.uUrl)
+                    r.log("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
+                    r.log("Para resetear presione Ctrl+R")
                 }
             }else{
-                log.lv("\nAtención! Por la configuración de ZipManager NO se ha  modificado el archivo "+unikeyCfgPath)
+                r.log("\nAtención! Por la configuración de ZipManager NO se ha  modificado el archivo "+unikeyCfgPath)
                 if(r.resetApp && r.isProbe){
                     mainPath=mainPath.replace('.zip', '-main')
-                    log.lv("Carpeta de archivos: "+mainPath)
+                    r.log("Carpeta de archivos: "+mainPath)
                     txtLog.text='Reseteando con parámetro: -folder='+mainPath
 
                     //MODO PROBE
                     if(r.launch){
-                        log.lv('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
+                        r.log('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
                         if(apps.runOut){
                             unik.runOut('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
                         }else{
@@ -594,10 +593,10 @@ Rectangle{
                         if(!apps.dev){
                             app.close()
                         }else{
-                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                            r.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                         }
                     }else{
-                        log.lv('\nr.launch: '+r.launch+'. En modo prueba NO  se lanza mainPath: '+mainPath)
+                        r.log('\nr.launch: '+r.launch+'. En modo prueba NO  se lanza mainPath: '+mainPath)
                     }
 
                     r.isProbe=false
@@ -605,7 +604,7 @@ Rectangle{
                 }else if(r.resetApp){
                     txtLog.text='Reseteando sin parámetro...'
                     if(r.launch){
-                        log.lv('<br>r.launch: '+r.launch+'. En modo 2 install NO CFG  se lanza mainPath: '+mainPath)
+                        r.log('<br>r.launch: '+r.launch+'. En modo 2 install NO CFG  se lanza mainPath: '+mainPath)
                         if(apps.runOut){
                             unik.runOut(unik.getPath(0)+' -nocfg')
                         }else{
@@ -614,16 +613,16 @@ Rectangle{
                         if(!apps.dev){
                             app.close()
                         }else{
-                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                            r.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                         }
                     }else{
-                        log.lv('No se lanza...')
+                        r.log('No se lanza...')
                         //unik.runOut(unik.getPath(0))
                     }
                 }else{
-                    log.lv("Se ha descargado todo el repositorio "+r.uUrl)
-                    log.lv("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
-                    log.lv("Para resetear presione Ctrl+R")
+                    r.log("Se ha descargado todo el repositorio "+r.uUrl)
+                    r.log("Para ejecutar la aplicación con el nuevo código fuente hay que resetear esta aplicación.")
+                    r.log("Para resetear presione Ctrl+R")
                 }
             }
         }
@@ -642,8 +641,6 @@ Rectangle{
         c+='        uqp4.destroy(0)\n'
         c+='    }\n'
         c+='    onLogDataChanged:{\n'
-        //  c+='        procCurlStdOut(logData)\n'
-        //c+='        log.lv("La carpeta '+folder+' ha sido vaciada.")\n'
         c+='    }\n'
         c+='    Component.onCompleted:{\n'
         if(Qt.platform.os==='windows'){
@@ -653,12 +650,12 @@ Rectangle{
             c+='        let cmd=\'rm -r -rf "'+folder+'/*"\'\n'
         }
         c+='        console.log("cmd clean: "+cmd)\n'
-        c+='        log.lv("cmd clean: "+cmd)\n'
+        c+='        r.log("cmd clean: "+cmd)\n'
         c+='        run(cmd)\n'
         c+='    }\n'
         c+='}\n'
         c+='}\n'
-        //log.lv(c)
+        //r.log(c)
         let comp=Qt.createQmlObject(c, xuqpCurl, 'uqp-curl-code')
     }
     function cancelar(){
@@ -666,7 +663,6 @@ Rectangle{
         r.cPorc=0.00
         r.uStdOut='Cancelado.'
         txtLog.text='Cancelado.'
-        tCancel.restart()
-        log.lv('Se ha cancelado la descarga y la descompresión del repositorio '+r.uUrl)
+        r.log('Se ha cancelado la descarga y la descompresión del repositorio '+r.uUrl)
     }
 }

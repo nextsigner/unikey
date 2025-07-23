@@ -1,1 +1,1 @@
-Se corrigen errores de rutas con espacios para Windows
+Se remueve mainZooland.qml
