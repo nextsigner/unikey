@@ -1,1 +1,1 @@
-Se retoca todo pero no funciona 2
+Se agregan funciones runCfgGit y runCfgFolder

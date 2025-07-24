@@ -2,8 +2,7 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import Qt.labs.settings 1.1
-import unik.Unik 1.0
-import ZipManager 1.0
+import ZipManager 4.0
 
 Window {
     id: app
@@ -14,6 +13,7 @@ Window {
     title: presetAppName
     color: c1
 
+    property string ctx: ''
     property int fs: Screen.width*0.015
     property int botFs: fs*0.6
     property color c1: 'black'
@@ -30,30 +30,32 @@ Window {
 
     Settings{
         id: apps
-        fileName: unik?unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg':''
+        fileName: unik?apps.mainFolder+'/'+(''+presetAppName).toLowerCase()+'_app.cfg':''
         property bool dev: false
+        property string mainFolder: ''
         property bool runFromGit: false
-        property string runFromFolder: ''
         property bool runOut: true
-        property string uGitRep: 'https://github.com/nextsigner/unikey-demo'
+        property string uGitRep: 'https://github.com/nextsigner/unikey-apps'
         property string uFolder: unik.getPath(3)
         property bool enableCheckBoxShowGitRep: false
         property color fontColor: 'white'
         property color backgroundColor: 'black'
         property string uCtxUpdate: ''
     }
-    Unik{
-        id: unik
+
+
+    Connections{
+        target: unik
+        property int i: 1
         onUkStdChanged:{
-            log.text+=''+unik.ukStd+'<br>'
+            log.text+=i+': '+unik.ukStd+'<br>'
+            let fp=apps.mainFolder+'/log'
+            let ld=i>1?unik.getFile(fp):''
+            ld+=i+': '+unik.ukStd
+            unik.setFile(fp, ld)
+            i++
         }
     }
-    //    Connections{
-    //        target: unik
-    //        onUkStdChanged:{
-    //            log.text+=''+unik.ukStd+'<br>'
-    //        }
-    //    }
     Connections{
         target: qmlErrorLogger
         onMessagesChanged:{
@@ -68,6 +70,7 @@ Window {
         id: xApp
         anchors.fill: parent
         Flickable{
+            id: flickabler
             contentWidth: parent.width
             contentHeight: col.height+app.fs
             //anchors.fill: parent
@@ -119,6 +122,11 @@ Window {
                         contentWidth: log.contentWidth
                         contentHeight: log.contentHeight+app.fs
                         anchors.horizontalCenter: parent.horizontalCenter
+                        ScrollBar.vertical: ScrollBar {
+                            width: log.font.pixelSize
+                            anchors.left: parent.right
+                            policy: ScrollBar.AlwaysOn
+                        }
                         Text{
                             id: log
                             color: app.c2
@@ -126,7 +134,7 @@ Window {
                             //height: app.fs*6
                             wrapMode: Text.WordWrap
                             textFormat: Text.RichText
-                            font.pixelSize: app.fs
+                            font.pixelSize: app.fs*0.65
                             anchors.horizontalCenter: parent.horizontalCenter
                             onTextChanged: {
                                 if(log.contentHeight>flk.height){
@@ -153,19 +161,19 @@ Window {
                         onClicked: {
                             let cp = unik.currentFolderPath()
                             let fp=cp+'/main.qml'
-                            log.lv('Creando el archivo main.qml en la carpeta ['+cp+']')
+                            unik.log('Creando el archivo main.qml en la carpeta ['+cp+']')
                             if(!unik.fileExist(fp)){
                                 unik.setFile(fp, app.uExampleCode)
                                 if(unik.fileExist(fp)){
-                                    log.lv('El archivo '+fp+' se ha creado correctamente.')
+                                    unik.log('El archivo '+fp+' se ha creado correctamente.')
                                     botLanzarQml.visible=true
                                     botDeleteQmlFileExample.visible=true
                                     botCrearMainQmlDeEjemplo.visible=false
                                 }else{
-                                    log.lv('El archivo '+fp+' NO se ha creado correctamente.')
+                                    unik.log('El archivo '+fp+' NO se ha creado correctamente.')
                                 }
                             }else{
-                                log.lv('El archivo '+fp+' ya existe!<br>No se ha creado nuevamente.')
+                                unik.log('El archivo '+fp+' ya existe!<br>No se ha creado nuevamente.')
                             }
                         }
                     }
@@ -197,12 +205,12 @@ Window {
                             if(fileData===app.uExampleCode){
                                 unik.deleteFile(fp)
                                 if(!unik.fileExist(fp)){
-                                    log.lv('El archivo '+fp+' de ejemplo ha sido eliminado.')
+                                    unik.log('El archivo '+fp+' de ejemplo ha sido eliminado.')
                                     botLanzarQml.visible=false
                                     botDeleteQmlFileExample.visible=false
                                     if(!checkBoxShowGitRep.checked)botCrearMainQmlDeEjemplo.visible=true
                                 }else{
-                                    log.lv('Ha ocurrido un problema. Se intentó borrar el archivo de ejemplo '+fp+' sin éxito.')
+                                    unik.log('Ha ocurrido un problema. Se intentó borrar el archivo de ejemplo '+fp+' sin éxito.')
                                 }
                             }
                         }
@@ -277,6 +285,57 @@ Window {
                     anchors.horizontalCenter: parent.horizontalCenter
                     //visible: checkBoxShowGitRep.checked
                     Text{
+                        id: txtTitMainFolder
+                        text: '<b>Carpeta Principal:</b>'
+                        font.pixelSize: app.fs
+                        color: 'white'
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Rectangle{
+                        width: xApp.width-txtTitMainFolder.contentWidth-botDefinirMainFolder.width-app.fs*1.75
+                        height: app.fs*1.5
+                        color: 'transparent'
+                        border.width: 1
+                        border.color: 'white'
+                        clip: true
+                        anchors.verticalCenter: parent.verticalCenter
+                        TextInput{
+                            id: tiMainFolder
+                            text: apps.mainFolder
+                            font.pixelSize: app.fs
+                            width: parent.width-app.fs*0.5
+                            height: parent.height-app.fs*0.5
+                            color: 'white'
+                            anchors.centerIn: parent
+                            onTextChanged: {
+                                if(!unik.folderExist(text)){
+                                    unik.log('La carpeta ['+text+'] no existe.')
+                                    tiMainFolder.color='red'
+                                }else{
+                                    tiMainFolder.color=apps.fontColor
+                                }
+                            }
+                        }
+                    }
+                    Button{
+                        id: botDefinirMainFolder
+                        text: 'Definir'
+                        font.pixelSize: app.botFs
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: {
+                            if(!unik.folderExist(text)){
+                                apps.mainFolder=tiMainFolder.text
+                            }else{
+
+                            }
+                        }
+                    }
+                }
+                Row{
+                    spacing: app.fs*0.25
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    //visible: checkBoxShowGitRep.checked
+                    Text{
                         id: txtTitGitRep
                         text: checkBoxShowGitRep.checked?'<b>Repositorio Git:</b>':'<b>Carpeta de Origen:</b>'
                         font.pixelSize: app.fs
@@ -301,9 +360,7 @@ Window {
                             color: 'white'
                             anchors.centerIn: parent
                             onTextChanged: {
-                                if(zipManager.curlPath!=='' && zipManager.app7ZipPath !==''){
-                                    zipManager.mkUqpRepExist(text)
-                                }
+                                if(zipManager.curlPath!=='')zipManager.mkUqpRepExist(text)
                             }
 
                         }
@@ -327,7 +384,7 @@ Window {
                             anchors.centerIn: parent
                             onTextChanged: {
                                 if(!unik.folderExist(text)){
-                                    log.lv('La carpeta ['+text+'] no existe.')
+                                    unik.log('La carpeta ['+text+'] no existe.')
                                     tiFolder.color='red'
                                 }else{
                                     tiFolder.color=apps.fontColor
@@ -363,25 +420,27 @@ Window {
                         parent: apps.dev?colZM:colSplash
                         visible: true
                         dev: apps.dev
-                        onLog: log.lv(data)
+                        //version: '1.1.1'
+                        onLog: unik.log(data)
                         onDownloadFinished: {
                             //Retorna: downloadFinished(string url, string folderPath, string zipFileName)
-                            log.lv('Se descargó: '+zipFileName)
-                            log.lv('Origen: '+url)
-                            log.lv('Destino: '+folderPath)
+                            unik.log('Se descargó: '+zipFileName)
+                            unik.log('Origen: '+url)
+                            unik.log('Destino: '+folderPath)
                         }
                         onUnzipFinished: {
                             //Retorna: unzipFinished(string url, string folderPath, string zipFileName)
+                            unik.log('Se ha descomprimido: '+fileName)
                         }
                         onResponseRepExist:{
                             if(res.indexOf('404')>=0){
                                 tiGitRep.color='red'
-                                log.lv('El repositorio ['+url+'] no existe.')
+                                unik.log('El repositorio ['+url+'] no existe.')
                             }else{
                                 tiGitRep.color=apps.fontColor
-                                log.lv('El repositorio ['+url+'] está disponible en internet.')
-                                log.lv('Para probarlo presiona ENTER')
-                                log.lv('Para instalarlo presiona Ctrl+ENTER')
+                                unik.log('El repositorio ['+url+'] está disponible en internet.')
+                                unik.log('Para probarlo presiona ENTER')
+                                unik.log('Para instalarlo presiona Ctrl+ENTER')
                             }
                         }
                         onResponseRepVersion:{
@@ -390,12 +449,12 @@ Window {
                         //                        onResponseRepExist:{
                         //                            if(res.indexOf('404')>=0){
                         //                                tiGitRep.color='red'
-                        //                                log.lv('El repositorio ['+url+'] no existe.')
+                        //                                unik.log('El repositorio ['+url+'] no existe.')
                         //                            }else{
                         //                                tiGitRep.color=apps.fontColor
-                        //                                log.lv('El repositorio ['+url+'] está disponible en internet.')
-                        //                                log.lv('Para probarlo presiona ENTER')
-                        //                                log.lv('Para instalarlo presiona Ctrl+ENTER')
+                        //                                unik.log('El repositorio ['+url+'] está disponible en internet.')
+                        //                                unik.log('Para probarlo presiona ENTER')
+                        //                                unik.log('Para instalarlo presiona Ctrl+ENTER')
                         //                            }
                         //                        }
                         //                    }
@@ -432,8 +491,8 @@ Window {
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             let aname=(''+presetAppName).toLowerCase()
-                            unik.deleteFile(unik.getPath(4)+'/'+aname+'.cfg')
-                            log.lv('Archivo de configuración eliminado.')
+                            unik.deleteFile(apps.mainFolder+'/'+aname+'.cfg')
+                            unik.log('Archivo de configuración eliminado.')
                         }
                     }
                     Button{
@@ -441,7 +500,7 @@ Window {
                         font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
+                            unik.setFile(apps.mainFolder+'/log', app.uLogData)
                             unik.restartApp()
                         }
                     }
@@ -450,7 +509,7 @@ Window {
                         font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
+                            unik.setFile(apps.mainFolder+'/log', app.uLogData)
                             unik.restartApp('-nocfg')
                         }
                     }
@@ -497,31 +556,46 @@ Window {
     }
     Component.onCompleted: {
         zipManager.curlPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
-        log.lv('Curl Path: '+zipManager.curlPath)
+        unik.log('Curl Path: '+zipManager.curlPath)
         zipManager.app7ZipPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
-        log.lv('7z Path: '+zipManager.app7ZipPath)
-        zipManager.uFolder = apps.runFromFolder!==""?'"'+apps.runFromFolder.replace(/\"/g, '')+'"':'"'+unik.getPath(3)+'"'
-//        while(!unik){
-//            log.text+='.'
-//        }
+        unik.log('7z Path: '+zipManager.app7ZipPath)
+        zipManager.uFolder = '"'+unik.getPath(3)+'"'
+        //        while(!unik){
+        //            log.text+='.'
+        //        }
         let aname=(''+presetAppName).toLowerCase()
-        var cfgDefaultPath='"'+unik.getPath(4).replace(/\"/g, '')+'/'+aname+'.cfg"'
+        var cfgDefaultPath='"'+apps.mainFolder.replace(/\"/g, '')+'/'+aname+'.cfg"'
         if(!unik.fileExist(cfgDefaultPath)){
             restoreDefaultCfg(cfgDefaultPath)
-            log.lv('Se ha restaurado la configuración por defecto: '+cfgDefaultPath)
+            unik.log('Se ha restaurado la configuración por defecto: '+cfgDefaultPath)
+        }
+        if(apps.mainFolder==='')apps.mainFolder=unik.getPath(4)
+
+        //Setear CTX
+        app.ctx=getCtx()
+        unik.log('Args: '+Qt.application.arguments)
+        unik.log('Contexto: '+app.ctx)
+        app.visibility='Maximized'
+        apps.dev=true
+
+        //RUN CTXs
+        if(app.ctx==='cfg-git'){
+            runCtxCfgGit()
+        }
+        if(app.ctx==='cfg-folder'){
+            runCtxCfgFolder()
         }
 
-        if(apps.runFromFolder!==""){
-            if(unik.folderExist(unik.getPath(4)+'/'+apps.runFromFolder) && unik.fileExist(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')){
-                unik.addImportPath(unik.getPath(4)+'/'+apps.runFromFolder+'/modules')
-                unik.cd(unik.getPath(4)+'/'+apps.runFromFolder)
-                engine.load('"'+unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml"')
-                return
-            }
-            log.lv('Procesando...')
-        }
 
 
+
+        return
+
+
+
+
+
+        zipManager.uFolder = unik.getPath(3)
         tiGitRep.focus=true
         tiGitRep.selectAll()
 
@@ -571,7 +645,7 @@ Window {
     Shortcut{
         sequence: 'Ctrl+i'
         onActivated: {
-            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
+            unik.setFile(apps.mainFolder+'/log', app.uLogData)
             app.uLogData=''
             init()
         }
@@ -579,7 +653,7 @@ Window {
     Shortcut{
         sequence: 'Ctrl+R'
         onActivated: {
-            unik.setFile(unik.getPath(4)+'/log', app.uLogData)
+            unik.setFile(apps.mainFolder+'/log', app.uLogData)
             unik.restartApp()
         }
     }
@@ -618,69 +692,68 @@ Window {
         }
     }
     function runMix(tipo){
-        log.lv('runMix('+tipo+')...')
         if(tipo==='probe'){
             if(apps.enableCheckBoxShowGitRep){
                 zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
             }else{
-                log.lv('Probando ['+tiFolder.text+']...')
+                unik.log('Probando ['+tiFolder.text+']...')
                 if(unik.folderExist(tiFolder.text)){
-                    log.lv('Revisando la carpeta ['+tiFolder.text+']...')
+                    unik.log('Revisando la carpeta ['+tiFolder.text+']...')
                     if(!unik.fileExist(tiFolder.text+'/main.qml')){
-                        log.lv('Error! La carpeta ['+tiFolder.text+'] no contiene un archivo [main.qml].')
+                        unik.log('Error! La carpeta ['+tiFolder.text+'] no contiene un archivo [main.qml].')
                         return
                     }else{
-                        log.lv('Existe un archivo ['+tiFolder.text+'/main.qml]...')
+                        unik.log('Existe un archivo ['+tiFolder.text+'/main.qml]...')
                         let c=unik.getFile(tiFolder.text+'/main.qml')
-                        log.lv('Código QML: '+c+'')
+                        unik.log('Código QML: '+c+'')
                     }
                     apps.uFolder=tiFolder.text
                     var cmd=unik.getPath(0)+' -nocfg -folder='+tiFolder.text
                     if(checkBoxRunOut.checked){
-                        log.lv('Lanzando aparte ['+cmd+']')
+                        unik.log('Lanzando aparte ['+cmd+']')
                         unik.runOut(cmd)
                         if(!apps.dev){
                             app.close()
                         }else{
-                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                            unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                         }
                     }else{
                         unik.run(cmd)
                         if(!apps.dev){
                             app.close()
                         }else{
-                            log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                            unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                         }
                     }
                 }else{
-                    log.lv('Error! La carpeta ['+tiFolder.text+'] no existe!.')
+                    unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
                 }
             }
         }else{
             if(apps.enableCheckBoxShowGitRep){
                 zipManager.mkUqpRepVersion(tiGitRep.text, 'install')
             }else{
-                log.lv('Probando ['+tiFolder.text+']...')
+                unik.log('Probando ['+tiFolder.text+']...')
                 if(unik.folderExist(tiFolder.text)){
-                    log.lv('Revisando la carpeta ['+tiFolder.text+']...')
+                    unik.log('Revisando la carpeta ['+tiFolder.text+']...')
                     if(!unik.fileExist(tiFolder.text+'/main.qml')){
-                        log.lv('Error! La carpeta ['+tiFolder.text+'] no contiene un archivo [main.qml].')
+                        unik.log('Error! La carpeta ['+tiFolder.text+'] no contiene un archivo [main.qml].')
                         return
                     }else{
-                        log.lv('Existe un archivo ['+tiFolder.text+'/main.qml]...')
+                        unik.log('Existe un archivo ['+tiFolder.text+'/main.qml]...')
                         let c=unik.getFile(tiFolder.text+'/main.qml')
-                        log.lv('Código QML: '+c+'')
+                        unik.log('Código QML: '+c+'')
                     }
                     let j={}
                     j.args={}
                     j.args['folder']=tiFolder.text
                     let aname=(''+presetAppName).toLowerCase()
-                    unik.setFile(unik.getPath(4)+'/'+aname+'.cfg', JSON.stringify(j, null, 2))
+                    unik.setFile(apps.mainFolder+'/'+aname+'.cfg', JSON.stringify(j, null, 2))
                     apps.uFolder=tiFolder.text
-                    mkAd(unik.getPath(0), '-folder='+tiFolder.text, unik.getPath(4))
+                    mkAd(unik.getPath(0), '-folder='+tiFolder.text, apps.mainFolder)
                     let cmd=unik.getPath(0)
                     if(checkBoxRunOut.checked){
-                        log.lv('Lanzando aparte ['+cmd+']')
+                        unik.log('Lanzando aparte ['+cmd+']')
                         unik.runOut(cmd)
                     }else{
                         unik.run(cmd)
@@ -688,42 +761,105 @@ Window {
                     if(!apps.dev){
                         app.close()
                     }else{
-                        log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                        unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                     }
                 }else{
-                    log.lv('Error! La carpeta ['+tiFolder.text+'] no existe!.')
+                    unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
                 }
             }
         }
     }
+    function getCtx(){
+        let ret=''
+        let count=getArgsUnikeyCount()
+        unik.log('Cantidad de argumentos UniKey: '+count)
+        let argIndexFolder=getArgsIndex(Qt.application.arguments, 'folder')
+        let argIndexGit=getArgsIndex(Qt.application.arguments, 'git')
+        let argIndexNoCfg=getArgsIndex(Qt.application.arguments, 'nocfg')
+        if(argIndexFolder>=0 && count===1){
+            ret='folder'
+        }
+        if(argIndexGit>=0 && count===1){
+            ret='git'
+        }
+        if(argIndexNoCfg>=0 && count===1){
+            ret='nocfg'
+        }
+        if(argIndexFolder>=0 && argIndexGit>=0 && count===2){
+            ret='git-folder'
+        }
+        if(argIndexFolder>=0 && argIndexNoCfg>=0 && count===2){
+            ret='nocfg-folder'
+        }
+        if(argIndexGit>=0 && argIndexNoCfg>=0 && count===2){
+            ret='nocfg-git'
+        }
+        if(argIndexFolder>=0 && argIndexGit>=0 && argIndexNoCfg>=0 && count===3){
+            ret='nocfg-git-folder'
+        }
+        if(ret===''){
+            let aname=(''+presetAppName).toLowerCase()
+            unik.log('apps.mainFolder: '+apps.mainFolder)
+            let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
+            let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
+            if(js==='error'){
+                js=unik.getFile(nCfgFilePath.replace(/\"/g, '')).replace(/\n/g, '')
+            }
+            unik.log('js: '+js)
+            let j=JSON.parse(js)
+            if(j.args['runFromGit']){
+                ret='cfg-git'
+            }else{
+                if(j.args['runFromFolder']!==""){
+                    ret='cfg-folder'
+                }
+            }
+
+
+        }
+        return ret
+    }
+    function getArgsUnikeyCount(){
+        let count=0
+        let a=['folder', 'git', 'nocfg']
+        for(var i=0;i<a.length;i++){
+            for(var i2=0;i2<Qt.application.arguments.length;i2++){
+                //unik.log('-->'+Qt.application.arguments[i2])
+                if((''+Qt.application.arguments[i2])===''+a[i] || (''+Qt.application.arguments[i2]).indexOf('-'+a[i])===0){
+                    count++
+                }
+            }
+        }
+        return count
+    }
     function init(){
-        //log.lv('Folder AppData: '+unik.getPath(4))
+        //unik.log('Folder AppData: '+apps.mainFolder)
         let argsFinal=[]
         cp = unik.currentFolderPath()
-        let fp='"'+cp+'/main.qml"'
-        log.lv('Parámetros recibidos: '+Qt.application.arguments.toString())
-        log.lv('Carpeta actual: '+cp)
+        let fp=cp+'/main.qml'
+        unik.log('Parámetros recibidos: '+Qt.application.arguments.toString())
+        unik.log('Carpeta actual: '+cp)
 
         let m0
 
         let argIndexNoCfg=getArgsIndex(Qt.application.arguments, 'nocfg')
-        if(apps.dev)log.lv('argIndexNoCfg: '+argIndexNoCfg)
+        if(apps.dev)unik.log('argIndexNoCfg: '+argIndexNoCfg)
         //log.text='aaa: '+argIndexNoCfg
 
-        if(argIndexNoCfg<0){
-            let cAppData=unik.getPath(4)
-            log.lv('Carpeta de datos: '+cAppData)
+        if(argIndexNoCfg<0){ //Carga CFG
+            let cAppData=apps.mainFolder
+            unik.log('Carpeta de datos: '+cAppData)
             let j
             let cfgSeted=false
-            var aname=(''+presetAppName).toLowerCase()
-            if(unik.fileExist('"'+cAppData+'/'+aname+'.cfg"')){
-                log.lv('Procesando archivo de configuración de '+presetAppName+'...')
-                let jsonString = unik.getFile('"'+cAppData+'/'+aname+'.cfg"').replace(/\n/g, '')
+            let aname=(''+presetAppName).toLowerCase()
+            if(unik.fileExist(cAppData+'/'+aname+'.cfg')){
+                unik.log('Procesando archivo de configuración de '+presetAppName+'...')
+                let jsonString = unik.getFile(cAppData+'/'+aname+'.cfg').replace(/\n/g, '')
                 try {
                     j = JSON.parse(jsonString);
                     let aname=(''+presetAppName).toLowerCase()
-                    log.lv('Iniciando con configuración de '+aname+'.cfg:\n'+JSON.stringify(j, null, 2))
-                    //log.lv('Iniciando con configuración de '+aname+'.cfg:\n'+JSON.stringify(j.args, null, 2))
+                    unik.log('Iniciando con configuración de '+aname+'.cfg:\n'+JSON.stringify(j, null, 2))
+                    //unik.log('Iniciando con configuración de '+aname+'.cfg:\n'+JSON.stringify(j.args, null, 2))
                     if(j.args && j.args['git']){
                         argsFinal.push('-git='+j.args['git'])
                     }else{
@@ -734,14 +870,14 @@ Window {
                     cfgSeted=true
                 } catch (error) {
                     let aname=(''+presetAppName).toLowerCase()
-                    log.lv('Falló la carga de '+aname+'.cfg:\n'+jsonString)
+                    unik.log('Falló la carga de '+aname+'.cfg:\n'+jsonString)
                     console.error("Error! Hay un error en el archivo de configuración "+cAppData+'/'+aname+'.cfg', error);
                 }
             }
 
         }else{
             let aname=(''+presetAppName).toLowerCase()
-            log.lv('Se omite la revisión del archivo '+aname+'.cfg...')
+            unik.log('Se omite la revisión del archivo '+aname+'.cfg...')
         }
 
         if(argsFinal.length===0){
@@ -756,65 +892,68 @@ Window {
         let argIndexFolder=getArgsIndex(app.appArgs, 'folder')
         if(argIndexFolder>=0){
             let a=app.appArgs[argIndexFolder]
-            log.lv('Ejecutando '+presetAppName+' con el argumento '+a)
+            unik.log('Ejecutando '+presetAppName+' con el argumento '+a)
             let m0=a.split('=')
-            log.lv('Chequeando si existe la carpeta '+m0[1])
+            unik.log('Chequeando si existe la carpeta '+m0[1])
             if(unik.folderExist(m0[1])){
-                log.lv('Ingresando a la carpeta '+m0[1])
+                unik.log('Ingresando a la carpeta '+m0[1])
                 unik.cd(m0[1])
-                log.lv('Carpeta actual: '+unik.currentFolderPath())
+                unik.addImportPath(m0[1]+'/modules')
+                unik.log('Carpeta actual: '+unik.currentFolderPath())
                 cp=m0[1]
                 fp=cp+'/main.qml'
+                engine.load(fp)
+                return
             }else{
-                log.lv('Error!\nEl argumento '+a+' no se podrá procesar porque la carpeta '+m0[1]+' no existe!')
-                log.lv('Se continúa en la carpeta actual: '+unik.currentFolderPath())
+                unik.log('Error!\nEl argumento '+a+' no se podrá procesar porque la carpeta '+m0[1]+' no existe!')
+                unik.log('Se continúa en la carpeta actual: '+unik.currentFolderPath())
                 app.visibility="Maximized"
             }
         }
         if(argIndexGit>=0 && apps.runFromGit){
             let a=app.appArgs[argIndexGit]
-            log.lv('Ejecutando '+presetAppName+' con el argumento '+a)
+            unik.log('Ejecutando '+presetAppName+' con el argumento '+a)
             m0=a.split('=')
-            log.lv('Ejecutando auto actualización...')
-            log.lv('Última carpeta de archivos: '+apps.uFolder)
+            unik.log('Ejecutando auto actualización...')
+            unik.log('Última carpeta de archivos: '+apps.uFolder)
             apps.uGitRep=m0[1]
             tiGitRep.text=apps.uGitRep
-            log.lv('Descargando '+m0[1]+'...')
+            unik.log('Descargando '+m0[1]+'...')
             app.visible=true
             app.visibility="Maximized"
 
             zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
         }else if(argIndexGit>=0 && !apps.runFromGit){
             let a=app.appArgs[argIndexGit]
-            log.lv('Cargando url git desde configuración...')
+            unik.log('Cargando url git desde configuración...')
             apps.enableCheckBoxShowGitRep=true
             m0=a.split('=')
-            //log.lv('Ejecutando auto actualización...')
+            //unik.log('Ejecutando auto actualización...')
             apps.uGitRep=m0[1]
             tiGitRep.text=apps.uGitRep
-            log.lv('Descargando '+m0[1]+'...')
+            unik.log('Descargando '+m0[1]+'...')
             app.visible=true
             app.visibility="Maximized"
             //zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
         }else{
             if(argIndexFolder>=0){
                 let a=app.appArgs[argIndexFolder]
-                //log.lv('Ejecutando Unikey con el argumento '+a)
+                //unik.log('Ejecutando Unikey con el argumento '+a)
                 m0=a.split('=')
-                log.lv('El repositorio git se descargará en la carpeta '+m0[1])
+                unik.log('El repositorio git se descargará en la carpeta '+m0[1])
                 if(unik.folderExist(m0[1])){
-                    log.lv('Ingresando a la carpeta '+m0[1])
+                    unik.log('Ingresando a la carpeta '+m0[1])
                     unik.cd(m0[1])
                     unik.addImportPath(m0[1]+'/modules')
-                    log.lv('Carpeta actual: '+unik.currentFolderPath())
+                    unik.log('Carpeta actual: '+unik.currentFolderPath())
                     cp=m0[1]
                     //fp=cp+'/main.qml'
                 }else{
-                    log.lv('La carpeta '+m0[1]+' no existe.')
-                    log.lv('Creando la carpeta '+m0[1]+'')
+                    unik.log('La carpeta '+m0[1]+' no existe.')
+                    unik.log('Creando la carpeta '+m0[1]+'')
                     unik.mkdir(m0[1])
                     if(unik.folderExist(m0[1])){
-                        log.lv('La carpeta '+m0[1]+' fue creada con éxito.')
+                        unik.log('La carpeta '+m0[1]+' fue creada con éxito.')
                         cp=m0[1]
                     }
                 }
@@ -824,13 +963,13 @@ Window {
 
         //let t1=''
         if(unik.fileExist(fp)){
-            log.lv('Esta carpeta contiene un archivo main.qml')
+            unik.log('Esta carpeta contiene un archivo main.qml')
             botLanzarQml.visible=true
             let fileData=unik.getFile(fp)
-            //log.lv("["+fileData+"]")
-            //log.lv("["+app.uExampleCode+"]")
+            //unik.log("["+fileData+"]")
+            //unik.log("["+app.uExampleCode+"]")
             if(app.uExampleCode===fileData){
-                log.lv('Se ha detectado que el archivo '+fp+' al parecer es un archivo de ejemplo de Unikey.')
+                unik.log('Se ha detectado que el archivo '+fp+' al parecer es un archivo de ejemplo de Unikey.')
                 botLanzarQml.text='Lanzar la aplicación de Ejemplo'
                 botDeleteQmlFileExample.visible=true
             }else{
@@ -844,8 +983,8 @@ Window {
                 app.close()
             }
         }else{
-            log.lv('Esta carpeta ['+fp.replace('/main.qml', '')+'] NO contiene un archivo main.qml')
-            log.lv('Es posible que estes viendo estos mensajes porque no tienes un archivo main.qml en esta carpeta.<br><br>El archivo main.qml es necesario para que '+presetAppName+' inicie una aplicación del tipo QtQuick.')
+            unik.log('Esta carpeta ['+fp.replace('/main.qml', '')+'] NO contiene un archivo main.qml')
+            unik.log('Es posible que estes viendo estos mensajes porque no tienes un archivo main.qml en esta carpeta.<br><br>El archivo main.qml es necesario para que '+presetAppName+' inicie una aplicación del tipo QtQuick.')
             if(!checkBoxShowGitRep.checked)botCrearMainQmlDeEjemplo.visible=true
             app.visibility="Maximized"
         }
@@ -885,7 +1024,6 @@ Window {
         zipManager.resetApp=true
         zipManager.setCfg=false
         //zipManager.launch=false
-        log.lv('Descargando: '+tiGitRep.text)
         zipManager.download(tiGitRep.text)
     }
     function runInstall(){
@@ -952,7 +1090,7 @@ Terminal=false'
         let c=getAdCode(exePath, args, wd)
         if(Qt.platform.os==='linux'){
             let desktopIconFilePath=unik.getPath(6)+'/'+fileName+'.desktop'
-            log.lv('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
+            unik.log('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
             unik.setFile(desktopIconFilePath, c)
         }else{
             unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
@@ -968,7 +1106,7 @@ Terminal=false'
             c='wscript "'+unik.getPath(2)+'/'+fileName+'.vbs"'
             let cmd=c
 
-            c='        log.lv(logData)\n'
+            c='        unik.log(logData)\n'
             let onLogDataCode=c
 
 
@@ -978,7 +1116,7 @@ Terminal=false'
 
             let cf=zipManager.getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
 
-            if(app.dev)log.lv('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+            if(app.dev)unik.log('cf '+idName+': '+cf)
 
             let comp=Qt.createQmlObject(cf, zipManager.uqpsContainer, 'uqp-code-'+idName)
         }
@@ -986,9 +1124,9 @@ Terminal=false'
     }
     //Procesar Response Repository Version
     function procRRV(res, url, tipo){
-        //log.lv('onResponseRepVersion res: '+res)
-        //log.lv('onResponseRepVersion url: '+url)
-        //log.lv('onResponseRepVersion tipo: '+tipo)
+        //unik.log('onResponseRepVersion res: '+res)
+        //unik.log('onResponseRepVersion url: '+url)
+        //unik.log('onResponseRepVersion tipo: '+tipo)
         let nCtx=''
         let nRes=res.replace('\n', '')
         let version=''
@@ -998,9 +1136,9 @@ Terminal=false'
                 nCtx=nRes+'_'+url+'_'+tipo
                 apps.uCtxUpdate=nCtx
                 version='probe_'+nRes
-                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
+                unik.log('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
             }else{
-                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+                unik.log('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
             }
             zipManager.version=version
             runProbe()
@@ -1010,11 +1148,11 @@ Terminal=false'
             if(nRes.split('.').length>=3){
                 //Existe un dato de version
                 nCtx=nRes+'_'+url+'_'+tipo
-                log.lv('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
+                unik.log('El repositorio '+tiGitRep.text+' tiene disponible la versión '+nRes)
                 //Check si el nuevo contexto es igual al anterior
                 if(apps.uCtxUpdate===nCtx){
                     //Estamos en un contexto similar al anterior
-                    log.lv('No se puede instalar este repositorio '+url+' porque ya está instalada la versión '+nRes)
+                    unik.log('No se puede instalar este repositorio '+url+' porque ya está instalada la versión '+nRes)
 
                     //Check si existe carpeta del contexto similar
                     //Si la carpeta no existe se reinstalará el mismo contexto
@@ -1022,22 +1160,22 @@ Terminal=false'
                     if(apps.uCtxUpdate.indexOf(url)>=0 && apps.uCtxUpdate.indexOf('_')>=0){
                         let m100=apps.uCtxUpdate.split(url)
                         lastVersionInstaled=m100[0]
-                        log.lv('La última versión de este repositorio '+url+' instalada fué '+lastVersionInstaled)
+                        unik.log('La última versión de este repositorio '+url+' instalada fué '+lastVersionInstaled)
                         //Check si la última version instalada es diferente a la última disponible
                         if( lastVersionInstaled===nRes){
                             //La última version instalada es igual
                             //Se procede a ejecutar por carpeta
                             let m101=url.replace('/main/version').split('/')
                             let repName=m101[m101.length-1]
-                            let fullFolderToInstall=unik.getPath(4)+'/'+repName+'_'+nRes
-                            let fullFolderToInstall2=unik.getPath(4)+'/'+repName+'_'+nRes+'/'+repName+'-main'
-                            let fullFileMainToInstall=unik.getPath(4)+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
+                            let fullFolderToInstall=apps.mainFolder+'/'+repName+'_'+nRes
+                            let fullFolderToInstall2=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main'
+                            let fullFileMainToInstall=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
                             if(unik.folderExist(fullFolderToInstall) && unik.folderExist(fullFolderToInstall2) && unik.fileExist(fullFileMainToInstall)){
                                 unik.runOut(unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2)
                                 if(!apps.dev){
                                     app.close()
                                 }else{
-                                    log.lv('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                                    unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
                                 }
                                 return
                             }
@@ -1054,7 +1192,7 @@ Terminal=false'
                 }
             }else{
                 //Repositorio sin version
-                log.lv('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+                unik.log('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
             }
             zipManager.version=version
             runInstall()
@@ -1063,43 +1201,48 @@ Terminal=false'
     }
     function restoreDefaultCfg(cfgDefaultPath){
         /*
-        EJEMPLO DE JSON POR DEFECTO
-        {
-            "args":{
-                "git":"https://github.com/nextsigner/qml-pacman",
-                "dev": false,
-                "dep": false,
-                "runFromGit": true,
-                "runFromFolder": "zool"
+            EJEMPLO DE JSON POR DEFECTO
+            {
+                "args":{
+                    "mainFolder": "/home/ns"
+                    "git":"https://github.com/nextsigner/qml-pacman",
+                    "dev": false,
+                    "dep": false,
+                    "runFromGit": true,
+                    "runFromFolder": "zool"
+                }
             }
-        }
-        */
+            */
         let aname=(''+presetAppName).toLowerCase()
-        let nCfgFilePath=unik.getPath(4)+'/'+aname+'.cfg'
+        let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
         let defaultCfgPath='"'+unik.getPath(1)+'/default.cfg"'
-        log.lv('Cargando configuración por defecto desde: '+defaultCfgPath)
-        let js=unik.getFile(defaultCfgPath)
-        log.lv('Buscando '+defaultCfgPath)
+        unik.log('Cargando configuración por defecto desde: '+defaultCfgPath)
+        let js=unik.getFile(defaultCfgPath).replace(/\n/g, '')
+        if(js==='error'){
+            js=unik.getFile(defaultCfgPath.replace(/\"/g, '')).replace(/\n/g, '')
+        }
+        unik.log(''+js)
+        unik.log('Buscando '+defaultCfgPath)
         if(unik.fileExist(defaultCfgPath)){
 
 
             let j=JSON.parse(js)
-            log.lv('Configuración por defecto: '+JSON.stringify(j, null, 2))
+            unik.log('Configuración por defecto: '+JSON.stringify(j, null, 2))
 
-            apps.dev=j.args['dev']
-            apps.runFromGit=j.args['runFromGit']
-            apps.runFromFolder=j.args['runFromFolder']
-            apps.runOut=j.args['dep']
+            if(j.args['dev'])apps.dev=j.args['dev']
+            if(j.args['runFromGit'])apps.runFromGit=j.args['runFromGit']
+            if(j.args['runFromFolder'])apps.runFromFolder=j.args['runFromFolder']
+            if(j.args['dep'])apps.runOut=j.args['dep']
+            if(j.args['mainFolder'])apps.mainFolder=j.args['mainFolder']
 
-            log.lv('Definiendo configuración por defecto: '+nCfgFilePath)
+            unik.log('Definiendo configuración por defecto: '+nCfgFilePath)
             unik.setFile(nCfgFilePath, JSON.stringify(j, null, 2))
         }else{
-            log.lv('Configuración por defecto no existe!: '+defaultCfgPath)
+            unik.log('Configuración por defecto no existe!: '+defaultCfgPath)
             let j={}
             j.args={}
-            //j.args['git']="https://github.com/nextsigner/unikey-apps"
-            j.args['git']="https://github.com/nextsigner/qml-pacman
-"
+            j.args['mainFolder']=unik.getPath(4)
+            j.args['git']="https://github.com/nextsigner/unikey-apps"
             j.args['dev']=false
             j.args['runFromGit']=true
             j.args['runFromFolder']=""
@@ -1115,5 +1258,44 @@ Terminal=false'
             apps.runOut=false
         }
 
+    }
+
+    //Aprobado en GNU/Linux
+    function runCtxCfgGit(){
+        let aname=(''+presetAppName).toLowerCase()
+        let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
+        let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
+        if(js==='error'){
+            js=unik.getFile(nCfgFilePath.replace(/\"/g, '')).replace(/\n/g, '')
+        }
+        //unik.log('js: '+js)
+        let j=JSON.parse(js)
+
+        apps.uGitRep=j.args['git']
+        zipManager.isProbe=false
+        zipManager.resetApp=true
+        zipManager.setCfg=false
+        zipManager.download(j.args['git'])
+
+
+    }
+    //Aprobado en GNU/Linux
+    function runCtxCfgFolder(){
+        let aname=(''+presetAppName).toLowerCase()
+        let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
+        let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
+        if(js==='error'){
+            js=unik.getFile(nCfgFilePath.replace(/\"/g, '')).replace(/\n/g, '')
+        }
+        //unik.log('js: '+js)
+        let j=JSON.parse(js)
+        let folder=j.args['folder']
+        if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
+            unik.addImportPath(folder+'/modules')
+            unik.cd(folder)
+            unik.log('Cargando: '+''+folder+'/main.qml')
+            engine.load(folder+'/main.qml')
+
+        }
     }
 }

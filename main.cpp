@@ -80,7 +80,8 @@ int main(int argc, char *argv[])
     ip.append(qApp->applicationDirPath());
     ip.append("/modules");
     engine.addImportPath(ip);
-    engine.addImportPath("qrc:/modules");
+    engine.addImportPath("./modules");
+    //engine.addImportPath("qrc:/modules");
     //<--Set Import Path
 
     QDir::setCurrent(u.getPath(4));

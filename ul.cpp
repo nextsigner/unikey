@@ -57,12 +57,7 @@ QString UL::getFile(QByteArray n)
     QString r;
     QFile file(n);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QFile file2(QString(n).replace("\"", ""));
-        if(!file2.open(QIODevice::ReadOnly | QIODevice::Text)){
-            return "error";
-        }else{
-            return file2.readAll();
-        }
+        return "error";
     }
     return file.readAll();
 }
@@ -74,8 +69,13 @@ bool UL::folderExist(const QByteArray folder)
 bool UL::fileExist(QByteArray fileName)
 {
     QFile a(fileName);
-    QFile a2(fileName.replace("\"", ""));
-    return a.exists() || a2.exists();
+    if(!a.exists()){
+        QFile a2(QString(fileName).replace("\"", ""));
+        if(a2.exists()){
+            return a2.exists();
+        }
+    }
+    return a.exists();
 }
 
 
