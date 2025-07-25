@@ -28,14 +28,6 @@ CONFIG(release, debug|release):{
     }
 }
 
-
-#Building Quazip from Windows 8.1
-INCLUDEPATH += $$PWD\quazip
-DEFINES+=QUAZIP_STATIC
-HEADERS += $$PWD\quazip\*.h
-SOURCES += $$PWD\quazip\*.cpp
-SOURCES += $$PWD\quazip\*.c
-
 equals(PROYECTO, "unikey") {
     message("Cargando configuracion para unikey...")
     DESTDIR = F:\zooldev\unikey-build

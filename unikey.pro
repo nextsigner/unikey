@@ -84,17 +84,17 @@ MODULES_SOURCE_DIR = $$PWD/modules
 # Reglas de copia
 # Verifica si la carpeta 'modules' existe antes de intentar copiarla
 exists($$MODULES_SOURCE_DIR) {
-    QMAKE_POST_LINK += $$QMAKE_COPY_DIR \"$$MODULES_SOURCE_DIR\" \"$$DESTDIR/modules\"
+    #QMAKE_POST_LINK += $$QMAKE_COPY_DIR \"$$MODULES_SOURCE_DIR\" \"$$DESTDIR/modules\"
 } else {
     warning("La carpeta 'modules' no se encontró en $$MODULES_SOURCE_DIR. La copia no se realizará.")
 }
 
 # Si estás en Windows y necesitas un comando más robusto para copiar directorios:
 win32 {
-     QMAKE_POST_LINK += $$quote(xcopy /E /I /Y "$$MODULES_SOURCE_DIR" "$$DESTDIR\\modules\\")
+     #QMAKE_POST_LINK += $$quote(xcopy /E /I /Y "$$MODULES_SOURCE_DIR" "$$DESTDIR\\modules\\")
 }
 
 # Si estás en sistemas Unix/Linux/macOS:
 unix {
-     QMAKE_POST_LINK += $$quote(cp -R "$$MODULES_SOURCE_DIR" "$$DESTDIR")
+     #QMAKE_POST_LINK += $$quote(cp -R "$$MODULES_SOURCE_DIR" "$$DESTDIR")
 }

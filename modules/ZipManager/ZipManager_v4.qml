@@ -487,9 +487,14 @@ Rectangle{
             if(app.ctx==='cfg-git' || app.ctx==='git' ){
                 unik.log('En contexto '+app.ctx+': mainPath='+mainPath)
                 let mainFilePath=Qt.platform.os==='windows'?'\"'+mainPath+'/main.qml"':mainPath+'/main.qml'
-                unik.addImportPath('"'+mainPath+'/modules"')
-                unik.addImportPath(mainPath+'/modules')
-                engine.load(mainFilePath)
+                if(Qt.application.os==='linux'){
+                    unik.addImportPath('"'+mainPath+'/modules"')
+                    unik.addImportPath(mainPath+'/modules')
+                    engine.load(mainFilePath)
+                }else{
+                    unik.runOut('"'+unik.getPath(0)+'" -folder='+mainPath)
+                }
+                if(!apps.dep)app.close()
                 return
             }
 
@@ -599,7 +604,7 @@ Rectangle{
 
         let cmd=''
         if(Qt.platform.os==='windows'){
-            cmd+='rmdir /S /Q "'+folder+'"'
+            cmd+='cmd.exe rmdir /S /Q "'+folder+'"'
         }else{
             cmd='rm -r -rf "'+folder+'/*"'
         }

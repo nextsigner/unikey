@@ -1,1 +1,1 @@
-Se agrega archivo de version
+Se crean instaladores de UniKey y Zool 1.7.25
