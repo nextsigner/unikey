@@ -484,9 +484,11 @@ Rectangle{
                 unik.deleteFile(r.uZipFilePath.replace(/\"/g, ''))
             }
 
-            if(app.ctx==='cfg-git'){
+            if(app.ctx==='cfg-git' || app.ctx==='git' ){
+                unik.log('En contexto '+app.ctx+': mainPath='+mainPath)
                 let mainFilePath=Qt.platform.os==='windows'?'\"'+mainPath+'/main.qml"':mainPath+'/main.qml'
                 unik.addImportPath('"'+mainPath+'/modules"')
+                unik.addImportPath(mainPath+'/modules')
                 engine.load(mainFilePath)
                 return
             }
@@ -509,6 +511,16 @@ Rectangle{
 
                     //MODO INSTALL
                     if(r.launch){
+                        if(app.ctx==='ugit' || app.ctx==='cfg-ugit'){
+                            unik.log('app.ctx: '+app.ctx)
+                            unik.log('Iniciando aplicación en carpeta '+mainPath)
+                            //unik.addImportPath(mainPath)
+                            //unik.cd('"'+mainPath+'"')
+                            //engine.load('"'+mainPath+'/main.qml"')
+                            unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
+                            app.close()
+                            return
+                        }
                         if(apps.runOut){
                             unik.runOut(unik.getPath(0))
                         }else{

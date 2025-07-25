@@ -430,7 +430,7 @@ Window {
                         }
                         onUnzipFinished: {
                             //Retorna: unzipFinished(string url, string folderPath, string zipFileName)
-                            unik.log('Se ha descomprimido: '+fileName)
+                            unik.log('Se ha descomprimido: '+zipFileName)
                         }
                         onResponseRepExist:{
                             if(res.indexOf('404')>=0){
@@ -579,11 +579,23 @@ Window {
         apps.dev=true
 
         //RUN CTXs
+        if(app.ctx==='cfg-ugit'){
+            runCtxCfgUGit()
+        }
+        if(app.ctx==='ugit'){
+            runCtxUGit()
+        }
         if(app.ctx==='cfg-git'){
             runCtxCfgGit()
         }
         if(app.ctx==='cfg-folder'){
             runCtxCfgFolder()
+        }
+        if(app.ctx==='git'){
+            runCtxGit()
+        }
+        if(app.ctx==='folder'){
+            runCtxFolder()
         }
 
 
@@ -774,10 +786,14 @@ Window {
         let count=getArgsUnikeyCount()
         unik.log('Cantidad de argumentos UniKey: '+count)
         let argIndexFolder=getArgsIndex(Qt.application.arguments, 'folder')
+        let argIndexUGit=getArgsIndex(Qt.application.arguments, 'ugit')
         let argIndexGit=getArgsIndex(Qt.application.arguments, 'git')
         let argIndexNoCfg=getArgsIndex(Qt.application.arguments, 'nocfg')
         if(argIndexFolder>=0 && count===1){
             ret='folder'
+        }
+        if(argIndexUGit>=0 && count===1){
+            ret='ugit'
         }
         if(argIndexGit>=0 && count===1){
             ret='git'
@@ -807,7 +823,9 @@ Window {
             }
             unik.log('js: '+js)
             let j=JSON.parse(js)
-            if(j.args['runFromGit']){
+            if(j.args['ugit']){
+                ret='cfg-ugit'
+            }else if(j.args['runFromGit']){
                 ret='cfg-git'
             }else{
                 if(j.args['runFromFolder']!==""){
@@ -821,7 +839,7 @@ Window {
     }
     function getArgsUnikeyCount(){
         let count=0
-        let a=['folder', 'git', 'nocfg']
+        let a=['folder', 'git', 'nocfg', 'ugit']
         for(var i=0;i<a.length;i++){
             for(var i2=0;i2<Qt.application.arguments.length;i2++){
                 //unik.log('-->'+Qt.application.arguments[i2])
@@ -1144,7 +1162,7 @@ Terminal=false'
             runProbe()
         }else{
             //Instalando...
-            version='install'
+            version=tipo//'install'
             if(nRes.split('.').length>=3){
                 //Existe un dato de version
                 nCtx=nRes+'_'+url+'_'+tipo
@@ -1171,11 +1189,16 @@ Terminal=false'
                             let fullFolderToInstall2=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main'
                             let fullFileMainToInstall=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
                             if(unik.folderExist(fullFolderToInstall) && unik.folderExist(fullFolderToInstall2) && unik.fileExist(fullFileMainToInstall)){
-                                unik.runOut(unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2)
-                                if(!apps.dev){
-                                    app.close()
+                                if(app.ctx==='ugit' || app.ctx==='cfg-ugit' ){
+                                    let uGitCmd=unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2
+                                    unik.log('uGitCmd: '+uGitCmd)
                                 }else{
-                                    unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                                    unik.runOut(unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2)
+                                    if(!apps.dev){
+                                        app.close()
+                                    }else{
+                                        unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
+                                    }
                                 }
                                 return
                             }
@@ -1193,7 +1216,13 @@ Terminal=false'
             }else{
                 //Repositorio sin version
                 unik.log('El repositorio '+tiGitRep.text+' NO tiene un archivo "version" disponible.')
+                if(app.ctx==='ugit'){
+                    unik.log('Contexto ugit: No hay un archivo de version. version: '+version)
+
+                    return
+                }
             }
+
             zipManager.version=version
             runInstall()
         }
@@ -1260,6 +1289,24 @@ Terminal=false'
 
     }
 
+    function runCtxCfgUGit(){
+        let aname=(''+presetAppName).toLowerCase()
+        let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
+        let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
+        if(js==='error'){
+            js=unik.getFile(nCfgFilePath.replace(/\"/g, '')).replace(/\n/g, '')
+        }
+        //unik.log('js: '+js)
+        let j=JSON.parse(js)
+        if(j.args['dev']){
+            apps.dev=j.args['dev']
+        }else{
+            apps.dev=false
+        }
+        apps.uGitRep=j.args['ugit']
+        //unik.log('runCtxCfgUGit() url: '+apps.uGitRep)
+        zipManager.mkUqpRepVersion(j.args['ugit'], 'updated')
+    }
     //Aprobado en GNU/Linux
     function runCtxCfgGit(){
         let aname=(''+presetAppName).toLowerCase()
@@ -1290,6 +1337,58 @@ Terminal=false'
         //unik.log('js: '+js)
         let j=JSON.parse(js)
         let folder=j.args['folder']
+        if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
+            unik.addImportPath(folder+'/modules')
+            unik.cd(folder)
+            unik.log('Cargando: '+''+folder+'/main.qml')
+            engine.load(folder+'/main.qml')
+
+        }
+    }
+    function runCtxUGit(){
+        apps.dev=false
+        let urlGit=''
+        let args=Qt.application.arguments
+        for(var i=0;i<args.length;i++){
+            if(args[i].indexOf('-ugit=')>=0){
+                let m0=args[i].split('-ugit=')
+                urlGit=m0[1]
+            }
+            if(args[i].indexOf('-dev=')>=0){
+                apps.dev=true
+            }
+        }
+        apps.uGitRep=urlGit
+        zipManager.mkUqpRepVersion(urlGit, 'updated')
+    }
+    //Aprobado en GNU/Linux
+    function runCtxGit(){
+        let urlGit=''
+        let args=Qt.application.arguments
+        for(var i=0;i<args.length;i++){
+            if(args[i].indexOf('-git=')>=0){
+                let m0=args[i].split('-git=')
+                urlGit=m0[1]
+            }
+        }
+        apps.uGitRep=urlGit
+        zipManager.isProbe=false
+        zipManager.resetApp=true
+        zipManager.setCfg=false
+        zipManager.download(urlGit)
+
+
+    }
+    //Aprobado en GNU/Linux
+    function runCtxFolder(){
+        let folder=''
+        let args=Qt.application.arguments
+        for(var i=0;i<args.length;i++){
+            if(args[i].indexOf('-folder=')>=0){
+                let m0=args[i].split('-folder=')
+                folder=m0[1]
+            }
+        }
         if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
             unik.addImportPath(folder+'/modules')
             unik.cd(folder)

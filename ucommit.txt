@@ -1,1 +1,1 @@
-Se agregan funciones runCfgGit y runCfgFolder
+Se prueba cfg-ugit
