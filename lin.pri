@@ -23,13 +23,3 @@
 CONFIG(release, debug|release):{
     DESTDIR = $$PWD/build_lin
 }
-
-#Building Quazip from Ubuntu 16.10
-#Compile quazip.pro and install with sudo make install from the $$OUT_PWD
-INCLUDEPATH += $$PWD/quazip
-LIBS += -lz
-LIBS+=-L/usr/local/zlib/lib
-INCLUDEPATH+=/usr/local/zlib/include
-HEADERS += $$PWD/quazip/*.h
-SOURCES += $$PWD/quazip/*.cpp
-SOURCES += $$PWD/quazip/*.c
