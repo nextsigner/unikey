@@ -24,13 +24,14 @@ CONFIG(release, debug|release):{
     }
     equals(QT_ARCH, x86_64) {
         message(Compilando para Windows 64bit)
-        DESTDIR = F:\zooldev\unikey-build
+        #DESTDIR = F:\zooldev\unikey-build
     }
 }
 
 equals(PROYECTO, "unikey") {
     message("Cargando configuracion para unikey...")
-    DESTDIR = F:\zooldev\unikey-build
+    #DESTDIR = F:\zooldev\unikey-build
+    DESTDIR = C:/unikey-build
     RC_FILE = $$PWD/res_$$PROYECTO/unikey.rc
 } else:equals(PROYECTO, "zool") {
     message("Cargando configuracion para zool...")

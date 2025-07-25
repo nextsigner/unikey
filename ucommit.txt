@@ -1,1 +1,1 @@
-Se prueba UniKey versión 1.7.25.2 en GNU/Linux
+En este estado la app dejó de funcionar, se volverá el hash 02abff7
