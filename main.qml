@@ -1162,7 +1162,7 @@ Terminal=false'
             runProbe()
         }else{
             //Instalando...
-            version=tipo//'install'
+            version=tipo
             if(nRes.split('.').length>=3){
                 //Existe un dato de version
                 nCtx=nRes+'_'+url+'_'+tipo
@@ -1180,18 +1180,24 @@ Terminal=false'
                         lastVersionInstaled=m100[0]
                         unik.log('La última versión de este repositorio '+url+' instalada fué '+lastVersionInstaled)
                         //Check si la última version instalada es diferente a la última disponible
-                        if( lastVersionInstaled===nRes){
+                        var m101=url.replace('/main/version').split('/')
+                        var repName=m101[m101.length-1]
+                        var fullFolderToInstall=apps.mainFolder+'/'+repName+'_'+nRes
+                        var fullFolderToInstall2=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main'
+                        var fullFileMainToInstall=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
+                        var fullFileVersionInstalled='"'+apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main/version"'
+                        var fullFileVersionInstalledData=unik.getFile(fullFileVersionInstalled).replace(/\n/g, '')
+                        if( lastVersionInstaled===nRes || fullFileVersionInstalledData===nRes){
                             //La última version instalada es igual
                             //Se procede a ejecutar por carpeta
-                            let m101=url.replace('/main/version').split('/')
-                            let repName=m101[m101.length-1]
-                            let fullFolderToInstall=apps.mainFolder+'/'+repName+'_'+nRes
-                            let fullFolderToInstall2=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main'
-                            let fullFileMainToInstall=apps.mainFolder+'/'+repName+'_'+nRes+'/'+repName+'-main/main.qml'
+
+
+
                             if(unik.folderExist(fullFolderToInstall) && unik.folderExist(fullFolderToInstall2) && unik.fileExist(fullFileMainToInstall)){
                                 if(app.ctx==='ugit' || app.ctx==='cfg-ugit' ){
-                                    let uGitCmd=unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2
+                                    let uGitCmd='"'+unik.getPath(0)+'" -folder='+fullFolderToInstall2
                                     unik.log('uGitCmd: '+uGitCmd)
+                                    unik.runOut(uGitCmd)
                                 }else{
                                     unik.runOut(unik.getPath(0)+' -nocfg -folder='+fullFolderToInstall2)
                                     if(!apps.dev){
@@ -1289,6 +1295,7 @@ Terminal=false'
 
     }
 
+    //Aprobado en GNU/Linux
     function runCtxCfgUGit(){
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
@@ -1345,6 +1352,7 @@ Terminal=false'
 
         }
     }
+    //Aprobado en GNU/Linux
     function runCtxUGit(){
         apps.dev=false
         let urlGit=''
