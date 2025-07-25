@@ -187,9 +187,18 @@ Window {
                             let cp = unik.currentFolderPath()
                             let fp=cp+'/main.qml'
                             unik.setProperty('from'+presetAppName, true)
-                            unik.setProperty("documentsPath", unik.getPath(3))
-                            unik.addImportPath(cp+'/modules')
-                            engine.load(fp)
+                            if(Qt.platform.os==='linux'){
+                                unik.setProperty("documentsPath", unik.getPath(3))
+                                unik.addImportPath(cp+'/modules')
+                                engine.load(fp)
+                            }else{
+                                unik.runOut('"'+unik.getPath(0)+'" -folder="'+cp+'"')
+                            }
+                            if(!apps.dep){
+                                app.close()
+                            }else{
+                                apps.dev=true
+                            }
                         }
                     }
                     Button{
@@ -421,6 +430,11 @@ Window {
                         visible: true
                         dev: apps.dev
                         //version: '1.1.1'
+                        onCPorcChanged:{
+                            if(cPorc>=0.01){
+                                app.visibility='Maximized'
+                            }
+                        }
                         onLog: unik.log(data)
                         onDownloadFinished: {
                             //Retorna: downloadFinished(string url, string folderPath, string zipFileName)
@@ -563,9 +577,11 @@ Window {
         //        while(!unik){
         //            log.text+='.'
         //        }
+        if(apps.mainFolder==='')apps.mainFolder=unik.getPath(4)
         let aname=(''+presetAppName).toLowerCase()
         var cfgDefaultPath='"'+apps.mainFolder.replace(/\"/g, '')+'/'+aname+'.cfg"'
         if(!unik.fileExist(cfgDefaultPath)){
+            console.log('Resaurando ['+cfgDefaultPath+']')
             restoreDefaultCfg(cfgDefaultPath)
             unik.log('Se ha restaurado la configuración por defecto: '+cfgDefaultPath)
         }
@@ -575,27 +591,38 @@ Window {
         app.ctx=getCtx()
         unik.log('Args: '+Qt.application.arguments)
         unik.log('Contexto: '+app.ctx)
-        app.visibility='Maximized'
-        apps.dev=true
+        //app.visibility='Maximized'
+        //apps.dev=true
 
         //RUN CTXs
+        if(app.ctx==='nocfg'){
+            app.visibility='Maximized'
+            apps.dev=true
+            return
+        }
         if(app.ctx==='cfg-ugit'){
             runCtxCfgUGit()
+            return
         }
         if(app.ctx==='ugit'){
             runCtxUGit()
+            return
         }
         if(app.ctx==='cfg-git'){
             runCtxCfgGit()
+            return
         }
         if(app.ctx==='cfg-folder'){
             runCtxCfgFolder()
+            return
         }
         if(app.ctx==='git'){
             runCtxGit()
+            return
         }
         if(app.ctx==='folder'){
             runCtxFolder()
+            return
         }
 
 
@@ -816,7 +843,7 @@ Window {
         if(ret===''){
             let aname=(''+presetAppName).toLowerCase()
             unik.log('apps.mainFolder: '+apps.mainFolder)
-            let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
+            let nCfgFilePath='"'+apps.mainFolder+'/'+aname+'.cfg"'
             let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
             if(js==='error'){
                 js=unik.getFile(nCfgFilePath.replace(/\"/g, '')).replace(/\n/g, '')
@@ -997,8 +1024,18 @@ Window {
                 unik.addImportPath(cp+'/modules')
                 console.log('Cargando fp: '+fp)
                 app.enableQmlErrorLog=false
-                engine.load(fp)
-                app.close()
+
+                if(Qt.platform.os==='linux'){
+                    unik.addImportPath(fp+'/modules')
+                    engine.load(fp)
+                }else{
+                    unik.runOut('"'+unik.getPath(0)+'" -folder="'+fp+'"')
+                }
+                if(!apps.dep){
+                    app.close()
+                }else{
+                    apps.dev=true
+                }
             }
         }else{
             unik.log('Esta carpeta ['+fp.replace('/main.qml', '')+'] NO contiene un archivo main.qml')
@@ -1297,6 +1334,8 @@ Terminal=false'
 
     //Aprobado en GNU/Linux
     function runCtxCfgUGit(){
+        apps.dev=false
+        app.visibility="Maximized"
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
         let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
@@ -1316,6 +1355,8 @@ Terminal=false'
     }
     //Aprobado en GNU/Linux
     function runCtxCfgGit(){
+        apps.dev=false
+        app.visibility="Maximized"
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
         let js=unik.getFile(nCfgFilePath).replace(/\n/g, '')
@@ -1341,20 +1382,22 @@ Terminal=false'
         if(js==='error'){
             js=unik.getFile(nCfgFilePath.replace(/\"/g, '')).replace(/\n/g, '')
         }
-        //unik.log('js: '+js)
+        unik.log('js: '+js)
         let j=JSON.parse(js)
         let folder=j.args['folder']
         if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
             unik.addImportPath(folder+'/modules')
             unik.cd(folder)
             unik.log('Cargando: '+''+folder+'/main.qml')
-            engine.load(folder+'/main.qml')
+            unik.runOut('"'+unik.getPath(0)+'" -folder='+folder)
+            //engine.load(folder+'/main.qml')
 
         }
     }
     //Aprobado en GNU/Linux
     function runCtxUGit(){
         apps.dev=false
+        app.visibility='Maximized'
         let urlGit=''
         let args=Qt.application.arguments
         for(var i=0;i<args.length;i++){
@@ -1371,6 +1414,8 @@ Terminal=false'
     }
     //Aprobado en GNU/Linux
     function runCtxGit(){
+        apps.dev=false
+        app.visibility="Maximized"
         let urlGit=''
         let args=Qt.application.arguments
         for(var i=0;i<args.length;i++){
@@ -1398,10 +1443,19 @@ Terminal=false'
             }
         }
         if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
-            unik.addImportPath(folder+'/modules')
-            unik.cd(folder)
-            unik.log('Cargando: '+''+folder+'/main.qml')
-            engine.load(folder+'/main.qml')
+            if(Qt.platform.os==='linux'){
+                unik.addImportPath(folder+'/modules')
+                unik.cd(folder)
+                unik.log('Cargando: '+''+folder+'/main.qml')
+                engine.load(folder+'/main.qml')
+            }else{
+                unik.runOut('"'+unik.getPath(0)+'" -folder="'+folder+'"')
+            }
+            if(!apps.dep){
+                app.close()
+            }else{
+                apps.dev=true
+            }
 
         }
     }

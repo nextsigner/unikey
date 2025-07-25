@@ -1,1 +1,1 @@
-Se crean instaladores de UniKey y Zool 1.7.25 °2
+Se prueba UniKey versión 1.7.25.2 en GNU/Linux

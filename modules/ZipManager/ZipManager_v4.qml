@@ -519,11 +519,18 @@ Rectangle{
                         if(app.ctx==='ugit' || app.ctx==='cfg-ugit'){
                             unik.log('app.ctx: '+app.ctx)
                             unik.log('Iniciando aplicación en carpeta '+mainPath)
-                            //unik.addImportPath(mainPath)
-                            //unik.cd('"'+mainPath+'"')
-                            //engine.load('"'+mainPath+'/main.qml"')
-                            unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
-                            app.close()
+                            if(Qt.platform.os==='linux'){
+                                unik.addImportPath(mainPath)
+                                unik.cd('"'+mainPath+'"')
+                                engine.load('"'+mainPath+'/main.qml"')
+                            }else{
+                                unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
+                            }
+                            if(!apps.dep){
+                                app.close()
+                            }else{
+                                apps.dev=true
+                            }
                             return
                         }
                         if(apps.runOut){
