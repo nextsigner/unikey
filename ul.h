@@ -33,8 +33,6 @@
 #include <QtAndroidExtras/QAndroidJniObject>
 #endif
 
-#include <quazip.h>
-#include <quazipfile.h>
 
 
 //Libreria QtQuick
@@ -281,14 +279,6 @@ public:
     //Funciones Network
     Q_INVOKABLE QByteArray getHttpFile(QByteArray url);
     void httpReadyRead();
-    Q_INVOKABLE Q_INVOKABLE bool downloadZipFile(QByteArray url, QByteArray ubicacion);
-    Q_INVOKABLE bool downloadZipFile(QByteArray url, QByteArray ubicacion, bool parseUrl);
-    Q_INVOKABLE QString getZipContainerFolderName(QByteArray zipFile);
-    Q_INVOKABLE bool unzipFile(QByteArray zipFile, QByteArray location);
-    Q_INVOKABLE bool downloadGit(QByteArray url, QByteArray localFolder);
-    Q_INVOKABLE bool downloadGit(QByteArray url, QByteArray branch, QByteArray localFolder, bool toProjectFolder);
-    Q_INVOKABLE void getZipFileSizeForDownload(QByteArray url);
-    void setUZipFileSize();
 
     Q_INVOKABLE void sendFile(QString file, QString phpReceiver);
     void uploadProgress(qint64 bytesSend, qint64 bytesTotal);
@@ -314,7 +304,6 @@ private slots:
     QString compData(QString d);
     QString desCompData(QString d);
 
-    void downloadZipProgress(qint64 bytesSend, qint64 bytesTotal);
 
 private:
     QSqlDatabase db;
