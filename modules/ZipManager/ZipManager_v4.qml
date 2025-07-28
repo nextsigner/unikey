@@ -197,7 +197,21 @@ Rectangle{
                 r.folderRoot='"'+nfr+'"'
             }
             unik.log('Limpiando '+r.folderRoot)
-            mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
+            //mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
+
+            if(unik.folderExist('"'+r.folderRoot+'"')){
+                let folderCleaned=unik.deleteFolder(r.folderRoot)
+                if(folderCleaned){
+                    unik.log('Carpeta ['+r.folderRoot+'] eliminada.')
+                    downloadGitHub(url, ''+r.folderRoot+'')
+                }else{
+                    mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
+                }
+            }else{
+                unik.log('La carpeta ['+r.folderRoot+'] no existe. Se crearà...')
+                downloadGitHub(url, ''+r.folderRoot+'')
+            }
+
         }else{
             //downloadGitHub(url)
         }
@@ -210,16 +224,18 @@ Rectangle{
         let u=getUrlFromRepositoryToZip(url)
         let m0=u.split('/')
         if(m0.length<1){
-            zpn.log('Hay un error en la dirección URL para descargar desde GitHub.\nUrl: '+url)
+            unik.log('Hay un error en la dirección URL para descargar desde GitHub.\nUrl: '+url)
             return
         }else{
             //Formato: https://github.com/nextsigner/zoolv4/archive/refs/heads/main.zip
+            unik.log('downloadGitHub('+url+', '+folder+')...')
             let repName=m0[m0.length-5]
-            if(!unik.folderExist(folder)){
-                unik.mkdir(folder)
+            if(!unik.folderExist(folder.replace(/\"/g, ''))){
+                unik.mkdir(folder.replace(/\"/g, ''))
             }
-            if(!unik.folderExist(folder)){
-                zpn.log('Error en la descarga de repositorio GitHub: La carpeta '+folder+' no existe.')
+            if(!unik.folderExist(folder.replace(/\"/g, ''))){
+                unik.log('downloadGitHub('+url+', '+folder+'): Carpeta no existente: ['+folder+']')
+                unik.log('Error en la descarga de repositorio GitHub: La carpeta '+folder+' no existe.')
                 //btnIniciarReintentar.visible=true
                 return
             }
@@ -486,15 +502,18 @@ Rectangle{
 
             if(app.ctx==='cfg-git' || app.ctx==='git' ){
                 unik.log('En contexto '+app.ctx+': mainPath='+mainPath)
-                let mainFilePath=Qt.platform.os==='windows'?'\"'+mainPath+'/main.qml"':mainPath+'/main.qml'
-                if(Qt.application.os==='linux'){
-                    unik.addImportPath('"'+mainPath+'/modules"')
-                    unik.addImportPath(mainPath+'/modules')
-                    engine.load(mainFilePath)
+                let mainFilePath=mainPath+'/main.qml'
+                //unik.clearComponentCache()
+                unik.addImportPath(mainPath.replace(/\"/g, '')+'/modules')
+                unik.cd(""+mainPath.replace(/\"/g, ''))
+                unik.log('Cargando desde ZipManager en contexto '+app.ctx+': "'+mainPath.replace(/\"/g, '')+'/main.qml"')
+                engine.load('file:///'+mainPath.replace(/\"/g, '')+'/main.qml')
+
+                if(!apps.runOut){
+                    app.close()
                 }else{
-                    unik.runOut('"'+unik.getPath(0)+'" -folder='+mainPath)
+                    app.dev=true
                 }
-                if(!apps.dep)app.close()
                 return
             }
 
@@ -519,18 +538,11 @@ Rectangle{
                         if(app.ctx==='ugit' || app.ctx==='cfg-ugit'){
                             unik.log('app.ctx: '+app.ctx)
                             unik.log('Iniciando aplicación en carpeta '+mainPath)
-                            if(Qt.platform.os==='linux'){
-                                unik.addImportPath(mainPath)
-                                unik.cd('"'+mainPath+'"')
-                                engine.load('"'+mainPath+'/main.qml"')
-                            }else{
-                                unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
-                            }
-                            if(!apps.dep){
-                                app.close()
-                            }else{
-                                apps.dev=true
-                            }
+                            unik.addImportPath(mainPath)
+                            unik.cd('"'+mainPath+'"')
+                            engine.load('"'+mainPath+'/main.qml"')
+                            //unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
+                            app.close()
                             return
                         }
                         if(apps.runOut){
@@ -612,6 +624,7 @@ Rectangle{
         let cmd=''
         if(Qt.platform.os==='windows'){
             cmd+='cmd.exe rmdir /S /Q "'+folder+'"'
+            //cmd+='cmd.exe rmdir /S /Q \''+folder.replace(/\//g, '\\').replace(/ /g, '%20')+'\''
         }else{
             cmd='rm -r -rf "'+folder+'/*"'
         }
@@ -622,7 +635,7 @@ Rectangle{
         c='uqpClean'
         let idName=c
 
-        c='        //Nada'
+        c='        unik.log(logData)\n'
         let onLogDataCode=c
 
 
