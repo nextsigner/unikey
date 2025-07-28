@@ -1,1 +1,1 @@
-Se copia carpeta modules desde unikey-cloned a unikey git main
+Se elimina runFromFolder y runFromGit de la configuración.

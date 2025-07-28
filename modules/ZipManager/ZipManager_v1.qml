@@ -492,7 +492,7 @@ Rectangle{
 
                     //MODO INSTALL
                     if(r.launch){
-                        if(apps.runOut){
+                        if(apps.dep){
                             unik.runOut(unik.getPath(0))
                         }else{
                             unik.run(unik.getPath(0))
@@ -520,7 +520,7 @@ Rectangle{
                     //MODO PROBE
                     if(r.launch){
                         r.log('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
-                        if(apps.runOut){
+                        if(apps.dep){
                             unik.runOut('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
                         }else{
                             unik.run('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
@@ -540,7 +540,7 @@ Rectangle{
                     txtLog.text='Reseteando sin parámetro...'
                     if(r.launch){
                         r.log('<br>r.launch: '+r.launch+'. En modo 2 install NO CFG  se lanza mainPath: '+mainPath)
-                        if(apps.runOut){
+                        if(apps.dep){
                             unik.runOut(unik.getPath(0)+' -nocfg')
                         }else{
                             unik.run(unik.getPath(0)+' -nocfg')

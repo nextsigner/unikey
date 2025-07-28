@@ -5,7 +5,7 @@ QT += widgets quick3d
 
 CONFIG += c++11
 
-PROYECTO = zool
+PROYECTO = unikey
 TARGET=$$PROYECTO
 
 !linux:{

@@ -32,14 +32,11 @@ Window {
 
     Settings{
         id: apps
-        //fileName: unik?'"'+apps.mainFolder+'/'+(''+presetAppName).toLowerCase()+'_app.cfg"':''
-        //fileName: apps.mainFolder+'/'+(''+presetAppName).toLowerCase()+'_app.cfg'
-        //fileName: './'+(''+presetAppName).toLowerCase()+'_app.cfg'
         fileName: unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg'
         property bool dev: false
+        property bool dep: true
         property string mainFolder: ''
         property bool runFromGit: false
-        property bool runOut: true
         property string uGitRep: 'https://github.com/nextsigner/unikey-apps'
         property string uFolder: unik?unik.getPath(3):''
         property bool enableCheckBoxShowGitRep: false
@@ -192,18 +189,9 @@ Window {
                             let cp = unik.currentFolderPath()
                             let fp=cp+'/main.qml'
                             unik.setProperty('from'+presetAppName, true)
-                            if(Qt.platform.os==='linux'){
-                                unik.setProperty("documentsPath", unik.getPath(3))
-                                unik.addImportPath(cp+'/modules')
-                                engine.load(fp)
-                            }else{
-                                unik.runOut('"'+unik.getPath(0)+'" -folder="'+cp+'"')
-                            }
-                            if(!apps.dep){
-                                app.close()
-                            }else{
-                                apps.dev=true
-                            }
+                            unik.setProperty("documentsPath", unik.getPath(3))
+                            unik.addImportPath(cp+'/modules')
+                            engine.load(fp)
                         }
                     }
                     Button{
@@ -247,22 +235,6 @@ Window {
                     }
                     Row{
                         Text{
-                            text: '<b>Auto Actualizar</b><br><b>desde Git:</b>'
-                            color: 'white'
-                            font.pixelSize: app.fs
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        CheckBox{
-                            id: checkBoxAAG
-                            checked: apps.runFromGit
-                            anchors.verticalCenter: parent.verticalCenter
-                            onCheckedChanged: {
-                                apps.runFromGit=checked
-                            }
-                        }
-                    }
-                    Row{
-                        Text{
                             text: '<b>Depurar:</b>'
                             color: 'white'
                             font.pixelSize: app.fs
@@ -270,10 +242,10 @@ Window {
                         }
                         CheckBox{
                             id: checkBoxRunOut
-                            checked: apps.runOut
+                            checked: apps.dep
                             anchors.verticalCenter: parent.verticalCenter
                             onCheckedChanged: {
-                                apps.runOut=checked
+                                apps.dep=checked
                             }
                         }
                     }
@@ -435,11 +407,6 @@ Window {
                         visible: true
                         dev: apps.dev
                         //version: '1.1.1'
-                        onCPorcChanged:{
-                            if(cPorc>=0.01){
-                                app.visibility='Maximized'
-                            }
-                        }
                         onLog: unik.log(data)
                         onDownloadFinished: {
                             //Retorna: downloadFinished(string url, string folderPath, string zipFileName)
@@ -579,12 +546,6 @@ Window {
         zipManager.app7ZipPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
         unik.log('7z Path: '+zipManager.app7ZipPath)
         zipManager.uFolder = '"'+unik.getPath(3)+'"'
-<<<<<<< HEAD
-        //        while(!unik){
-        //            log.text+='.'
-        //        }
-=======
->>>>>>> mi-nueva-rama
         if(apps.mainFolder==='')apps.mainFolder=unik.getPath(4)
         let aname=(''+presetAppName).toLowerCase()
         var cfgDefaultPath='"'+apps.mainFolder.replace(/\"/g, '')+'/'+aname+'.cfg"'
@@ -606,11 +567,7 @@ Window {
         //RUN CTXs
         if(app.ctx==='nocfg'){
             app.visibility='Maximized'
-<<<<<<< HEAD
-            apps.dev=true
-=======
             app.dev=true
->>>>>>> mi-nueva-rama
             return
         }
         if(app.ctx==='cfg-ugit'){
@@ -897,10 +854,10 @@ Window {
             let j=JSON.parse(js)
             if(j.args['ugit']){
                 ret='cfg-ugit'
-            }else if(j.args['runFromGit']){
+            }else if(j.args['git']){
                 ret='cfg-git'
             }else{
-                if(j.args['runFromFolder']!==""){
+                if(j.args['folder']!==""){
                     ret='cfg-folder'
                 }
             }
@@ -924,120 +881,6 @@ Window {
     }
 
 
-<<<<<<< HEAD
-        let argIndexGit=getArgsIndex(app.appArgs, 'git')
-        let argIndexFolder=getArgsIndex(app.appArgs, 'folder')
-        if(argIndexFolder>=0){
-            let a=app.appArgs[argIndexFolder]
-            unik.log('Ejecutando '+presetAppName+' con el argumento '+a)
-            let m0=a.split('=')
-            unik.log('Chequeando si existe la carpeta '+m0[1])
-            if(unik.folderExist(m0[1])){
-                unik.log('Ingresando a la carpeta '+m0[1])
-                unik.cd(m0[1])
-                unik.addImportPath(m0[1]+'/modules')
-                unik.log('Carpeta actual: '+unik.currentFolderPath())
-                cp=m0[1]
-                fp=cp+'/main.qml'
-                engine.load(fp)
-                return
-            }else{
-                unik.log('Error!\nEl argumento '+a+' no se podrá procesar porque la carpeta '+m0[1]+' no existe!')
-                unik.log('Se continúa en la carpeta actual: '+unik.currentFolderPath())
-                app.visibility="Maximized"
-            }
-        }
-        if(argIndexGit>=0 && apps.runFromGit){
-            let a=app.appArgs[argIndexGit]
-            unik.log('Ejecutando '+presetAppName+' con el argumento '+a)
-            m0=a.split('=')
-            unik.log('Ejecutando auto actualización...')
-            unik.log('Última carpeta de archivos: '+apps.uFolder)
-            apps.uGitRep=m0[1]
-            tiGitRep.text=apps.uGitRep
-            unik.log('Descargando '+m0[1]+'...')
-            app.visible=true
-            app.visibility="Maximized"
-
-            zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
-        }else if(argIndexGit>=0 && !apps.runFromGit){
-            let a=app.appArgs[argIndexGit]
-            unik.log('Cargando url git desde configuración...')
-            apps.enableCheckBoxShowGitRep=true
-            m0=a.split('=')
-            //unik.log('Ejecutando auto actualización...')
-            apps.uGitRep=m0[1]
-            tiGitRep.text=apps.uGitRep
-            unik.log('Descargando '+m0[1]+'...')
-            app.visible=true
-            app.visibility="Maximized"
-            //zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
-        }else{
-            if(argIndexFolder>=0){
-                let a=app.appArgs[argIndexFolder]
-                //unik.log('Ejecutando Unikey con el argumento '+a)
-                m0=a.split('=')
-                unik.log('El repositorio git se descargará en la carpeta '+m0[1])
-                if(unik.folderExist(m0[1])){
-                    unik.log('Ingresando a la carpeta '+m0[1])
-                    unik.cd(m0[1])
-                    unik.addImportPath(m0[1]+'/modules')
-                    unik.log('Carpeta actual: '+unik.currentFolderPath())
-                    cp=m0[1]
-                    //fp=cp+'/main.qml'
-                }else{
-                    unik.log('La carpeta '+m0[1]+' no existe.')
-                    unik.log('Creando la carpeta '+m0[1]+'')
-                    unik.mkdir(m0[1])
-                    if(unik.folderExist(m0[1])){
-                        unik.log('La carpeta '+m0[1]+' fue creada con éxito.')
-                        cp=m0[1]
-                    }
-                }
-            }
-
-        }
-
-        //let t1=''
-        if(unik.fileExist(fp)){
-            unik.log('Esta carpeta contiene un archivo main.qml')
-            botLanzarQml.visible=true
-            let fileData=unik.getFile(fp)
-            //unik.log("["+fileData+"]")
-            //unik.log("["+app.uExampleCode+"]")
-            if(app.uExampleCode===fileData){
-                unik.log('Se ha detectado que el archivo '+fp+' al parecer es un archivo de ejemplo de Unikey.')
-                botLanzarQml.text='Lanzar la aplicación de Ejemplo'
-                botDeleteQmlFileExample.visible=true
-            }else{
-                unik.clearComponentCache()
-                unik.setProperty('unik', unik)
-                unik.setProperty("documentsPath", unik.getPath(3))
-                unik.addImportPath(cp+'/modules')
-                console.log('Cargando fp: '+fp)
-                app.enableQmlErrorLog=false
-
-                if(Qt.platform.os==='linux'){
-                    unik.addImportPath(fp+'/modules')
-                    engine.load(fp)
-                }else{
-                    unik.runOut('"'+unik.getPath(0)+'" -folder="'+fp+'"')
-                }
-                if(!apps.dep){
-                    app.close()
-                }else{
-                    apps.dev=true
-                }
-            }
-        }else{
-            unik.log('Esta carpeta ['+fp.replace('/main.qml', '')+'] NO contiene un archivo main.qml')
-            unik.log('Es posible que estes viendo estos mensajes porque no tienes un archivo main.qml en esta carpeta.<br><br>El archivo main.qml es necesario para que '+presetAppName+' inicie una aplicación del tipo QtQuick.')
-            if(!checkBoxShowGitRep.checked)botCrearMainQmlDeEjemplo.visible=true
-            app.visibility="Maximized"
-        }
-    }
-=======
->>>>>>> mi-nueva-rama
     function getArgsIndex(args, arg){
         //let args=app.appArgs
         let ret=-1
@@ -1273,9 +1116,7 @@ Terminal=false'
                     "mainFolder": "/home/ns"
                     "git":"https://github.com/nextsigner/qml-pacman",
                     "dev": false,
-                    "dep": false,
-                    "runFromGit": true,
-                    "runFromFolder": "zool"
+                    "dep": false
                 }
             }
             */
@@ -1296,9 +1137,7 @@ Terminal=false'
             unik.log('Configuración por defecto: '+JSON.stringify(j, null, 2))
 
             if(j.args['dev'])apps.dev=j.args['dev']
-            if(j.args['runFromGit'])apps.runFromGit=j.args['runFromGit']
-            if(j.args['runFromFolder'])apps.runFromFolder=j.args['runFromFolder']
-            if(j.args['dep'])apps.runOut=j.args['dep']
+            if(j.args['dep'])apps.dep=j.args['dep']
             if(j.args['mainFolder'])apps.mainFolder=j.args['mainFolder']
 
             unik.log('Definiendo configuración por defecto: '+nCfgFilePath)
@@ -1310,8 +1149,6 @@ Terminal=false'
             j.args['mainFolder']=apps.mainFolder
             j.args['git']="https://github.com/nextsigner/unikey-apps"
             j.args['dev']=false
-            j.args['runFromGit']=true
-            j.args['runFromFolder']=""
             j.args['dep']=false
             let jsData=JSON.stringify(j, null, 2)
             unik.setFile(nCfgFilePath, jsData)
@@ -1319,20 +1156,14 @@ Terminal=false'
 
             apps.uGitRep="https://github.com/nextsigner/unikey-apps"
             apps.dev=false
-            apps.runFromGit=true
-            apps.runFromFolder=""
-            apps.runOut=false
+            apps.dep=false
         }
 
     }
 
     //Aprobado en GNU/Linux
     function runCtxCfgUGit(){
-<<<<<<< HEAD
-        apps.dev=false
-=======
         app.dev=false
->>>>>>> mi-nueva-rama
         app.visibility="Maximized"
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
@@ -1353,11 +1184,7 @@ Terminal=false'
     }
     //Aprobado en GNU/Linux
     function runCtxCfgGit(){
-<<<<<<< HEAD
-        apps.dev=false
-=======
         app.dev=false
->>>>>>> mi-nueva-rama
         app.visibility="Maximized"
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
@@ -1387,30 +1214,21 @@ Terminal=false'
         unik.log('js: '+js)
         let j=JSON.parse(js)
         let folder=j.args['folder']
-<<<<<<< HEAD
-        if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
-            unik.addImportPath(folder+'/modules')
-            unik.cd(folder)
-            unik.log('Cargando: '+''+folder+'/main.qml')
-            unik.runOut('"'+unik.getPath(0)+'" -folder='+folder)
-            //engine.load(folder+'/main.qml')
-
-=======
         if(unik.folderExist(folder.replace(/\"/g, '')) && unik.fileExist(folder+'/main.qml')){
             unik.addImportPath(folder.replace(/\"/g, '')+'/modules')
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
->>>>>>> mi-nueva-rama
+            if(!apps.dep || apps.dev){
+                app.visibility='Minimized'
+            }else{
+                app.close()
+            }
         }
     }
     //Aprobado en GNU/Linux
     function runCtxUGit(){
-<<<<<<< HEAD
-        apps.dev=false
-=======
         app.dev=false
->>>>>>> mi-nueva-rama
         app.visibility='Maximized'
         let urlGit=''
         let args=Qt.application.arguments
@@ -1434,11 +1252,7 @@ Terminal=false'
     }
     //Aprobado en GNU/Linux
     function runCtxGit(){
-<<<<<<< HEAD
-        apps.dev=false
-=======
         app.dev=false
->>>>>>> mi-nueva-rama
         app.visibility="Maximized"
         let urlGit=''
         let args=Qt.application.arguments
@@ -1484,29 +1298,16 @@ Terminal=false'
                 app.visibility='Maximized'
             }
         }
-<<<<<<< HEAD
-        if(unik.folderExist(folder) && unik.fileExist(folder+'/main.qml')){
-            if(Qt.platform.os==='linux'){
-                unik.addImportPath(folder+'/modules')
-                unik.cd(folder)
-                unik.log('Cargando: '+''+folder+'/main.qml')
-                engine.load(folder+'/main.qml')
-            }else{
-                unik.runOut('"'+unik.getPath(0)+'" -folder="'+folder+'"')
-            }
-            if(!apps.dep){
-                app.close()
-            }else{
-                apps.dev=true
-            }
-
-=======
         if(unik.folderExist(folder.replace(/\"/g, '')) && unik.fileExist(folder+'/main.qml')){
             unik.addImportPath(folder.replace(/\"/g, '')+'/modules')
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
->>>>>>> mi-nueva-rama
+            if(!apps.dep || apps.dev){
+                app.visibility='Minimized'
+            }else{
+                app.close()
+            }
         }
     }
 }
