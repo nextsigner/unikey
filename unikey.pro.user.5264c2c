@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.11.1, 2025-07-28T04:10:05. -->
+<!-- Written by QtCreator 4.11.1, 2025-07-26T21:54:34. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{7b275305-e39c-4284-9f20-0a77751d689e}</value>
+  <value type="QByteArray">{5264c2c6-196a-4711-abed-81c61cef250d}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -289,7 +289,7 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:F:/zooldev/unikey-cloned/unikey.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">F:/zooldev/unikey-cloned/unikey.pro</value>
-    <value type="QString" key="RunConfiguration.Arguments"></value>
+    <value type="QString" key="RunConfiguration.Arguments">-git=https://github.com/nextsigner/zoolv4</value>
     <value type="bool" key="RunConfiguration.Arguments.multi">false</value>
     <value type="QString" key="RunConfiguration.OverrideDebuggerStartup"></value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
@@ -298,8 +298,8 @@
     <value type="bool" key="RunConfiguration.UseMultiProcess">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\zool-win-64\build</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory">F:/zooldev/unikey-build</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\unikey-build</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

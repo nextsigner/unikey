@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.11.1, 2025-07-28T04:10:05. -->
+<!-- Written by QtCreator 4.11.1, 2025-07-25T17:30:36. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{7b275305-e39c-4284-9f20-0a77751d689e}</value>
+  <value type="QByteArray">{958fcd1b-c0e9-41c1-a1ff-0649babfb531}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -299,7 +299,7 @@
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\zool-win-64\build</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\unikey-build</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

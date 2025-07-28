@@ -14,25 +14,10 @@
 
 
 
-# Para la configuración Release
-CONFIG(release, debug|release):{
-    #message(Arch3 $$QT_ARCH)
-    #message(Arch2 $$QMAKE_TARGET)
-    equals(QT_ARCH, i386) {
-        message(Compilando para Windows 32bit)
-        DESTDIR = F:\build_win_32
-    }
-    equals(QT_ARCH, x86_64) {
-        message(Compilando para Windows 64bit)
-        DESTDIR = F:\zooldev\unikey-build
-    }
-}
-
-
 equals(PROYECTO, "unikey") {
     message("Cargando configuracion para unikey...")
+    DESTDIR = F:\zooldev\unikey-build
     #DESTDIR = Z:\media\ns\Archivos\zooldev\unikey-build
-    DESTDIR = C:\unikey-build
     RC_FILE = $$PWD/res_$$PROYECTO/unikey.rc
 } else:equals(PROYECTO, "zool") {
     message("Cargando configuracion para zool...")
