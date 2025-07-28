@@ -1,1 +1,1 @@
-Se actualiza proyecto para unikey y zool en build-dep
+Se modifica archivo de version
