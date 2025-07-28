@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.11.1, 2025-07-28T16:11:11. -->
+<!-- Written by QtCreator 4.11.1, 2025-07-14T16:12:44. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{67ef201d-128b-497b-8c84-f4fe8fc13e2b}</value>
+  <value type="QByteArray">{dae70240-8a6f-4bdd-a579-651ce6904bec}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -289,7 +289,7 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:F:/zooldev/unikey-main/unikey.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">F:/zooldev/unikey-main/unikey.pro</value>
-    <value type="QString" key="RunConfiguration.Arguments">-git=https://github.com/nextsigner/zoolv4</value>
+    <value type="QString" key="RunConfiguration.Arguments"></value>
     <value type="bool" key="RunConfiguration.Arguments.multi">false</value>
     <value type="QString" key="RunConfiguration.OverrideDebuggerStartup"></value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>

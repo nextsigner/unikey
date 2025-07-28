@@ -508,7 +508,7 @@ Rectangle{
                 unik.cd(""+mainPath.replace(/\"/g, ''))
                 unik.log('Cargando desde ZipManager en contexto '+app.ctx+': "'+mainPath.replace(/\"/g, '')+'/main.qml"')
                 if(!app.dev){
-                    unik.clearComponentCache()
+                    //unik.clearComponentCache()
                 }
                 engine.load('file:///'+mainPath.replace(/\"/g, '')+'/main.qml')
 

@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import Qt.labs.settings 1.1
-import unik.Unik 1.0
 import ZipManager 1.0
 
 Window {
@@ -42,18 +41,13 @@ Window {
         property color backgroundColor: 'black'
         property string uCtxUpdate: ''
     }
-    Unik{
-        id: unik
+
+    Connections{
+        target: unik
         onUkStdChanged:{
             log.text+=''+unik.ukStd+'<br>'
         }
     }
-    //    Connections{
-    //        target: unik
-    //        onUkStdChanged:{
-    //            log.text+=''+unik.ukStd+'<br>'
-    //        }
-    //    }
     Connections{
         target: qmlErrorLogger
         onMessagesChanged:{
@@ -301,9 +295,7 @@ Window {
                             color: 'white'
                             anchors.centerIn: parent
                             onTextChanged: {
-                                if(zipManager.curlPath!=='' && zipManager.app7ZipPath !==''){
-                                    zipManager.mkUqpRepExist(text)
-                                }
+                                zipManager.mkUqpRepExist(text)
                             }
 
                         }
@@ -363,16 +355,7 @@ Window {
                         parent: apps.dev?colZM:colSplash
                         visible: true
                         dev: apps.dev
-                        onLog: log.lv(data)
-                        onDownloadFinished: {
-                            //Retorna: downloadFinished(string url, string folderPath, string zipFileName)
-                            log.lv('Se descargó: '+zipFileName)
-                            log.lv('Origen: '+url)
-                            log.lv('Destino: '+folderPath)
-                        }
-                        onUnzipFinished: {
-                            //Retorna: unzipFinished(string url, string folderPath, string zipFileName)
-                        }
+                        //version: '1.1.1'
                         onResponseRepExist:{
                             if(res.indexOf('404')>=0){
                                 tiGitRep.color='red'
@@ -418,11 +401,11 @@ Window {
                             repeat: true
                             interval: 1000
                             onTriggered: {
-                                if(unik.fileExist(unik.getPath(1)+'/default.cfg')){
-                                    parent.visible=true
-                                }else{
-                                    parent.visible=false
-                                }
+                                    if(unik.fileExist(unik.getPath(1)+'/default.cfg')){
+                                        parent.visible=true
+                                    }else{
+                                        parent.visible=false
+                                    }
                             }
                         }
                     }
@@ -496,32 +479,26 @@ Window {
         }
     }
     Component.onCompleted: {
-        zipManager.curlPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
-        log.lv('Curl Path: '+zipManager.curlPath)
-        zipManager.app7ZipPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
-        log.lv('7z Path: '+zipManager.app7ZipPath)
-        zipManager.uFolder = apps.runFromFolder!==""?'"'+apps.runFromFolder.replace(/\"/g, '')+'"':'"'+unik.getPath(3)+'"'
-//        while(!unik){
-//            log.text+='.'
-//        }
+        while(!unik){
+            log.text+='.'
+        }
         let aname=(''+presetAppName).toLowerCase()
-        var cfgDefaultPath='"'+unik.getPath(4).replace(/\"/g, '')+'/'+aname+'.cfg"'
-        if(!unik.fileExist(cfgDefaultPath)){
-            restoreDefaultCfg(cfgDefaultPath)
-            log.lv('Se ha restaurado la configuración por defecto: '+cfgDefaultPath)
+        if(!unik.fileExist(unik.getPath(4)+'/'+aname+'.cfg')){
+            restoreDefaultCfg()
         }
 
         if(apps.runFromFolder!==""){
             if(unik.folderExist(unik.getPath(4)+'/'+apps.runFromFolder) && unik.fileExist(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')){
                 unik.addImportPath(unik.getPath(4)+'/'+apps.runFromFolder+'/modules')
                 unik.cd(unik.getPath(4)+'/'+apps.runFromFolder)
-                engine.load('"'+unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml"')
+                engine.load(unik.getPath(4)+'/'+apps.runFromFolder+'/main.qml')
                 return
             }
-            log.lv('Procesando...')
         }
 
-
+        zipManager.curlPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
+        zipManager.app7ZipPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
+        zipManager.uFolder = unik.getPath(3)
         tiGitRep.focus=true
         tiGitRep.selectAll()
 
@@ -618,7 +595,6 @@ Window {
         }
     }
     function runMix(tipo){
-        log.lv('runMix('+tipo+')...')
         if(tipo==='probe'){
             if(apps.enableCheckBoxShowGitRep){
                 zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
@@ -700,7 +676,7 @@ Window {
         //log.lv('Folder AppData: '+unik.getPath(4))
         let argsFinal=[]
         cp = unik.currentFolderPath()
-        let fp='"'+cp+'/main.qml"'
+        let fp=cp+'/main.qml'
         log.lv('Parámetros recibidos: '+Qt.application.arguments.toString())
         log.lv('Carpeta actual: '+cp)
 
@@ -715,10 +691,10 @@ Window {
             log.lv('Carpeta de datos: '+cAppData)
             let j
             let cfgSeted=false
-            var aname=(''+presetAppName).toLowerCase()
-            if(unik.fileExist('"'+cAppData+'/'+aname+'.cfg"')){
+            let aname=(''+presetAppName).toLowerCase()
+            if(unik.fileExist(cAppData+'/'+aname+'.cfg')){
                 log.lv('Procesando archivo de configuración de '+presetAppName+'...')
-                let jsonString = unik.getFile('"'+cAppData+'/'+aname+'.cfg"').replace(/\n/g, '')
+                let jsonString = unik.getFile(cAppData+'/'+aname+'.cfg').replace(/\n/g, '')
                 try {
                     j = JSON.parse(jsonString);
                     let aname=(''+presetAppName).toLowerCase()
@@ -885,7 +861,6 @@ Window {
         zipManager.resetApp=true
         zipManager.setCfg=false
         //zipManager.launch=false
-        log.lv('Descargando: '+tiGitRep.text)
         zipManager.download(tiGitRep.text)
     }
     function runInstall(){
@@ -978,7 +953,7 @@ Terminal=false'
 
             let cf=zipManager.getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
 
-            if(app.dev)log.lv('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+            if(app.dev)log.lv('cf '+idName+': '+cf)
 
             let comp=Qt.createQmlObject(cf, zipManager.uqpsContainer, 'uqp-code-'+idName)
         }
@@ -1061,7 +1036,7 @@ Terminal=false'
         }
 
     }
-    function restoreDefaultCfg(cfgDefaultPath){
+    function restoreDefaultCfg(){
         /*
         EJEMPLO DE JSON POR DEFECTO
         {
@@ -1075,45 +1050,16 @@ Terminal=false'
         }
         */
         let aname=(''+presetAppName).toLowerCase()
+        let js=unik.getFile(unik.getPath(1)+'/default.cfg')
+        let j=JSON.parse(js)
+        log.lv('Configuración por defecto: '+JSON.stringify(j, null, 2))
+        apps.dev=j.args['dev']
+        apps.runFromGit=j.args['runFromGit']
+        apps.runFromFolder=j.args['runFromFolder']
+        apps.runOut=j.args['dep']
+
         let nCfgFilePath=unik.getPath(4)+'/'+aname+'.cfg'
-        let defaultCfgPath='"'+unik.getPath(1)+'/default.cfg"'
-        log.lv('Cargando configuración por defecto desde: '+defaultCfgPath)
-        let js=unik.getFile(defaultCfgPath)
-        log.lv('Buscando '+defaultCfgPath)
-        if(unik.fileExist(defaultCfgPath)){
-
-
-            let j=JSON.parse(js)
-            log.lv('Configuración por defecto: '+JSON.stringify(j, null, 2))
-
-            apps.dev=j.args['dev']
-            apps.runFromGit=j.args['runFromGit']
-            apps.runFromFolder=j.args['runFromFolder']
-            apps.runOut=j.args['dep']
-
-            log.lv('Definiendo configuración por defecto: '+nCfgFilePath)
-            unik.setFile(nCfgFilePath, JSON.stringify(j, null, 2))
-        }else{
-            log.lv('Configuración por defecto no existe!: '+defaultCfgPath)
-            let j={}
-            j.args={}
-            //j.args['git']="https://github.com/nextsigner/unikey-apps"
-            j.args['git']="https://github.com/nextsigner/qml-pacman
-"
-            j.args['dev']=false
-            j.args['runFromGit']=true
-            j.args['runFromFolder']=""
-            j.args['dep']=false
-            let jsData=JSON.stringify(j, null, 2)
-            unik.setFile(nCfgFilePath, jsData)
-            unik.setFile(defaultCfgPath, jsData)
-
-            apps.uGitRep="https://github.com/nextsigner/unikey-apps"
-            apps.dev=false
-            apps.runFromGit=true
-            apps.runFromFolder=""
-            apps.runOut=false
-        }
-
+        log.lv('Definiendo configuración por defecto: '+nCfgFilePath)
+        unik.setFile(nCfgFilePath, JSON.stringify(j, null, 2))
     }
 }

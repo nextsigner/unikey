@@ -1,24 +1,18 @@
-QT += qml quick
-QT += sql network
-QT += widgets quick3d
+QT += widgets qml quick quick3d sql network webchannel
 
 
 CONFIG += c++11
 
-PROYECTO = unikey
+PROYECTO = zool
 TARGET=$$PROYECTO
 
 !linux:{
     message("Compilando en Windows")
-    QT += widgets
     #MINGW73_64 no lo soporta QT += webengine
-    QT += webchannel
     include(win.pri)
 } else {
     message("Compilando en GNU/Linux")
-    QT += widgets
     #MINGW73_64 no lo soporta QT += webengine
-    QT += webchannel
     include(lin.pri)
 }
 

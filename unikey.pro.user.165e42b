@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.11.1, 2025-07-28T16:11:11. -->
+<!-- Written by QtCreator 4.11.1, 2025-07-12T17:30:26. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{67ef201d-128b-497b-8c84-f4fe8fc13e2b}</value>
+  <value type="QByteArray">{165e42b1-b927-42e0-91c3-f4c9c07cd19a}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -289,7 +289,7 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:F:/zooldev/unikey-main/unikey.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">F:/zooldev/unikey-main/unikey.pro</value>
-    <value type="QString" key="RunConfiguration.Arguments">-git=https://github.com/nextsigner/zoolv4</value>
+    <value type="QString" key="RunConfiguration.Arguments">-folder=F:/zooldev/zool-win-64/build/zoolv4-main</value>
     <value type="bool" key="RunConfiguration.Arguments.multi">false</value>
     <value type="QString" key="RunConfiguration.OverrideDebuggerStartup"></value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
@@ -299,7 +299,7 @@
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\unikey-build</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:/zooldev/unikey-main\zooldev\zool-win-64\build</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

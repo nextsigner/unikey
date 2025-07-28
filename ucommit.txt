@@ -1,1 +1,1 @@
-Se elimina runFromFolder y runFromGit de la configuración.
+Se actualiza proyecto para unikey y zool en build-dep
