@@ -5,18 +5,61 @@ UL::UL(QObject *parent) : QObject(parent)
 
 }
 
-void UL::cd(QString folder)
+void UL::cd(const QString &path)
 {
-    QDir::setCurrent(folder);
-    _engine->addImportPath(QDir::currentPath());
-    _engine->addPluginPath(QDir::currentPath());
-    qInfo()<<"Set current dir: "<<QDir::currentPath();
+    QDir dir; // QDir con el directorio de trabajo actual
+
+    // Verifica si la ruta existe y es un directorio
+    QDir targetDir(path);
+    if (!targetDir.exists() || !targetDir.isReadable()) { // También verificamos si es legible
+        qWarning() << "No se puede cambiar al directorio:" << path << "- El directorio no existe o no es accesible.";
+        //emit currentDirectoryChanged(path, false);
+        return;
+    }
+
+    // Intenta cambiar el directorio de trabajo actual
+    if (dir.setCurrent(path)) {
+        qDebug() << "Directorio de trabajo cambiado a:" << dir.currentPath();
+        //emit currentDirectoryChanged(dir.currentPath(), true);
+    } else {
+        qWarning() << "Error al cambiar el directorio de trabajo a:" << path;
+        //emit currentDirectoryChanged(path, false);
+    }
+}
+bool UL::deleteFolder(const QString &path)
+{
+    QDir dir(path);
+
+    // Verifica si el directorio existe
+    if (!dir.exists()) {
+        qWarning() << "El directorio no existe:" << path;
+        //emit directoryRemoved(path, false); // Emite la señal con fallo
+        return false;
+    }
+
+    // Intenta eliminar el directorio y su contenido recursivamente
+    // (Esto funciona tanto en Linux como en Windows)
+    if (dir.removeRecursively()) {
+        qDebug() << "Directorio eliminado exitosamente:" << path;
+        //emit directoryRemoved(path, true); // Emite la señal con éxito
+        return true;
+    } else {
+        qWarning() << "Error al eliminar el directorio:" << path;
+        // Puedes agregar más detalles sobre el error si es necesario
+        // QDirF:Recursively() puede fallar por permisos, archivos abiertos, etc.
+        //emit directoryRemoved(path, false); // Emite la señal con fallo
+        return false;
+    }
 }
 
 QString UL::currentFolderPath()
 {
-    QDir f(QDir::currentPath());
-    return f.currentPath();
+    QString currentPath = QDir::currentPath(); // Obtiene el directorio de trabajo actual
+
+    qDebug() << "Directorio de trabajo actual:" << currentPath;
+    //emit currentFolderPathRetrieved(currentPath); // Emite la señal con la ruta (opcional)
+
+    return currentPath;
 }
 
 QString UL::currentFolderName()
@@ -24,10 +67,10 @@ QString UL::currentFolderName()
     QDir f(QDir::currentPath());
     return f.dirName();
 }
-void UL::deleteFile(QByteArray f)
+bool UL::deleteFile(QByteArray f)
 {
     QFile arch(f);
-    arch.remove();
+    return arch.remove();
 }
 
 bool UL::setFile(QByteArray fileName, QByteArray fileData)
@@ -62,9 +105,18 @@ QString UL::getFile(QByteArray n)
     return file.readAll();
 }
 
-bool UL::folderExist(const QByteArray folder)
+bool UL::folderExist(const QString &path)
 {
-    return  QDir(folder.constData()).exists();
+    QDir dir(path);
+    bool exists = dir.exists(); // <-- Aquí es donde se verifica la existencia
+
+    if (exists) {
+        log("La carpeta existe:");
+    } else {
+        log("La carpeta NO existe, creando con mkdir()...");
+    }
+    //emit folderExistenceChecked(path, exists); // Emite la señal con el resultado (opcional)
+    return exists;
 }
 bool UL::fileExist(QByteArray fileName)
 {
@@ -93,13 +145,30 @@ QList<QString> UL::getFileList(QByteArray folder)
     return list;
 }
 
-bool UL::mkdir(const QString path)
+bool UL::mkdir(const QString &path)
 {
-    QDir dir0(path);
-    if (!dir0.exists()) {
-        dir0.mkpath(".");
+    QDir dir(path);
+
+    // Verifica si el directorio ya existe
+    if (dir.exists()) {
+        qWarning() << "El directorio ya existe:" << path;
+        //emit directoryCreated(path, false); // Emite la señal con fallo (ya existe)
+        return false;
     }
-    return dir0.exists();
+
+    // Intenta crear el directorio.
+    // QDir::mkpath() es preferible a QDir::mkdir() porque crea todos los directorios
+    // intermedios necesarios si no existen (similar a 'mkdir -p' en Linux).
+    if (dir.mkpath(path)) {
+        qDebug() << "Directorio creado exitosamente:" << path;
+        //emit directoryCreated(path, true); // Emite la señal con éxito
+        return true;
+    } else {
+        qWarning() << "Error al crear el directorio:" << path;
+        // Esto podría fallar por permisos insuficientes o si la ruta es inválida.
+        //emit directoryCreated(path, false); // Emite la señal con fallo
+        return false;
+    }
 }
 
 bool UL::isFolder(const QString &folder)
@@ -118,6 +187,48 @@ QList<QString> UL::getFolderFileList(const QByteArray folder)
     return  ret;
 }
 
+void UL::restart(const QStringList &args, const QString &newWorkingDirectory)
+{
+    QString applicationPath = QCoreApplication::applicationFilePath();
+        QString finalWorkingDirectory = newWorkingDirectory;
+
+        qDebug() << "Intentando reiniciar aplicación...";
+        qDebug() << "Ruta de la aplicación:" << applicationPath;
+        qDebug() << "Argumentos:" << args.join(" ");
+
+        if (!newWorkingDirectory.isEmpty()) {
+            QDir newDir(newWorkingDirectory);
+            if (!newDir.exists() || !newDir.isReadable()) {
+                qWarning() << "El nuevo directorio de trabajo especificado no existe o no es accesible:" << newWorkingDirectory;
+                //emit restartAttempted(false, "El directorio de trabajo no existe o no es accesible.");
+                return;
+            }
+            finalWorkingDirectory = QDir::cleanPath(newDir.absolutePath());
+            qDebug() << "Nuevo directorio de trabajo (final):" << finalWorkingDirectory;
+        } else {
+            finalWorkingDirectory = QCoreApplication::applicationDirPath();
+            qDebug() << "No se especificó nuevo directorio de trabajo, usando el actual:" << finalWorkingDirectory;
+        }
+
+        // Usamos QProcess::startDetached() que es no bloqueante y adecuado para esto.
+        bool started = QProcess::startDetached(applicationPath, args, finalWorkingDirectory);
+
+        if (started) {
+            qDebug() << "Proceso de reinicio iniciado exitosamente.";
+            //emit restartAttempted(true, "Reinicio exitoso.");
+
+            // *** CAMBIO CLAVE AQUÍ ***
+            // Retrasar el cierre de la aplicación actual para dar tiempo al nuevo proceso a independizarse.
+            // Unos pocos milisegundos suelen ser suficientes.
+            QTimer::singleShot(5000, QCoreApplication::instance(), &QCoreApplication::quit);
+            // Opcional: Si necesitas un retardo más garantizado (aunque bloqueante para la UI en este hilo)
+            // QThread::msleep(200); // Bloquea el hilo actual por 200 ms
+            // QCoreApplication::quit(); // Luego, cierra la aplicación
+        } else {
+            qWarning() << "Fallo al iniciar el proceso de reinicio.";
+            //emit restartAttempted(false, "Fallo al iniciar el proceso de reinicio.");
+        }
+}
 void UL::restartApp()
 {
 
@@ -344,7 +455,8 @@ QString UL::getPath(int path)
         r = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     }
     if(path==5){//Current Dir
-        r = QDir::currentPath();
+        //r = QDir::currentPath();
+        r="X:/Users/Default/AppData/Roaming/UniKey/zoolv4/zoolv4-main";
     }
     if(path==6){//Current Desktop
         r = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).at(0);

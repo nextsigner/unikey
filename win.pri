@@ -14,6 +14,7 @@
 
 
 
+<<<<<<< HEAD
 # Para la configuración Release
 CONFIG(release, debug|release):{
     #message(Arch3 $$QT_ARCH)
@@ -32,6 +33,12 @@ equals(PROYECTO, "unikey") {
     message("Cargando configuracion para unikey...")
     #DESTDIR = F:\zooldev\unikey-build
     DESTDIR = C:/unikey-build
+=======
+equals(PROYECTO, "unikey") {
+    message("Cargando configuracion para unikey...")
+    DESTDIR = F:\zooldev\unikey-build
+    #DESTDIR = Z:\media\ns\Archivos\zooldev\unikey-build
+>>>>>>> mi-nueva-rama
     RC_FILE = $$PWD/res_$$PROYECTO/unikey.rc
 } else:equals(PROYECTO, "zool") {
     message("Cargando configuracion para zool...")

@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     engine.addImportPath("qrc:/modules");
     //<--Set Import Path
 
-    QDir::setCurrent(u.getPath(4));
+    //QDir::setCurrent(u.getPath(4));
 
     engine.rootContext()->setContextProperty("argtitle", presetAppName);
     for (int i = 0; i < argc; ++i) {

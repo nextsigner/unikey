@@ -1,1 +1,1 @@
-En este estado la app dejó de funcionar, se volverá el hash 02abff7
+Se sale de head detached y se vuelve a main

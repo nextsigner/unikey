@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<<<<<<< HEAD
-<!-- Written by QtCreator 4.11.1, 2025-07-25T15:38:14. -->
+<!-- Written by QtCreator 4.11.1, 2025-07-25T17:12:51. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{c3bbdd2c-fad6-41e3-87fd-2fd556f708ec}</value>
-=======
-<!-- Written by QtCreator 4.11.1, 2025-07-28T04:10:05. -->
-<qtcreator>
- <data>
-  <variable>EnvironmentId</variable>
-  <value type="QByteArray">{7b275305-e39c-4284-9f20-0a77751d689e}</value>
->>>>>>> mi-nueva-rama
+  <value type="QByteArray">{d655f4d1-f086-4656-b400-e1b9adc4fd75}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -72,24 +64,14 @@
  <data>
   <variable>ProjectExplorer.Project.Target.0</variable>
   <valuemap type="QVariantMap">
-<<<<<<< HEAD
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop Qt 5.14.2 MinGW 32-bit</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop Qt 5.14.2 MinGW 32-bit</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt5.5142.win32_mingw73_kit</value>
-=======
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop Qt 5.14.2 MinGW 64-bit</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Desktop Qt 5.14.2 MinGW 64-bit</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt5.5142.win64_mingw73_kit</value>
->>>>>>> mi-nueva-rama
    <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">1</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
-<<<<<<< HEAD
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">Z:/home/ns/nsp/build-unikey-Desktop_Qt_5_14_2_MinGW_32_bit-Debug</value>
-=======
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">F:/zooldev/build-unikey-Desktop_Qt_5_14_2_MinGW_64_bit-Debug</value>
->>>>>>> mi-nueva-rama
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -137,11 +119,7 @@
     <value type="int" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration">2</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
-<<<<<<< HEAD
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">Z:/home/ns/nsp/build-unikey-Desktop_Qt_5_14_2_MinGW_32_bit-Release</value>
-=======
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">F:/zooldev/build-unikey-Desktop_Qt_5_14_2_MinGW_64_bit-Release</value>
->>>>>>> mi-nueva-rama
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -189,11 +167,7 @@
     <value type="int" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration">0</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.2">
-<<<<<<< HEAD
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">Z:/home/ns/nsp/build-unikey-Desktop_Qt_5_14_2_MinGW_32_bit-Profile</value>
-=======
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">F:/zooldev/build-unikey-Desktop_Qt_5_14_2_MinGW_64_bit-Profile</value>
->>>>>>> mi-nueva-rama
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -313,13 +287,8 @@
     </valuelist>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-<<<<<<< HEAD
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:Z:/home/ns/nsp/unikey/unikey.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">Z:/home/ns/nsp/unikey/unikey.pro</value>
-=======
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:F:/zooldev/unikey-cloned/unikey.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">F:/zooldev/unikey-cloned/unikey.pro</value>
->>>>>>> mi-nueva-rama
     <value type="QString" key="RunConfiguration.Arguments"></value>
     <value type="bool" key="RunConfiguration.Arguments.multi">false</value>
     <value type="QString" key="RunConfiguration.OverrideDebuggerStartup"></value>
@@ -330,11 +299,7 @@
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-<<<<<<< HEAD
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\unikey-build</value>
-=======
     <value type="QString" key="RunConfiguration.WorkingDirectory.default">F:\zooldev\zool-win-64\build</value>
->>>>>>> mi-nueva-rama
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

@@ -242,19 +242,21 @@ public:
     //<--Variables
 
     //Funciones de Sistema de Archivos
-    Q_INVOKABLE void cd(QString folder);
+    Q_INVOKABLE void cd(const QString &path);
+    Q_INVOKABLE bool deleteFolder(const QString &path);
     Q_INVOKABLE QString currentFolderPath();
     Q_INVOKABLE QString currentFolderName();
-    Q_INVOKABLE void deleteFile(QByteArray f);
+    Q_INVOKABLE bool deleteFile(QByteArray f);
     Q_INVOKABLE bool setFile(QByteArray fileName, QByteArray fileData);
     Q_INVOKABLE bool setFile(QByteArray fileName, QByteArray fileData, QByteArray codec);
     Q_INVOKABLE QString getFile(QByteArray n);
-    Q_INVOKABLE bool folderExist(const QByteArray folder);
+    Q_INVOKABLE bool folderExist(const QString &path);
     Q_INVOKABLE bool fileExist(QByteArray fileName);
     Q_INVOKABLE QList<QString> getFileList(QByteArray folder);
-    Q_INVOKABLE bool mkdir(const QString path);
+    Q_INVOKABLE bool mkdir(const QString &path);
     Q_INVOKABLE bool isFolder(const QString &folder);
     Q_INVOKABLE QList<QString> getFolderFileList(const QByteArray folder);
+    Q_INVOKABLE void restart(const QStringList &args, const QString &newWorkingDirectory);
     Q_INVOKABLE void restartApp();
     Q_INVOKABLE void restartApp(QString args);
     Q_INVOKABLE bool run(QString commandLine);
