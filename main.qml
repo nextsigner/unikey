@@ -61,7 +61,7 @@ Window {
     Connections{
         target: qmlErrorLogger
         onMessagesChanged:{
-            if(Qt.platform.os==='linux' && app.enableQmlErrorLog){
+            if(Qt.platform.os==='linux' && app.enableQmlErrorLog && apps.dev && ap){
                 app.visibility="Maximized"
                 log.text+=''+qmlErrorLogger.messages[qmlErrorLogger.messages.length-1]+'<br>'
             }
@@ -705,8 +705,8 @@ Window {
             //Funciona en Windows
             //unik.cd("F:/zooldev")
             ///unik.log('CARPETA ACTUAL: '+unik.currentFolderPath())
-            tiMainFolder.text=unik.currentFolderPath()
-            tiMainFolder.color='green'
+            //tiMainFolder.text=unik.currentFolderPath()
+            //tiMainFolder.color='green'
 
         }
     }
@@ -1219,10 +1219,10 @@ Terminal=false'
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
-            if(!apps.dep || apps.dev){
-                app.visibility='Minimized'
-            }else{
+            if(!apps.dep && !apps.dev){
                 app.close()
+            }else{
+                app.visibility='Minimized'
             }
         }
     }
@@ -1303,10 +1303,10 @@ Terminal=false'
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
-            if(!apps.dep || apps.dev){
-                app.visibility='Minimized'
-            }else{
+            if(!apps.dep && !apps.dev){
                 app.close()
+            }else{                
+                app.visibility='Minimized'
             }
         }
     }

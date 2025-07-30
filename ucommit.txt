@@ -1,1 +1,1 @@
-Se modifica archivo de version
+Se quita consulta de unik.currentFolder()

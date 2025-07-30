@@ -19,7 +19,7 @@ void UL::cd(const QString &path)
 
     // Intenta cambiar el directorio de trabajo actual
     if (dir.setCurrent(path)) {
-        qDebug() << "Directorio de trabajo cambiado a:" << dir.currentPath();
+        //qDebug() << "Directorio de trabajo cambiado a:" << dir.currentPath();
         //emit currentDirectoryChanged(dir.currentPath(), true);
     } else {
         qWarning() << "Error al cambiar el directorio de trabajo a:" << path;
@@ -56,7 +56,7 @@ QString UL::currentFolderPath()
 {
     QString currentPath = QDir::currentPath(); // Obtiene el directorio de trabajo actual
 
-    qDebug() << "Directorio de trabajo actual:" << currentPath;
+    //qDebug() << "Directorio de trabajo actual:" << currentPath;
     //emit currentFolderPathRetrieved(currentPath); // Emite la señal con la ruta (opcional)
 
     return currentPath;
