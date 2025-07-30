@@ -8,6 +8,7 @@ Rectangle{
     color: 'transparent'
     border.width: 1
     border.color: 'white'
+    property string mainFolder: apps?apps.mainFolder:unik.getPath(4)
     signal log(string data)
     signal responseRepExist(string res, string url)
     signal responseRepVersion(string res, string url, string tipo)
@@ -148,9 +149,9 @@ Rectangle{
     }
     Component.onCompleted: {
         if(r.version===''){
-            r.folderRoot=apps.mainFolder+'/0.0.0.0'
+            r.folderRoot=r.mainFolder+'/0.0.0.0'
         }else{
-            r.folderRoot=apps.mainFolder+'/'+r.version
+            r.folderRoot=r.mainFolder+'/'+r.version
         }
         //let url = 'https://github.com/nextsigner/zool-release'
         //downloadGitHub(url)
@@ -192,7 +193,7 @@ Rectangle{
                 nfr=nfr+m0[m0.length-1]+'_'+r.version
                 r.folderRoot='"'+nfr+'"'
             }else{
-                let nfr=apps.mainFolder
+                let nfr=r.mainFolder
                 nfr=nfr+'/'+m0[m0.length-1]
                 r.folderRoot='"'+nfr+'"'
             }
@@ -432,7 +433,7 @@ Rectangle{
         c=r.app7ZipPath+' x "'+r.uZipFilePath.replace(/\"/g, '')+'" -o"'+folderPath.replace(/\"/g, '')+'" -aoa -bsp1'
         let cmd=c
 
-        c='        proc7ZipStdOut(logData)\n'
+        c='        proc7ZipStdOut(logData, \''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
         let onLogDataCode=c
 
 
@@ -450,6 +451,9 @@ Rectangle{
     }
     //function proc7ZipStdOut(data){
     function proc7ZipStdOut(data, url, folderPath, zipFileName){
+        //unik.log('Descomprimiendo 1: '+url)
+        //unik.log('Descomprimiendo 2: '+folderPath)
+        //unik.log('Descomprimiendo 3: '+folderPath)
         let m0
         let m1
         if(data!=="finished"){
@@ -517,7 +521,7 @@ Rectangle{
             }
 
             let aname=(''+presetAppName).toLowerCase()
-            let unikeyCfgPath='"'+apps.mainFolder+'/'+aname+'.cfg"'
+            let unikeyCfgPath='"'+r.mainFolder+'/'+aname+'.cfg"'
             if(r.setCfg){
                 unik.deleteFile(unikeyCfgPath)
                 let j={}
