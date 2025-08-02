@@ -300,6 +300,7 @@ Rectangle{
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
     function mkUqpRepVersion(url, tipo){
+        unik.log('Revisando versión de repositorio '+url)
         //cleanUqpCurl()
 
         let c=''
@@ -328,7 +329,7 @@ Rectangle{
 
         if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
-        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-code-'+idName)
     }
     function mkUqpCurl(url, folderPath, fileName){
         unik.log('\n\n\n\n mkUqpCurl('+url+', '+folderPath+', '+fileName+')\n\n\n')

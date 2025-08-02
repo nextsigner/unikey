@@ -407,6 +407,12 @@ Window {
                         visible: true
                         dev: apps.dev
                         //version: '1.1.1'
+                        uFolder: '"'+unik.getPath(3)+'"'
+                        onCPorcChanged:{
+                            if(cPorc>=0.01){
+                                r.visible=true
+                            }
+                        }
                         onLog: unik.log(data)
                         onDownloadFinished: {
                             //Retorna: downloadFinished(string url, string folderPath, string zipFileName)
@@ -414,9 +420,36 @@ Window {
                             unik.log('Origen: '+url)
                             unik.log('Destino: '+folderPath)
                         }
+                        property string d1: ''
+                        property string d2: ''
+                        property string d3: ''
                         onUnzipFinished: {
+                            if(url)d1=url
+                            if(folderPath && folderPath!=='')d2=folderPath
+                            if(zipFileName)d3=zipFileName
                             //Retorna: unzipFinished(string url, string folderPath, string zipFileName)
-                            unik.log('Se ha descomprimido: '+zipFileName)
+                            //unik.log('Se ha descomprimido: '+zipFileName)
+                            //r.visible=false
+                            //unik.log('zipFileName: '+zipFileName)
+                            //unik.log('zipFileName url: '+url)
+                            //unik.log('zipFileName folderPath: '+folderPath)
+                            let mainPath='"'+d2.replace(/\"/g, '')+'/'+d3.replace('.zip', '-main').replace(/\"/g, '')+'"'
+                            let aname=(''+presetAppName).toLowerCase()
+                            let unikeyCfgPath=''+unik.getPath(4)+'/'+aname+'.cfg'
+                            let j={}
+                            j.args={}
+                            j.args['folder']=mainPath
+                            j.args['dev']=false
+                            j.args['dep']=false
+                            unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
+                            unik.clearComponentCache()
+                            let args=[]
+                            args.push('-folder='+""+mainPath.replace(/\"/g, ''))
+                            unik.restart(args, ""+mainPath.replace(/\"/g, ''))
+                            app.close()
+                        }
+                        onResponseRepVersion:{
+                            procRRV(res, url, tipo)
                         }
                         onResponseRepExist:{
                             if(res.indexOf('404')>=0){
@@ -428,9 +461,6 @@ Window {
                                 unik.log('Para probarlo presiona ENTER')
                                 unik.log('Para instalarlo presiona Ctrl+ENTER')
                             }
-                        }
-                        onResponseRepVersion:{
-                            procRRV(res, url, tipo)
                         }
                         //                        onResponseRepExist:{
                         //                            if(res.indexOf('404')>=0){
@@ -1305,7 +1335,7 @@ Terminal=false'
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
             if(!apps.dep && !apps.dev){
                 app.close()
-            }else{                
+            }else{
                 app.visibility='Minimized'
             }
         }

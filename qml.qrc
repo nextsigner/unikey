@@ -4,5 +4,7 @@
         <file>modules/ZipManager/qmldir</file>
         <file>modules/ZipManager/ZipManager_v4.qml</file>
         <file>Dependences.qml</file>
+        <file>modules/UniKeyZipDownloader/qmldir</file>
+        <file>modules/UniKeyZipDownloader/UniKeyZipDownloader_v1.qml</file>
     </qresource>
 </RCC>
