@@ -36,10 +36,9 @@ Window {
         property bool dev: false
         property bool dep: true
         property string mainFolder: ''
-        property bool runFromGit: false
+        property int modoGitOrFolder: 0
         property string uGitRep: 'https://github.com/nextsigner/unikey-apps'
         property string uFolder: unik?unik.getPath(3):''
-        property bool enableCheckBoxShowGitRep: false
         property color fontColor: 'white'
         property color backgroundColor: 'black'
         property string uCtxUpdate: ''
@@ -218,18 +217,65 @@ Window {
                         }
                     }
                     Row{
+                        spacing: app.fs*0.25
                         Text{
-                            text: '<b>Configurar Repositorio:</b>'
+                            text: '<b>Configurar</b>'
                             color: 'white'
                             font.pixelSize: app.fs
                             anchors.verticalCenter: parent.verticalCenter
                         }
-                        CheckBox{
-                            id: checkBoxShowGitRep
-                            checked: apps.enableCheckBoxShowGitRep
-                            anchors.verticalCenter: parent.verticalCenter
-                            onCheckedChanged: {
-                                apps.enableCheckBoxShowGitRep=checked
+                        Rectangle{
+                            width: rowRbs.width+app.fs*0.25
+                            height: app.fs*2
+                            color: 'transparent'
+                            border.width: 1
+                            border.color: 'white'
+                            Row{
+                                id: rowRbs
+                                spacing: app.fs*0.25
+                                anchors.centerIn: parent
+                                Row{
+                                    Text{
+                                        text: 'Carpeta:'
+                                        color: 'white'
+                                        font.pixelSize: app.fs
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    RadioButton{
+                                        id: rb0
+                                        checked: false
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        onCheckedChanged: {
+                                            if(checked){
+                                                apps.modoGitOrFolder=0
+                                                rb1.checked=false
+                                            }else{
+                                                apps.modoGitOrFolder=1
+                                            }
+                                        }
+                                    }
+                                }
+                                Row{
+                                    Text{
+                                        text: 'Repositorio:'
+                                        color: 'white'
+                                        font.pixelSize: app.fs
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    RadioButton{
+                                        id: rb1
+                                        checked: false
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        onCheckedChanged: {
+                                            if(checked){
+                                                apps.modoGitOrFolder=1
+                                                rb0.checked=false
+                                            }else{
+                                                apps.modoGitOrFolder=0
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -323,20 +369,20 @@ Window {
                     //visible: checkBoxShowGitRep.checked
                     Text{
                         id: txtTitGitRep
-                        text: checkBoxShowGitRep.checked?'<b>Repositorio Git:</b>':'<b>Carpeta de Origen:</b>'
+                        text: apps.modoGitOrFolder===1?'<b>Repositorio Git:</b>':'<b>Carpeta de Origen:</b>'
                         font.pixelSize: app.fs
                         color: 'white'
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     Rectangle{
-                        width: xApp.width-txtTitGitRep.contentWidth-botSaveGitRep.width-botProbarGitRep.width-app.fs*1.75
+                        width: xApp.width-txtTitGitRep.contentWidth-botInstall.width-botProbarGitRep.width-app.fs*1.75
                         height: app.fs*1.5
                         color: 'transparent'
                         border.width: 1
                         border.color: 'white'
                         clip: true
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: checkBoxShowGitRep.checked
+                        visible: apps.modoGitOrFolder===1
                         TextInput{
                             id: tiGitRep
                             text: apps.uGitRep
@@ -352,14 +398,14 @@ Window {
                         }
                     }
                     Rectangle{
-                        width: xApp.width-txtTitGitRep.contentWidth-botSaveGitRep.width-botProbarGitRep.width-app.fs*1.75
+                        width: xApp.width-txtTitGitRep.contentWidth-botInstall.width-botProbarGitRep.width-app.fs*1.75
                         height: app.fs*1.5
                         color: 'transparent'
                         border.width: 1
                         border.color: 'white'
                         clip: true
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: !checkBoxShowGitRep.checked
+                        visible: apps.modoGitOrFolder===0
                         TextInput{
                             id: tiFolder
                             text: apps.uFolder
@@ -389,7 +435,7 @@ Window {
                         }
                     }
                     Button{
-                        id: botSaveGitRep
+                        id: botInstall
                         text: 'Instalar'
                         font.pixelSize: app.botFs
                         anchors.verticalCenter: parent.verticalCenter
@@ -429,19 +475,20 @@ Window {
                             if(zipFileName)d3=zipFileName
                             //Retorna: unzipFinished(string url, string folderPath, string zipFileName)
                             //unik.log('Se ha descomprimido: '+zipFileName)
-                            //r.visible=false
                             //unik.log('zipFileName: '+zipFileName)
                             //unik.log('zipFileName url: '+url)
                             //unik.log('zipFileName folderPath: '+folderPath)
                             let mainPath='"'+d2.replace(/\"/g, '')+'/'+d3.replace('.zip', '-main').replace(/\"/g, '')+'"'
                             let aname=(''+presetAppName).toLowerCase()
                             let unikeyCfgPath=''+unik.getPath(4)+'/'+aname+'.cfg'
-                            let j={}
-                            j.args={}
-                            j.args['folder']=mainPath
-                            j.args['dev']=false
-                            j.args['dep']=false
-                            unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
+                            if(zipManager.version.indexOf('install')>=0){
+                                let j={}
+                                j.args={}
+                                j.args['folder']=mainPath
+                                j.args['dev']=false
+                                j.args['dep']=false
+                                unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
+                            }
                             unik.clearComponentCache()
                             let args=[]
                             args.push('-folder='+""+mainPath.replace(/\"/g, ''))
@@ -571,6 +618,15 @@ Window {
         }
     }
     Component.onCompleted: {
+        if(apps.modoGitOrFolder===0){
+            rb0.checked=true
+        }
+        if(apps.modoGitOrFolder===1){
+            rb1.checked=true
+        }
+        if(apps.uFolder===''){
+            apps.uFolder=unik.getPath(4)+'/unikey-apps/unikey-apps-main'
+        }
         zipManager.curlPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
         unik.log('Curl Path: '+zipManager.curlPath)
         zipManager.app7ZipPath = Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
@@ -764,11 +820,12 @@ Window {
     }
     function runMix(tipo){
         if(tipo==='probe'){
-            if(apps.enableCheckBoxShowGitRep){
+            if(apps.modoGitOrFolder===1){
                 zipManager.mkUqpRepVersion(tiGitRep.text, 'probe')
             }else{
                 unik.log('Probando ['+tiFolder.text+']...')
                 if(unik.folderExist(tiFolder.text)){
+                    unik.log('Existe la carpeta ['+tiFolder.text+']...')
                     unik.log('Revisando la carpeta ['+tiFolder.text+']...')
                     if(!unik.fileExist(tiFolder.text+'/main.qml')){
                         unik.log('Error! La carpeta ['+tiFolder.text+'] no contiene un archivo [main.qml].')
@@ -779,33 +836,20 @@ Window {
                         unik.log('Código QML: '+c+'')
                     }
                     apps.uFolder=tiFolder.text
-                    var cmd=unik.getPath(0)+' -nocfg -folder='+tiFolder.text
-                    if(checkBoxRunOut.checked){
-                        unik.log('Lanzando aparte ['+cmd+']')
-                        unik.runOut(cmd)
-                        if(!apps.dev){
-                            app.close()
-                        }else{
-                            unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
-                        }
-                    }else{
-                        unik.run(cmd)
-                        if(!apps.dev){
-                            app.close()
-                        }else{
-                            unik.log('Esta instancia de '+presetAppName+' no se ha cerrado porque estamos en modo desarrollador. Se ejecutó runOut("'+cmd+'")')
-                        }
-                    }
+                    var cmd=unik.getPath(0)+' -folder='+tiFolder.text
+                    unik.log('Lanzando aparte ['+cmd+']')
+                    unik.runOut(cmd)
                 }else{
                     unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
                 }
             }
         }else{
-            if(apps.enableCheckBoxShowGitRep){
+            if(apps.modoGitOrFolder===1){
                 zipManager.mkUqpRepVersion(tiGitRep.text, 'install')
             }else{
-                unik.log('Probando ['+tiFolder.text+']...')
+                unik.log('Ejecutando carpeta ['+tiFolder.text+']...')
                 if(unik.folderExist(tiFolder.text)){
+                    unik.log('Existe la carpeta ['+tiFolder.text+']...')
                     unik.log('Revisando la carpeta ['+tiFolder.text+']...')
                     if(!unik.fileExist(tiFolder.text+'/main.qml')){
                         unik.log('Error! La carpeta ['+tiFolder.text+'] no contiene un archivo [main.qml].')
@@ -813,7 +857,7 @@ Window {
                     }else{
                         unik.log('Existe un archivo ['+tiFolder.text+'/main.qml]...')
                         let c=unik.getFile(tiFolder.text+'/main.qml')
-                        unik.log('Código QML: '+c+'')
+                        if(app.dev)unik.log('Código QML: '+c+'')
                     }
                     let j={}
                     j.args={}
@@ -821,7 +865,9 @@ Window {
                     let aname=(''+presetAppName).toLowerCase()
                     unik.setFile(apps.mainFolder+'/'+aname+'.cfg', JSON.stringify(j, null, 2))
                     apps.uFolder=tiFolder.text
-                    mkAd(unik.getPath(0), '-folder='+tiFolder.text, apps.mainFolder)
+                    let m0=tiFolder.text.split('/')
+                    iconText=(m0[m0.length-1]).replace(/-/g, ' ')
+                    mkAd(unik.getPath(0), '-folder='+tiFolder.text, apps.mainFolder, capitalizeFirstLetterOfEachWord(iconText))
                     let cmd=unik.getPath(0)
                     if(checkBoxRunOut.checked){
                         unik.log('Lanzando aparte ['+cmd+']')
@@ -958,13 +1004,13 @@ Window {
         zipManager.download(tiGitRep.text)
     }
 
-    function getAdCode(exePath, args, wd){
+    function getAdCodeWin(exePath, args, wd){
         let m0=exePath.split('/')
         let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '')
         let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
         let c=''
-        if(Qt.platform.os==='windows'){
-            c='Const TARGET_PATH = "'+exePath+'"
+
+        c='Const TARGET_PATH = "'+exePath+'"
             Const ARGUMENTS = "'+args+'"
             Const SHORTCUT_PATH = "%USERPROFILE%\Desktop\\'+fileName+'.lnk"
             Const DESCRIPTION = "Acceso directo a Zool con configuración deshabilitada"
@@ -990,31 +1036,39 @@ Window {
 
             Set oShellLink = Nothing
             Set WshShell = Nothing'
-        }else{
-            c='#!/usr/bin/env xdg-open
+
+
+        return c
+    }
+    function getAdCodeLin(exePath, args, wd, iconText){
+        let m0=exePath.split('/')
+        let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '')
+        let fileName=''+m0[m0.length-1]+'_'+argsName
+        let c=''
+        c='#!/usr/bin/env xdg-open
 [Desktop Entry]
 Encoding=UTF-8
-Name='+fileName+'
+Name='+iconText+'
 Comment=Creado por '+presetAppName+'
 Exec='+exePath+' '+args+'
 Icon='+unik.getPath(1)+'/logo.png
 Categories=Application
 Type=Application
 Terminal=false'
-        }
-
         return c
     }
-    function mkAd(exePath, args, wd){
+    function mkAd(exePath, args, wd, iconText){
         let m0=exePath.split('/')
         let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '_')
         let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
-        let c=getAdCode(exePath, args, wd)
+        var c=''
         if(Qt.platform.os==='linux'){
+            c=getAdCodeLin(exePath, args, wd, iconText)
             let desktopIconFilePath=unik.getPath(6)+'/'+fileName+'.desktop'
             unik.log('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
-            unik.setFile(desktopIconFilePath, c)
+            unik.setFile(desktopIconFilePath.replace(/__/g, '_'), c)
         }else{
+            c=getAdCodeWin(exePath, args, wd)
             unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
             c=''
 
@@ -1311,6 +1365,8 @@ Terminal=false'
     }
     //Aprobado en GNU/Linux
     function runCtxFolder(){
+        let mkAccDir=false
+        let iconText=''
         let folder=''
         let args=Qt.application.arguments
         for(var i=0;i<args.length;i++){
@@ -1327,8 +1383,16 @@ Terminal=false'
                 apps.dep=true
                 app.visibility='Maximized'
             }
+            if(args[i].indexOf('-install')>=0){
+                mkAccDir=true
+            }
         }
         if(unik.folderExist(folder.replace(/\"/g, '')) && unik.fileExist(folder+'/main.qml')){
+            if(mkAccDir){
+                let m0=folder.split('/')
+                iconText=(m0[m0.length-1]).replace(/-/g, ' ')
+                mkAd(unik.getPath(0), '-folder='+folder, apps.mainFolder, capitalizeFirstLetterOfEachWord(iconText))
+            }
             unik.addImportPath(folder.replace(/\"/g, '')+'/modules')
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
@@ -1339,5 +1403,24 @@ Terminal=false'
                 app.visibility='Minimized'
             }
         }
+    }
+    function capitalizeFirstLetterOfEachWord(inputString) {
+        if (typeof inputString !== 'string' || inputString.length === 0) {
+            return ""; // Retorna un string vacío si la entrada no es válida o está vacía
+        }
+
+        // Divide el string en un array de palabras
+        const words = inputString.split(" ");
+
+        // Itera sobre cada palabra, capitalizando la primera letra y poniendo el resto en minúsculas
+        const processedWords = words.map(word => {
+                                             if (word.length === 0) {
+                                                 return ""; // Maneja casos de múltiples espacios que resulten en palabras vacías
+                                             }
+                                             return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                                         });
+
+        // Une las palabras procesadas de nuevo en un string
+        return processedWords.join(" ");
     }
 }
