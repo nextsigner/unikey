@@ -1012,7 +1012,7 @@ Window {
 
         c='Const TARGET_PATH = "'+exePath+'"
             Const ARGUMENTS = "'+args+'"
-            Const SHORTCUT_PATH = "%USERPROFILE%\Desktop\\'+fileName+'.lnk"
+            Const SHORTCUT_PATH = "%USERPROFILE%\\Desktop\\'+fileName+'.lnk"
             Const DESCRIPTION = "Acceso directo a Zool con configuración deshabilitada"
             Const WORKING_DIRECTORY = "'+wd+'\"
             Const ICON_PATH = "'+exePath+'"
@@ -1060,14 +1060,16 @@ Terminal=false'
     function mkAd(exePath, args, wd, iconText){
         let m0=exePath.split('/')
         let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '_')
-        let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
+        let fileName=''//+m0[m0.length-1]+'_'+argsName//+'.lnk'
         var c=''
         if(Qt.platform.os==='linux'){
+            fileName=''+m0[m0.length-1]+'_'+argsName
             c=getAdCodeLin(exePath, args, wd, iconText)
             let desktopIconFilePath=unik.getPath(6)+'/'+fileName+'.desktop'
             unik.log('Creando acceso directo en el Escritorio: '+desktopIconFilePath)
             unik.setFile(desktopIconFilePath.replace(/__/g, '_'), c)
         }else{
+            fileName=''+m0[m0.length-1]
             c=getAdCodeWin(exePath, args, wd)
             unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
             c=''

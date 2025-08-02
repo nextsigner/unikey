@@ -1,1 +1,1 @@
-Se crea getAdCoreWin
+Se corrige getAdCodeWin()
