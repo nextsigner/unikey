@@ -866,7 +866,8 @@ Window {
                     unik.setFile(apps.mainFolder+'/'+aname+'.cfg', JSON.stringify(j, null, 2))
                     apps.uFolder=tiFolder.text
                     let m0=tiFolder.text.split('/')
-                    iconText=(m0[m0.length-1]).replace(/-/g, ' ')
+                    let iconText=(m0[m0.length-1]).replace(/-/g, ' ')
+                    console.log('----->'+unik.getPath(2))
                     mkAd(unik.getPath(0), '-folder='+tiFolder.text, apps.mainFolder, capitalizeFirstLetterOfEachWord(iconText))
                     let cmd=unik.getPath(0)
                     if(checkBoxRunOut.checked){
@@ -1004,16 +1005,16 @@ Window {
         zipManager.download(tiGitRep.text)
     }
 
-    function getAdCodeWin(exePath, args, wd){
+    function getAdCodeWin(exePath, args, wd, iconText){
         let m0=exePath.split('/')
         let argsName=args.replace(/-/g, '_').replace(/\//g, '_').replace(/\=/g, '')
-        let fileName=''+m0[m0.length-1]+'_'+argsName//+'.lnk'
+        let fileName=''+m0[m0.length-1].replace('.exe', '')//+'_'+argsName//+'.lnk'
         let c=''
 
         c='Const TARGET_PATH = "'+exePath+'"
             Const ARGUMENTS = "'+args+'"
-            Const SHORTCUT_PATH = "%USERPROFILE%\\Desktop\\'+fileName+'.lnk"
-            Const DESCRIPTION = "Acceso directo a Zool con configuración deshabilitada"
+            Const SHORTCUT_PATH = "%USERPROFILE%\\Desktop\\'+iconText+'.lnk"
+            Const DESCRIPTION = "'+args+'"
             Const WORKING_DIRECTORY = "'+wd+'\"
             Const ICON_PATH = "'+exePath+'"
 
@@ -1031,8 +1032,6 @@ Window {
             oShellLink.IconLocation = ICON_PATH
 
             oShellLink.Save
-
-            WScript.Echo "Acceso directo \''+fileName+'\' creado en " & strShortcutPath & " con el parámetro " & ARGUMENTS & "."
 
             Set oShellLink = Nothing
             Set WshShell = Nothing'
@@ -1070,8 +1069,9 @@ Terminal=false'
             unik.setFile(desktopIconFilePath.replace(/__/g, '_'), c)
         }else{
             fileName=''+m0[m0.length-1]
-            c=getAdCodeWin(exePath, args, wd)
-            unik.setFile(unik.getPath(2)+'/'+fileName+'.vbs', c)
+            c=getAdCodeWin(exePath, args, wd, iconText.replace(' Main', ''))
+            unik.setFile(unik.getPath(2)+'/'+fileName.replace('.exe', '')+'.vbs', c)
+            unik.runOut('wscript.exe "'+unik.getPath(2)+'/'+fileName.replace('.exe', '')+'.vbs"')
             c=''
 
             c=''
@@ -1081,7 +1081,7 @@ Terminal=false'
             let idName=c
 
 
-            c='wscript "'+unik.getPath(2)+'/'+fileName+'.vbs"'
+            c='wscript.exe "'+unik.getPath(2)+'/'+fileName.replace('.exe', '')+'.vbs"'
             let cmd=c
 
             c='        unik.log(logData)\n'

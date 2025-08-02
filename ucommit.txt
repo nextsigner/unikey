@@ -1,1 +1,1 @@
-Se corrige getAdCodeWin()
+Se ejecuta unik.run(wscript.exe ...) en Windows
