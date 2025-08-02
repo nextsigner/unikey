@@ -1,1 +1,1 @@
-Se eliminan versiones obsoletas de ZipManager
+Se emite r.unzipFinished() en mkUqp7Zip onFinished

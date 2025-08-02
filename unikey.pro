@@ -3,7 +3,7 @@ QT += widgets qml quick quick3d sql network webchannel
 
 CONFIG += c++11
 
-PROYECTO = zool
+PROYECTO = unikey
 TARGET=$$PROYECTO
 
 !linux:{

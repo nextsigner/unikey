@@ -438,7 +438,8 @@ Rectangle{
 
 
         //c='        proc7ZipStdOut("finished")\n'
-        c+='       proc7ZipStdOut("finished", \''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
+        c+='       r.unzipFinished(\''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
+        //r.unzipFinished(url, folderPath, zipFileName)
         let onFinishedCode=c
 
 
@@ -476,7 +477,7 @@ Rectangle{
                     //r.log('7Zip ????: '+data)
                     //r.cPorc=100.00
                     r.uStdOut='Archivo descomprimido con éxito.'
-                    r.unzipFinished(url, folderPath, zipFileName)
+                    //r.unzipFinished(url, folderPath, zipFileName)
                     //t7ZipFinished.start()
                 }
 
