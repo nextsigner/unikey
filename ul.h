@@ -256,6 +256,17 @@ public:
     Q_INVOKABLE bool mkdir(const QString &path);
     Q_INVOKABLE bool isFolder(const QString &folder);
     Q_INVOKABLE QList<QString> getFolderFileList(const QByteArray folder);
+
+    //Funciones Sqlite
+    Q_INVOKABLE bool sqliteInit(QString pathName);
+    Q_INVOKABLE bool sqlQuery(QString query);
+    Q_INVOKABLE QList<QObject *> getSqlData(QString query);
+    Q_INVOKABLE bool mysqlInit(QString hostName, QString dataBaseName, QString userName, QString password, int firtOrSecondDB);
+    Q_INVOKABLE void setMySqlDatabase(QString databaseName, int firtOrSecondDB);
+    Q_INVOKABLE void sqliteClose();
+
+
+    //Funciones Restart
     Q_INVOKABLE void restart(const QStringList &args, const QString &newWorkingDirectory);
     Q_INVOKABLE void restartApp();
     Q_INVOKABLE void restartApp(QString args);

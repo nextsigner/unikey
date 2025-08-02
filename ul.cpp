@@ -145,6 +145,149 @@ QList<QString> UL::getFileList(QByteArray folder)
     return list;
 }
 
+bool UL::sqliteInit(QString pathName)
+{
+    bool ret=false;
+    if(db.isOpen()){
+        db.close();
+    }
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    QByteArray rutaBD;
+    rutaBD.append(pathName);
+    db.setDatabaseName(rutaBD.constData());
+    if(!db.open()){
+        if(debugLog){
+            lba="";
+            lba.append("Sqlite open error");
+            log(lba);
+        }
+    }else{
+        if(debugLog){
+            lba="";
+            lba.append("Sqlite open ");
+            lba.append(rutaBD);
+            log(lba);
+        }
+    }
+    return ret;
+}
+
+bool UL::sqlQuery(QString query)
+{
+    QSqlQuery q;
+    q.prepare(query);
+    if(q.exec()){
+        if(debugLog){
+            lba="";
+            lba.append("sql query exec: ");
+            lba.append(query);
+            log(lba);
+
+            QByteArray d;
+            d.append("sql query exec: ");
+            d.append(query);
+            log(d);
+        }
+        return true;
+    }
+    if(debugLog){
+        lba="";
+        lba.append("Last command sqlite failed: ");
+        lba.append(query);
+        lba.append(" \nError SQL! ");
+        lba.append(q.lastError().text());
+        log(lba);
+    }
+    return false;
+}
+
+QList<QObject *> UL::getSqlData(QString query)
+{
+    QList<QObject*> ret;
+    QSqlQuery consultar;
+    consultar.prepare(query);
+    int cantcols=0;
+    if(consultar.exec()){
+        cantcols = consultar.record().count();
+        ret.clear();
+        if(debugLog){
+            qDebug()<<"Sql query is exec...";
+            qInfo("Sql query is exec...");
+            QString cc;
+            cc.append("Column count: ");
+            cc.append(QString::number(cantcols));
+            qInfo()<<cc;
+        }
+        int v=0;
+        while (consultar.next()) {
+            Row *r = new Row(this);
+            for (int i = 0; i < cantcols; ++i) {
+                r->col.append(consultar.value(i).toString());
+                v++;
+            }
+            ret.append(r);
+        }
+        if(debugLog){
+            QByteArray cc;
+            cc.append("Row count result: ");
+            cc.append(QString::number(v));
+            cc.append(" ");
+            cc.append("Column count result: ");
+            cc.append(QString::number(cantcols));
+            log(cc);
+        }
+    }else{
+        if(debugLog){
+            lba="";
+            lba.append("Sql query no exec: ");
+            lba.append(consultar.lastError().text());
+            log(lba);
+        }
+    }
+    return ret;
+}
+
+bool UL::mysqlInit(QString hostName, QString dataBaseName, QString userName, QString password, int firtOrSecondDB)
+{
+    bool ret=false;
+    if(firtOrSecondDB==1){
+        firstDB = QSqlDatabase::addDatabase("QMYSQL");
+        firstDB.setHostName(hostName);
+        firstDB.setDatabaseName(dataBaseName);
+        firstDB.setUserName(userName);
+        firstDB.setPassword(password);
+        bool o=firstDB.open();
+        qDebug()<<"Open: "<<o;
+        ret = o;
+
+    }else{
+        secondDB = QSqlDatabase::addDatabase("QMYSQL");
+        secondDB.setHostName(hostName);
+        secondDB.setDatabaseName(dataBaseName);
+        secondDB.setUserName(userName);
+        secondDB.setPassword(password);
+        ret = secondDB.open();
+    }
+    return ret;
+}
+
+void UL::setMySqlDatabase(QString databaseName, int firtOrSecondDB)
+{
+    if(firtOrSecondDB==1){
+        firstDB.setDatabaseName(databaseName);
+    }else{
+        secondDB.setDatabaseName(databaseName);
+    }
+}
+
+void UL::sqliteClose()
+{
+    db.removeDatabase(QSqlDatabase::database().connectionName());
+    db.close();
+
+}
+
+
 bool UL::mkdir(const QString &path)
 {
     QDir dir(path);
