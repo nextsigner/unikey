@@ -1,1 +1,1 @@
-Se ejecuta unik.run(wscript.exe ...) en Windows
+Se crea ZoolText 1.2
