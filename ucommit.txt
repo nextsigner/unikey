@@ -1,1 +1,1 @@
-Se crea ZoolText 1.2
+Se corrige getPath(5)

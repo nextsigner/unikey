@@ -598,8 +598,8 @@ QString UL::getPath(int path)
         r = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     }
     if(path==5){//Current Dir
-        //r = QDir::currentPath();
-        r="X:/Users/Default/AppData/Roaming/UniKey/zoolv4/zoolv4-main";
+        r = QDir::currentPath();
+        //r="X:/Users/Default/AppData/Roaming/UniKey/zoolv4/zoolv4-main";
     }
     if(path==6){//Current Desktop
         r = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).at(0);
