@@ -1,1 +1,1 @@
-Se corrige getPath(5)
+Se corrigen if(r.dev) en main.qml

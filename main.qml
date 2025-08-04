@@ -415,7 +415,7 @@ Window {
                             color: 'white'
                             anchors.centerIn: parent
                             onTextChanged: {
-                                if(!unik.folderExist(text)){
+                                if(unik && !unik.folderExist(text)){
                                     unik.log('La carpeta ['+text+'] no existe.')
                                     tiFolder.color='red'
                                 }else{
@@ -456,7 +456,7 @@ Window {
                         uFolder: '"'+unik.getPath(3)+'"'
                         onCPorcChanged:{
                             if(cPorc>=0.01){
-                                r.visible=true
+                                zipManager.visible=true
                             }
                         }
                         onLog: unik.log(data)

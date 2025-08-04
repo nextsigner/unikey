@@ -169,13 +169,13 @@ Rectangle{
         c+='        }\n'
         c+='        onLogDataChanged:{\n'
         c+='        '+onLogDataCode+'\n'
-        c+='        if(r.dev)r.log(logData)\n'
+        c+='        if(zipManager.dev)zipManager.log(logData)\n'
         c+='        }\n'
         c+='        Component.onCompleted:{\n'
         c+='        '+onCompleteCode+'\n'
         c+='            let cmd=\''+cmd+'\'\n'
-        c+='            if(r.dev)console.log("cmd '+idName+': "+cmd)\n'
-        c+='            if(r.dev)r.log(cmd)\n'
+        c+='            if(zipManager.dev)console.log("cmd '+idName+': "+cmd)\n'
+        c+='            if(zipManager.dev)zipManager.log(cmd)\n'
         c+='            run(cmd)\n'
         c+='        }\n'
         c+='    }\n'
@@ -183,12 +183,12 @@ Rectangle{
         return c
     }
     function download(url, from){
-        if(r.dev)r.log('download('+url+', '+from+')')
+        if(zipManager.dev)zipManager.log('download('+url+', '+from+')')
         if(from===undefined || from==='github'){
             let m0=url.split('/')
-            if(r.dev)r.log('From GitHub m0: '+m0.toString())
+            if(zipManager.dev)zipManager.log('From GitHub m0: '+m0.toString())
             if(url.indexOf('github')>=0 && m0.length>3 && r.version!==''){
-                if(r.dev)r.log('From GitHub..')
+                if(zipManager.dev)zipManager.log('From GitHub..')
                 let nfr=r.folderRoot.replace(r.version, '').replace('0.0.0.0', '')
                 nfr=nfr+m0[m0.length-1]+'_'+r.version
                 r.folderRoot='"'+nfr+'"'
@@ -295,7 +295,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
@@ -327,7 +327,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-code-'+idName)
     }
@@ -358,7 +358,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
@@ -411,12 +411,12 @@ Rectangle{
             }
         }else{
             if(data==="finished"){
-                if(r.dev)r.log('Descarga finalizada.')
+                if(zipManager.dev)zipManager.log('Descarga finalizada.')
                 r.downloadFinished(url, folderPath, zipFileName)
                 mkUqp7Zip(url, folderPath, zipFileName)
                 //mkUqp7Zip(r.uZipFilePath, r.uFolder)
             }else{
-                if(r.dev)r.log('Log 111: ['+data+']')
+                if(zipManager.dev)zipManager.log('Log 111: ['+data+']')
             }
         }
     }
@@ -447,7 +447,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
@@ -529,12 +529,12 @@ Rectangle{
                 let j={}
                 j.args={}
                 j.args.folder=mainPath
-                if(r.dev)r.log('unikeyCfgPath: '+unikeyCfgPath)
+                if(zipManager.dev)zipManager.log('unikeyCfgPath: '+unikeyCfgPath)
                 let aname=(''+presetAppName).toLowerCase()
-                if(r.dev)r.log(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
+                if(zipManager.dev)zipManager.log(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
                 unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
-                if(r.dev)r.log('unikeyCfgPath: '+unikeyCfgPath)
-                if(r.dev)r.log(aname+'.cfg: '+JSON.stringify(j, null, 2))
+                if(zipManager.dev)zipManager.log('unikeyCfgPath: '+unikeyCfgPath)
+                if(zipManager.dev)zipManager.log(aname+'.cfg: '+JSON.stringify(j, null, 2))
                 if(r.resetApp){
                     txtLog.text='Cargando aplicación...'
 
@@ -651,7 +651,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
         return
