@@ -243,6 +243,7 @@ Window {
                                     }
                                     RadioButton{
                                         id: rb0
+                                        //width: app.fs*0.5
                                         checked: false
                                         anchors.verticalCenter: parent.verticalCenter
                                         onCheckedChanged: {
@@ -264,6 +265,7 @@ Window {
                                     }
                                     RadioButton{
                                         id: rb1
+                                        //width: app.fs*0.5
                                         checked: false
                                         anchors.verticalCenter: parent.verticalCenter
                                         onCheckedChanged: {
@@ -415,7 +417,7 @@ Window {
                             color: 'white'
                             anchors.centerIn: parent
                             onTextChanged: {
-                                if(unik && !unik.folderExist(text)){
+                                if(!unik.folderExist(text)){
                                     unik.log('La carpeta ['+text+'] no existe.')
                                     tiFolder.color='red'
                                 }else{
@@ -456,7 +458,7 @@ Window {
                         uFolder: '"'+unik.getPath(3)+'"'
                         onCPorcChanged:{
                             if(cPorc>=0.01){
-                                zipManager.visible=true
+                                r.visible=true
                             }
                         }
                         onLog: unik.log(data)
@@ -757,6 +759,12 @@ Window {
         }
     }
     Shortcut{
+        sequence: 'F1'
+        onActivated: {
+            mostrarAyuda()
+        }
+    }
+    Shortcut{
         sequence: 'Esc'
         onActivated: {
             if(zipManager.uStdOut!=='Cancelado.'){
@@ -841,6 +849,7 @@ Window {
                     unik.runOut(cmd)
                 }else{
                     unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
+                    app.visibility='Maximized'
                 }
             }
         }else{
@@ -883,6 +892,7 @@ Window {
                     }
                 }else{
                     unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
+                    app.visibility='Maximized'
                 }
             }
         }
@@ -1167,6 +1177,11 @@ Terminal=false'
                                     }
                                 }
                                 return
+                            }else{
+                                if(!unik.folderExist(fullFileMainToInstall)){
+                                    unik.log('La carpeta '+fullFolderToInstall+' no existe o no ha podido ser creada.')
+                                    app.visibility='Maximized'
+                                }
                             }
                         }else{
                             //La última version instalada NO es igual
@@ -1402,8 +1417,18 @@ Terminal=false'
             if(!apps.dep && !apps.dev){
                 app.close()
             }else{
+                app.dev=true
                 app.visibility='Minimized'
             }
+        }else{
+            if(!unik.folderExist(folder.replace(/\"/g, ''))){
+                unik.log('Error!. La carpeta '+folder.replace(/\"/g, '')+' no existe.')
+            }
+            if(!unik.fileExist(folder+'/main.qml')){
+                unik.log('Error!. En la carpeta '+folder.replace(/\"/g, '')+' no existe el archivo main.qml.')
+            }
+            app.dev=true
+            app.visibility='Maximized'
         }
     }
     function capitalizeFirstLetterOfEachWord(inputString) {
@@ -1424,5 +1449,27 @@ Terminal=false'
 
         // Une las palabras procesadas de nuevo en un string
         return processedWords.join(" ");
+    }
+    function mostrarAyuda(){
+        let t=''
+        t+='<b>Ayuda</b><br>'
+        t+='Para ver esta ayuda: Presionar F1<br>'
+        t+='Esta aplicación puede ser lanzada con diferentes parámetros:<br>'
+        t+='<ul>'
+        let exe=unik.currentFolderPath()+'/unikey'
+        if(Qt.platform.os==='windows'){
+            exe+='.exe'
+        }
+        t+='    <li>'
+        t+='        <b>Ejecutar projecto desde GiHub.com:</b><br> '+exe+' -git=&lt;url de repositorio&gt;<br>'
+        t+='    </li>'
+        t+='    <li>'
+        t+='        <b>Ejecutar projecto en carpeta:</b><br> '+exe+' -folder="&lt;ruta de carpeta entre comillas&gt;"<br>'
+        t+='    </li>'
+        t+='    <li>'
+        t+='        <b>Ejecutar '+presetAppName+' sin cargar parámetros de configuración:</b><br> '+exe+' -nocfg<br>'
+        t+='    </li>'
+        t+='</ul>'
+        unik.log(t)
     }
 }
