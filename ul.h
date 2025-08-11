@@ -252,7 +252,7 @@ public:
     Q_INVOKABLE QString getFile(QByteArray n);
     Q_INVOKABLE bool folderExist(const QString &path);
     Q_INVOKABLE bool fileExist(QByteArray fileName);
-    Q_INVOKABLE QList<QString> getFileList(QByteArray folder);
+    Q_INVOKABLE QList<QString> getFileList(QByteArray folder, const QStringList types);
     Q_INVOKABLE bool mkdir(const QString &path);
     Q_INVOKABLE bool isFolder(const QString &folder);
     Q_INVOKABLE QList<QString> getFolderFileList(const QByteArray folder);

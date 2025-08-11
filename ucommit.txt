@@ -1,1 +1,1 @@
-MiniMac Se edita version a 1.8.8.1
+MiniMac Se optimiza getFileList(folder, types)

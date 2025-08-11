@@ -131,13 +131,13 @@ bool UL::fileExist(QByteArray fileName)
 }
 
 
-QList<QString> UL::getFileList(QByteArray folder)
+QList<QString> UL::getFileList(QByteArray folder, const QStringList types)
 {
     QList<QString> list;
 
     //QDir directory("/media/ns/WD/vnRicardo");
     QDir directory(folder);
-    QStringList images = directory.entryList(QStringList() << "*.mp4" << "*.mkv",QDir::Files);
+    QStringList images = directory.entryList(types,QDir::Files);
     foreach(QString filename, images) {
     //do whatever you need to do
         list.append(filename);
