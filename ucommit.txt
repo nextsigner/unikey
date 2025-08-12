@@ -1,1 +1,1 @@
-MiniMac Se optimiza getFileList(folder, types)
+i7: Se modifica main.qml agregando apps.cantRun

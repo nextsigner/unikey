@@ -8,9 +8,9 @@ import ZipManager 4.0
 Window {
     id: app
     visible: false
-    //visibility: "Maximized"
-    width: 640
-    height: 480
+    visibility: "Maximized"
+    width: Screen.width
+    height: Screen.height-(Screen.height-Screen.availableHeight)
     title: presetAppName
     color: c1
 
@@ -33,8 +33,9 @@ Window {
     Settings{
         id: apps
         fileName: unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg'
+        property int cantRun: 0
         property bool dev: false
-        property bool dep: true
+        property bool dep: false
         property string mainFolder: ''
         property int modoGitOrFolder: 0
         property string uGitRep: 'https://github.com/nextsigner/unikey-apps'
@@ -417,7 +418,7 @@ Window {
                             color: 'white'
                             anchors.centerIn: parent
                             onTextChanged: {
-                                if(!unik.folderExist(text)){
+                                if(unik && !unik.folderExist(text)){
                                     unik.log('La carpeta ['+text+'] no existe.')
                                     tiFolder.color='red'
                                 }else{
@@ -620,6 +621,8 @@ Window {
         }
     }
     Component.onCompleted: {
+        if(presetAppName==='UniKey' && apps.cantRun===0)mkAd(unik.getPath(0), '-nocfg', apps.mainFolder, 'UniKey!')
+        apps.cantRun++
         if(apps.modoGitOrFolder===0){
             rb0.checked=true
         }
@@ -749,6 +752,12 @@ Window {
             unik.setFile(apps.mainFolder+'/log', app.uLogData)
             app.uLogData=''
             init()
+        }
+    }
+    Shortcut{
+        sequence: 'Ctrl+a'
+        onActivated: {
+            if(presetAppName==='UniKey')mkAd(unik.getPath(0), '-nocfg', apps.mainFolder, 'UniKey!')
         }
     }
     Shortcut{
