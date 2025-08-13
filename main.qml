@@ -661,6 +661,13 @@ Window {
             app.dev=true
             return
         }
+        if(app.ctx==='nocfg-folder'){
+            rb0.checked=true
+            tiFolder.text=getArgsValue('folder')
+            app.visibility='Maximized'
+            app.dev=true
+            return
+        }
         if(app.ctx==='cfg-ugit'){
             runCtxCfgUGit()
             return
@@ -984,6 +991,21 @@ Window {
             let a=args[i]
             if(a.indexOf('-'+arg+'=')>=0 || a.indexOf('-'+arg+'')>=0){
                 ret=i
+                break
+            }
+        }
+        return ret
+    }
+    function getArgsValue(typeArg){
+        let args=Qt.application.arguments
+        let ret=''
+        for(var i=0;i<args.length;i++){
+            let a=args[i]
+            if(a.indexOf('-'+typeArg+'=')>=0){
+                let m0=a.split(typeArg+'=')
+                if(m0.length>1){
+                    ret=m0[1]
+                }
                 break
             }
         }

@@ -1,1 +1,1 @@
-i7: Se modifica main.qml agregando apps.cantRun
+i7: Se agrega getArgValue a main.qml
