@@ -10,11 +10,12 @@ import unik.Unik 1.0
 Window {
     id: app
     visible: true
-    visibility: "Maximized"
+    visibility: Window.Maximized//"Maximized"
     width: Screen.width
-    height: Screen.height-(Screen.height-Screen.availableHeight)
+    height: Screen.height//-(Screen.height-Screen.availableHeight)
     title: presetAppName
     color: c1
+    flags: Qt.Tool
 
     property bool dev: apps.dev
     property string ctx: ''
@@ -67,6 +68,7 @@ Window {
         target: qmlErrorLogger
         onMessagesChanged:{
             if(Qt.platform.os==='linux' && app.enableQmlErrorLog && apps.dev && ap){
+                app.flags=Qt.Window
                 app.visibility="Maximized"
                 log.text+=''+qmlErrorLogger.messages[qmlErrorLogger.messages.length-1]+'<br>'
             }
@@ -464,7 +466,7 @@ Window {
                         uFolder: '"'+unik.getPath(3)+'"'
                         onCPorcChanged:{
                             if(cPorc>=0.01){
-                                r.visible=true
+                                zipManager.visible=true
                             }
                         }
                         onLog: unik.log(data)
@@ -500,8 +502,9 @@ Window {
                             unik.clearComponentCache()
                             let args=[]
                             args.push('-folder='+""+mainPath.replace(/\"/g, ''))
+                            tClose.restart()
                             u.restart(args, ""+mainPath.replace(/\"/g, ''))
-                            app.close()
+                            //app.close()
                         }
                         onResponseRepVersion:{
                             procRRV(res, url, tipo)
@@ -625,6 +628,17 @@ Window {
             }
         }
     }
+    Timer{
+        id: tClose
+        running: false
+        repeat: true
+        interval: 2000
+        onTriggered: {
+            app.visible=false
+            app.flags=Qt.Tool
+            app.close()
+        }
+    }
     Component.onCompleted: {
         if(presetAppName==='UniKey' && apps.cantRun===0)mkAd(unik.getPath(0), '-nocfg', apps.mainFolder, 'UniKey!')
         apps.cantRun++
@@ -662,6 +676,7 @@ Window {
 
         //RUN CTXs
         if(app.ctx==='nocfg'){
+            app.flags=Qt.Window
             app.visibility='Maximized'
             app.dev=true
             return
@@ -669,6 +684,7 @@ Window {
         if(app.ctx==='nocfg-folder'){
             rb0.checked=true
             tiFolder.text=getArgsValue('folder')
+            app.flags=Qt.Window
             app.visibility='Maximized'
             app.dev=true
             return
@@ -870,6 +886,7 @@ Window {
                     unik.runOut(cmd)
                 }else{
                     unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
+                    app.flags=Qt.Window
                     app.visibility='Maximized'
                 }
             }
@@ -913,6 +930,7 @@ Window {
                     }
                 }else{
                     unik.log('Error! La carpeta ['+tiFolder.text+'] no existe!.')
+                    app.flags=Qt.Window
                     app.visibility='Maximized'
                 }
             }
@@ -1216,6 +1234,7 @@ Terminal=false'
                             }else{
                                 if(!unik.folderExist(fullFileMainToInstall)){
                                     unik.log('La carpeta '+fullFolderToInstall+' no existe o no ha podido ser creada.')
+                                    app.flags=Qt.Window
                                     app.visibility='Maximized'
                                 }
                             }
@@ -1301,6 +1320,7 @@ Terminal=false'
     //Aprobado en GNU/Linux
     function runCtxCfgUGit(){
         app.dev=false
+        app.flags=Qt.Window
         app.visibility="Maximized"
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
@@ -1322,6 +1342,7 @@ Terminal=false'
     //Aprobado en GNU/Linux
     function runCtxCfgGit(){
         app.dev=false
+        app.flags=Qt.Window
         app.visibility="Maximized"
         let aname=(''+presetAppName).toLowerCase()
         let nCfgFilePath=apps.mainFolder+'/'+aname+'.cfg'
@@ -1358,8 +1379,9 @@ Terminal=false'
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
             if(!apps.dep && !apps.dev){
-                app.close()
+                tClose.restart()
             }else{
+                app.flags=Qt.Window
                 app.visibility='Minimized'
             }
         }
@@ -1367,6 +1389,7 @@ Terminal=false'
     //Aprobado en GNU/Linux
     function runCtxUGit(){
         app.dev=false
+        app.flags=Qt.Window
         app.visibility='Maximized'
         let urlGit=''
         let args=Qt.application.arguments
@@ -1377,11 +1400,13 @@ Terminal=false'
             }
             if(args[i].indexOf('-dev')>=0){
                 apps.dev=true
+                app.flags=Qt.Window
                 app.visibility='Maximized'
             }
             if(args[i].indexOf('-dep')>=0){
                 apps.dev=true
                 apps.dep=true
+                app.flags=Qt.Window
                 app.visibility='Maximized'
             }
         }
@@ -1391,6 +1416,7 @@ Terminal=false'
     //Aprobado en GNU/Linux
     function runCtxGit(){
         app.dev=false
+        app.flags=Qt.Window
         app.visibility="Maximized"
         let urlGit=''
         let args=Qt.application.arguments
@@ -1401,11 +1427,13 @@ Terminal=false'
             }
             if(args[i].indexOf('-dev')>=0){
                 apps.dev=true
+                app.flags=Qt.Window
                 app.visibility='Maximized'
             }
             if(args[i].indexOf('-dep')>=0){
                 apps.dev=true
                 apps.dep=true
+                app.flags=Qt.Window
                 app.visibility='Maximized'
             }
         }
@@ -1430,11 +1458,13 @@ Terminal=false'
             }
             if(args[i].indexOf('-dev')>=0){
                 apps.dev=true
+                app.flags=Qt.Window
                 app.visibility='Maximized'
             }
             if(args[i].indexOf('-dep')>=0){
                 apps.dev=true
                 apps.dep=true
+                app.flags=Qt.Window
                 app.visibility='Maximized'
             }
             if(args[i].indexOf('-install')>=0){
@@ -1453,9 +1483,10 @@ Terminal=false'
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
             engine.load('file:///'+folder.replace(/\"/g, '')+'/main.qml')
             if(!apps.dep && !apps.dev){
-                app.close()
+                tClose.restart()
             }else{
                 app.dev=true
+                app.flags=Qt.Window
                 app.visibility='Minimized'
             }
         }else{
@@ -1466,6 +1497,7 @@ Terminal=false'
                 unik.log('Error!. En la carpeta '+folder.replace(/\"/g, '')+' no existe el archivo main.qml.')
             }
             app.dev=true
+            app.flags=Qt.Window
             app.visibility='Maximized'
         }
     }

@@ -8,7 +8,6 @@ Rectangle{
     color: 'transparent'
     border.width: 1
     border.color: 'white'
-    property string mainFolder: apps?apps.mainFolder:unik.getPath(4)
     signal log(string data)
     signal responseRepExist(string res, string url)
     signal responseRepVersion(string res, string url, string tipo)
@@ -149,9 +148,9 @@ Rectangle{
     }
     Component.onCompleted: {
         if(r.version===''){
-            r.folderRoot=r.mainFolder+'/0.0.0.0'
+            r.folderRoot=unik.getPath(4)+'/0.0.0.0'
         }else{
-            r.folderRoot=r.mainFolder+'/'+r.version
+            r.folderRoot=unik.getPath(4)+'/'+r.version
         }
         //let url = 'https://github.com/nextsigner/zool-release'
         //downloadGitHub(url)
@@ -169,13 +168,13 @@ Rectangle{
         c+='        }\n'
         c+='        onLogDataChanged:{\n'
         c+='        '+onLogDataCode+'\n'
-        c+='        if(zipManager.dev)zipManager.log(logData)\n'
+        c+='        if(r.dev)r.log(logData)\n'
         c+='        }\n'
         c+='        Component.onCompleted:{\n'
         c+='        '+onCompleteCode+'\n'
         c+='            let cmd=\''+cmd+'\'\n'
-        c+='            if(zipManager.dev)console.log("cmd '+idName+': "+cmd)\n'
-        c+='            if(zipManager.dev)zipManager.log(cmd)\n'
+        c+='            if(r.dev)console.log("cmd '+idName+': "+cmd)\n'
+        c+='            if(r.dev)r.log(cmd)\n'
         c+='            run(cmd)\n'
         c+='        }\n'
         c+='    }\n'
@@ -183,36 +182,17 @@ Rectangle{
         return c
     }
     function download(url, from){
-        if(zipManager.dev)zipManager.log('download('+url+', '+from+')')
+        if(r.dev)r.log('download('+url+', '+from+')')
         if(from===undefined || from==='github'){
             let m0=url.split('/')
-            if(zipManager.dev)zipManager.log('From GitHub m0: '+m0.toString())
+            if(r.dev)r.log('From GitHub m0: '+m0.toString())
             if(url.indexOf('github')>=0 && m0.length>3 && r.version!==''){
-                if(zipManager.dev)zipManager.log('From GitHub..')
+                if(r.dev)r.log('From GitHub..')
                 let nfr=r.folderRoot.replace(r.version, '').replace('0.0.0.0', '')
                 nfr=nfr+m0[m0.length-1]+'_'+r.version
                 r.folderRoot='"'+nfr+'"'
-            }else{
-                let nfr=r.mainFolder
-                nfr=nfr+'/'+m0[m0.length-1]
-                r.folderRoot='"'+nfr+'"'
             }
-            unik.log('Limpiando '+r.folderRoot)
-            //mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
-
-            if(unik.folderExist('"'+r.folderRoot+'"')){
-                let folderCleaned=unik.deleteFolder(r.folderRoot)
-                if(folderCleaned){
-                    unik.log('Carpeta ['+r.folderRoot+'] eliminada.')
-                    downloadGitHub(url, ''+r.folderRoot+'')
-                }else{
-                    mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
-                }
-            }else{
-                unik.log('La carpeta ['+r.folderRoot+'] no existe. Se crearà...')
-                downloadGitHub(url, ''+r.folderRoot+'')
-            }
-
+            mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
         }else{
             //downloadGitHub(url)
         }
@@ -225,18 +205,16 @@ Rectangle{
         let u=getUrlFromRepositoryToZip(url)
         let m0=u.split('/')
         if(m0.length<1){
-            unik.log('Hay un error en la dirección URL para descargar desde GitHub.\nUrl: '+url)
+            zpn.log('Hay un error en la dirección URL para descargar desde GitHub.\nUrl: '+url)
             return
         }else{
             //Formato: https://github.com/nextsigner/zoolv4/archive/refs/heads/main.zip
-            unik.log('downloadGitHub('+url+', '+folder+')...')
             let repName=m0[m0.length-5]
-            if(!unik.folderExist(folder.replace(/\"/g, ''))){
-                unik.mkdir(folder.replace(/\"/g, ''))
+            if(!unik.folderExist(folder)){
+                unik.mkdir(folder)
             }
-            if(!unik.folderExist(folder.replace(/\"/g, ''))){
-                unik.log('downloadGitHub('+url+', '+folder+'): Carpeta no existente: ['+folder+']')
-                unik.log('Error en la descarga de repositorio GitHub: La carpeta '+folder+' no existe.')
+            if(!unik.folderExist(folder)){
+                zpn.log('Error en la descarga de repositorio GitHub: La carpeta '+folder+' no existe.')
                 //btnIniciarReintentar.visible=true
                 return
             }
@@ -295,12 +273,11 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
     function mkUqpRepVersion(url, tipo){
-        unik.log('Revisando versión de repositorio '+url)
         //cleanUqpCurl()
 
         let c=''
@@ -327,12 +304,11 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
-        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-code-'+idName)
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
     function mkUqpCurl(url, folderPath, fileName){
-        unik.log('\n\n\n\n mkUqpCurl('+url+', '+folderPath+', '+fileName+')\n\n\n')
         cleanUqpCurl()
 
         let c=''
@@ -358,7 +334,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
@@ -411,18 +387,17 @@ Rectangle{
             }
         }else{
             if(data==="finished"){
-                if(zipManager.dev)zipManager.log('Descarga finalizada.')
+                if(r.dev)r.log('Descarga finalizada.')
                 r.downloadFinished(url, folderPath, zipFileName)
                 mkUqp7Zip(url, folderPath, zipFileName)
                 //mkUqp7Zip(r.uZipFilePath, r.uFolder)
             }else{
-                if(zipManager.dev)zipManager.log('Log 111: ['+data+']')
+                if(r.dev)r.log('Log 111: ['+data+']')
             }
         }
     }
     //function mkUqp7Zip(zipFilePath, folder){
     function mkUqp7Zip(url, folderPath, zipFileName){
-        //if(apps.dev)unik.log('-----> mkUqp7Zip('+url+', '+folderPath+', '+zipFileName+')')
         let c=''
 
         c='\n'
@@ -434,28 +409,24 @@ Rectangle{
         c=r.app7ZipPath+' x "'+r.uZipFilePath.replace(/\"/g, '')+'" -o"'+folderPath.replace(/\"/g, '')+'" -aoa -bsp1'
         let cmd=c
 
-        c='        proc7ZipStdOut(logData, \''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
+        c='        proc7ZipStdOut(logData)\n'
         let onLogDataCode=c
 
 
         //c='        proc7ZipStdOut("finished")\n'
-        c+='       r.unzipFinished(\''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
-        //r.unzipFinished(url, folderPath, zipFileName)
+        c+='       proc7ZipStdOut("finished", \''+url+'\',  \''+folderPath+'\', \''+zipFileName+'\')\n'
         let onFinishedCode=c
 
 
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
-        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
+        let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)        
     }
     //function proc7ZipStdOut(data){
     function proc7ZipStdOut(data, url, folderPath, zipFileName){
-        //unik.log('Descomprimiendo 1: '+url)
-        //unik.log('Descomprimiendo 2: '+folderPath)
-        //unik.log('Descomprimiendo 3: '+folderPath)
         let m0
         let m1
         if(data!=="finished"){
@@ -478,7 +449,7 @@ Rectangle{
                     //r.log('7Zip ????: '+data)
                     //r.cPorc=100.00
                     r.uStdOut='Archivo descomprimido con éxito.'
-                    //r.unzipFinished(url, folderPath, zipFileName)
+                    r.unzipFinished(url, folderPath, zipFileName)
                     //t7ZipFinished.start()
                 }
 
@@ -499,68 +470,28 @@ Rectangle{
             r.cPorc=100.00
 
             var mainPath=r.uZipFilePath
-            mainPath=mainPath.replace('.zip', '-main').replace(/\"/g, '')
-            r.log("Carpeta de archivos: \""+mainPath+'\"')
+            mainPath=mainPath.replace('.zip', '-main')
+            r.log("Carpeta de archivos: "+mainPath)
             unik.deleteFile(r.uZipFilePath)
-            if(unik.fileExist(r.uZipFilePath)){
-                unik.deleteFile(r.uZipFilePath.replace(/\"/g, ''))
-            }
-
-            if(app.ctx==='cfg-git' || app.ctx==='git' ){
-                unik.log('En contexto '+app.ctx+': mainPath='+mainPath)
-                let mainFilePath=mainPath+'/main.qml'
-                //unik.clearComponentCache()
-                unik.addImportPath(mainPath.replace(/\"/g, '')+'/modules')
-                unik.cd(""+mainPath.replace(/\"/g, ''))
-                unik.log('Cargando desde ZipManager en contexto '+app.ctx+': "'+mainPath.replace(/\"/g, '')+'/main.qml"')
-                if(!app.dev){
-                    //unik.clearComponentCache()
-                }
-                engine.load('file:///'+mainPath.replace(/\"/g, '')+'/main.qml')
-                if(!apps.dep && !apps.dev){
-                    tClose.restart()
-                }else{
-                    app.visible=true
-                    app.flags=Qt.Window
-                    app.visibility="Maximized"
-                }
-                return
-            }
 
             let aname=(''+presetAppName).toLowerCase()
-            let unikeyCfgPath='"'+r.mainFolder+'/'+aname+'.cfg"'
+            let unikeyCfgPath='"'+unik.getPath(4)+'/'+aname+'.cfg"'
             if(r.setCfg){
                 unik.deleteFile(unikeyCfgPath)
                 let j={}
                 j.args={}
                 j.args.folder=mainPath
-                if(zipManager.dev)zipManager.log('unikeyCfgPath: '+unikeyCfgPath)
+                if(r.dev)r.log('unikeyCfgPath: '+unikeyCfgPath)
                 let aname=(''+presetAppName).toLowerCase()
-                if(zipManager.dev)zipManager.log(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
+                if(r.dev)r.log(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
                 unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
-                if(zipManager.dev)zipManager.log('unikeyCfgPath: '+unikeyCfgPath)
-                if(zipManager.dev)zipManager.log(aname+'.cfg: '+JSON.stringify(j, null, 2))
+                if(r.dev)r.log('unikeyCfgPath: '+unikeyCfgPath)
+                if(r.dev)r.log(aname+'.cfg: '+JSON.stringify(j, null, 2))
                 if(r.resetApp){
                     txtLog.text='Cargando aplicación...'
 
                     //MODO INSTALL
                     if(r.launch){
-                        if(app.ctx==='ugit' || app.ctx==='cfg-ugit'){
-                            unik.log('app.ctx: '+app.ctx)
-                            unik.log('Iniciando aplicación en carpeta '+mainPath)
-                            unik.addImportPath(mainPath)
-                            unik.cd('"'+mainPath+'"')
-                            engine.load('"'+mainPath+'/main.qml"')
-                            //unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
-                            if(!apps.dep && !apps.dev){
-                                tClose.restart()
-                            }else{
-                                app.visible=true
-                                app.flags=Qt.Window
-                                app.visibility="Maximized"
-                            }
-                            return
-                        }
                         if(apps.dep){
                             unik.runOut(unik.getPath(0))
                         }else{
@@ -639,8 +570,7 @@ Rectangle{
 
         let cmd=''
         if(Qt.platform.os==='windows'){
-            cmd+='cmd.exe rmdir /S /Q "'+folder+'"'
-            //cmd+='cmd.exe rmdir /S /Q \''+folder.replace(/\//g, '\\').replace(/ /g, '%20')+'\''
+            cmd+='rmdir /S /Q "'+folder+'"'
         }else{
             cmd='rm -r -rf "'+folder+'/*"'
         }
@@ -651,7 +581,7 @@ Rectangle{
         c='uqpClean'
         let idName=c
 
-        c='        unik.log(logData)\n'
+        c='        //Nada'
         let onLogDataCode=c
 
 
@@ -662,7 +592,7 @@ Rectangle{
         let cf=getUqpCode(idName, cmd, onLogDataCode, onFinishedCode, onCompleteCode)
         console.log('cf:\n'+cf)
 
-        if(zipManager.dev)zipManager.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
+        if(r.dev)r.log('cf '+idName+': '+cf.replace(/\n/g, '<br>'))
 
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
         return

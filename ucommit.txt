@@ -1,1 +1,1 @@
-i7: Se cambia a Unik{}
+i7: Se crea instalador para Window v1.8.14.0
