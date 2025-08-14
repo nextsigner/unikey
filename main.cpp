@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
     //-->Set engine properties
     engine.rootContext()->setContextProperty("engine", &engine);
-    engine.rootContext()->setContextProperty("unik", &u);
+    engine.rootContext()->setContextProperty("u", &u);
     engine.rootContext()->setContextProperty("presetAppName", presetAppName);
     //<--Set engine properties
 

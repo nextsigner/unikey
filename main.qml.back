@@ -4,12 +4,10 @@ import QtQuick.Controls 2.12
 import Qt.labs.settings 1.1
 import ZipManager 4.0
 
-import unik.Unik 1.0
-
 
 Window {
     id: app
-    visible: true
+    visible: false
     visibility: "Maximized"
     width: Screen.width
     height: Screen.height-(Screen.height-Screen.availableHeight)
@@ -31,10 +29,7 @@ Window {
 
     property bool enableQmlErrorLog: true
     property string uLogData: ''
-    Unik{
-        id: unik
-        Component.onCompleted: unik.setEngine(engine)
-    }
+
     Settings{
         id: apps
         fileName: unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg'
@@ -500,7 +495,7 @@ Window {
                             unik.clearComponentCache()
                             let args=[]
                             args.push('-folder='+""+mainPath.replace(/\"/g, ''))
-                            u.restart(args, ""+mainPath.replace(/\"/g, ''))
+                            unik.restart(args, ""+mainPath.replace(/\"/g, ''))
                             app.close()
                         }
                         onResponseRepVersion:{
@@ -1352,7 +1347,6 @@ Terminal=false'
         let j=JSON.parse(js)
         let folder=j.args['folder']
         if(unik.folderExist(folder.replace(/\"/g, '')) && unik.fileExist(folder+'/main.qml')){
-            unik.setEngine(engine)
             unik.addImportPath(folder.replace(/\"/g, '')+'/modules')
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')
@@ -1447,7 +1441,6 @@ Terminal=false'
                 iconText=(m0[m0.length-1]).replace(/-/g, ' ')
                 mkAd(unik.getPath(0), '-folder='+folder, apps.mainFolder, capitalizeFirstLetterOfEachWord(iconText))
             }
-            unik.setEngine(engine)
             unik.addImportPath(folder.replace(/\"/g, '')+'/modules')
             unik.cd(""+folder.replace(/\"/g, ''))
             unik.log('Cargando: "'+folder.replace(/\"/g, '')+'/main.qml"')

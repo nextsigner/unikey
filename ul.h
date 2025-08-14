@@ -144,7 +144,7 @@ public:
     QByteArray lba;
 
     QQmlApplicationEngine *_engine;
-    void setEngine(QQmlApplicationEngine *e){
+    Q_INVOKABLE void setEngine(QQmlApplicationEngine *e){
         _engine = e;
         //connect(_engine, SIGNAL(quit()), this, SLOT(engineQuited()));
     }

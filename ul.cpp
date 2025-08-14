@@ -514,10 +514,10 @@ void UL::log(QByteArray d, bool htmlEscaped)
 {
     QString d2;
     d2.append(d);
-    if(!_engine->rootContext()->property("setInitString").toBool()){
+    /*if(!_engine->rootContext()->property("setInitString").toBool()){
         initStdString.append(d2);
         initStdString.append("\n");
-    }
+    }*/
     setUkStd(d2, htmlEscaped);
 }
 
