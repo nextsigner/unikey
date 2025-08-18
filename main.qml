@@ -9,8 +9,8 @@ import unik.Unik 1.0
 
 Window {
     id: app
-    visible: true
-    visibility: Window.Maximized//"Maximized"
+    visible: false
+    //visibility: Window.Maximized//"Maximized"
     width: Screen.width
     height: Screen.height//-(Screen.height-Screen.availableHeight)
     title: presetAppName
@@ -34,7 +34,7 @@ Window {
     property string uLogData: ''
     Unik{
         id: unik
-        Component.onCompleted: unik.setEngine(engine)
+        //Component.onCompleted: unik.setEngine(engine)
     }
     Settings{
         id: apps
