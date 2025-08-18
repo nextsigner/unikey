@@ -2,22 +2,6 @@
 
 UL::UL(QObject *parent) : QObject(parent)
 {
-    QQmlContext *context = QQmlEngine::contextForObject(this);
-
-        if (context) {
-            // 2. Obtener el motor QML del contexto.
-            QQmlEngine *engine = context->engine();
-
-            if (engine) {
-                // 3. Intentar "castear" el motor a QQmlApplicationEngine.
-                //QQmlApplicationEngine *appEngine = qobject_cast<QQmlApplicationEngine*>(engine);
-                _engine = qobject_cast<QQmlApplicationEngine*>(engine);
-            } else {
-                qDebug() << "No se pudo obtener el QQmlEngine del contexto.";
-            }
-        } else {
-            qDebug() << "No se pudo obtener el contexto QML para el objeto 'this'.";
-        }
 
 }
 
