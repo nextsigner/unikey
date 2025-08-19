@@ -28,20 +28,20 @@ Rectangle{
         ZipManager{
             id: zipManager
             width: parent.width
-            curlPath: Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
-            app7ZipPath: Qt.platform.os==='windows'?'"'+unik.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
-            uFolder: '"'+unik.getPath(3)+'"'
+            curlPath: Qt.platform.os==='windows'?'"'+u.getPath(1).replace(/\"/g, '')+'/curl-8.14.1_2-win64-mingw/bin/curl.exe"':'curl'
+            app7ZipPath: Qt.platform.os==='windows'?'"'+u.getPath(1).replace(/\"/g, '')+'/7-Zip32/7z.exe"':'7z'
+            uFolder: '"'+u.getPath(3)+'"'
             onCPorcChanged:{
                 if(cPorc>=0.01){
                     r.visible=true
                 }
             }
-            onLog: unik.log(data)
+            onLog: u.log(data)
             onDownloadFinished: {
                 //Retorna: downloadFinished(string url, string folderPath, string zipFileName)
-                unik.log('Se descargó: '+zipFileName)
-                unik.log('Origen: '+url)
-                unik.log('Destino: '+folderPath)
+                u.log('Se descargó: '+zipFileName)
+                u.log('Origen: '+url)
+                u.log('Destino: '+folderPath)
             }
             property string d1: ''
             property string d2: ''
@@ -51,35 +51,35 @@ Rectangle{
                 if(folderPath && folderPath!=='')d2=folderPath
                 if(zipFileName)d3=zipFileName
                 //Retorna: unzipFinished(string url, string folderPath, string zipFileName)
-                //unik.log('Se ha descomprimido: '+zipFileName)
+                //u.log('Se ha descomprimido: '+zipFileName)
                 r.visible=false
-                //unik.log('zipFileName: '+zipFileName)
-                //unik.log('zipFileName url: '+url)
-                //unik.log('zipFileName folderPath: '+folderPath)
+                //u.log('zipFileName: '+zipFileName)
+                //u.log('zipFileName url: '+url)
+                //u.log('zipFileName folderPath: '+folderPath)
                 let mainPath='"'+d2.replace(/\"/g, '')+'/'+d3.replace('.zip', '-main').replace(/\"/g, '')+'"'
                 let aname=(''+presetAppName).toLowerCase()
-                let unikeyCfgPath=''+unik.getPath(4)+'/'+aname+'.cfg'
+                let unikeyCfgPath=''+u.getPath(4)+'/'+aname+'.cfg'
                 let j={}
                 j.args={}
                 j.args['folder']=mainPath
                 j.args['dev']=false
                 j.args['dep']=false
-                unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
-                unik.clearComponentCache()
+                u.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
+                u.clearComponentCache()
                 let args=[]
                 args.push('-folder='+""+mainPath.replace(/\"/g, ''))
-                unik.restart(args, ""+mainPath.replace(/\"/g, ''))
+                u.restart(args, ""+mainPath.replace(/\"/g, ''))
                 app.close()
             }
             onResponseRepExist:{
                 if(res.indexOf('404')>=0){
                     //tiGitRep.color='red'
-                    unik.log('El repositorio ['+url+'] no existe.')
+                    u.log('El repositorio ['+url+'] no existe.')
                 }else{
                     //tiGitRep.color=apps.fontColor
-                    unik.log('El repositorio ['+url+'] está disponible en internet.')
-                    unik.log('Para probarlo presiona ENTER')
-                    unik.log('Para instalarlo presiona Ctrl+ENTER')
+                    u.log('El repositorio ['+url+'] está disponible en internet.')
+                    u.log('Para probarlo presiona ENTER')
+                    u.log('Para instalarlo presiona Ctrl+ENTER')
                 }
             }
             onResponseRepVersion:{
@@ -115,9 +115,9 @@ Rectangle{
         zpn.log(t)
     }
     function procRRV(res, url, tipo){
-        //unik.log('onResponseRepVersion res: '+res)
-        //unik.log('onResponseRepVersion url: '+url)
-        //unik.log('onResponseRepVersion tipo: '+tipo)
+        //u.log('onResponseRepVersion res: '+res)
+        //u.log('onResponseRepVersion url: '+url)
+        //u.log('onResponseRepVersion tipo: '+tipo)
         let nCtx=''
         let nRes=res.replace('\n', '')
         let version=''
@@ -125,7 +125,7 @@ Rectangle{
         if(nRes.split('.').length>=3){
             nCtx=nRes+'_'+url+'_'+tipo
             version='update_'+nRes
-            unik.log('El repositorio '+url+' tiene disponible la versión '+nRes)
+            u.log('El repositorio '+url+' tiene disponible la versión '+nRes)
             zipManager.version=version
             //zpn.log('zipManager.folderRoot:'+zipManager.folderRoot)
             /*zipManager.isProbe=false
@@ -164,7 +164,7 @@ Rectangle{
                 zpn.addNot(jsonNot, true, 20000)
             }
         }else{
-            unik.log('El repositorio '+url+' NO tiene un archivo "version" disponible.')
+            u.log('El repositorio '+url+' NO tiene un archivo "version" disponible.')
         }
     }
 }

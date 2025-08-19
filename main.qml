@@ -4,6 +4,8 @@ import QtQuick.Controls 2.12
 import Qt.labs.settings 1.1
 import ZipManager 4.0
 
+import UniKey 1.0
+
 import unik.Unik 1.0
 
 
@@ -32,10 +34,7 @@ Window {
 
     property bool enableQmlErrorLog: true
     property string uLogData: ''
-    Unik{
-        id: unik
-        //Component.onCompleted: unik.setEngine(engine)
-    }
+    UniKey{id: unik}
     Settings{
         id: apps
         fileName: unik.getPath(4)+'/'+(''+presetAppName).toLowerCase()+'_app.cfg'

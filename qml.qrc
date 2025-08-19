@@ -6,5 +6,7 @@
         <file>Dependences.qml</file>
         <file>modules/UniKeyZipDownloader/qmldir</file>
         <file>modules/UniKeyZipDownloader/UniKeyZipDownloader_v1.qml</file>
+        <file>modules/UniKey/UniKey_v1.qml</file>
+        <file>modules/UniKey/qmldir</file>
     </qresource>
 </RCC>

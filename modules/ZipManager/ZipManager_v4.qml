@@ -8,7 +8,7 @@ Rectangle{
     color: 'transparent'
     border.width: 1
     border.color: 'white'
-    property string mainFolder: apps?apps.mainFolder:unik.getPath(4)
+    property string mainFolder: apps?apps.mainFolder:u.getPath(4)
     signal log(string data)
     signal responseRepExist(string res, string url)
     signal responseRepVersion(string res, string url, string tipo)
@@ -19,8 +19,8 @@ Rectangle{
     property bool setCfg: false
     property bool isProbe: false
     property bool launch: true
-    property string curlPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
-    property string app7ZipPath: ''//Qt.platform.os==='windows'?unik.getPath(1)+'/7-Zip32/7z.exe':'7z'
+    property string curlPath: ''//Qt.platform.os==='windows'?u.getPath(1)+'/curl-8.14.1_2-win64-mingw/bin/curl.exe':'curl'
+    property string app7ZipPath: ''//Qt.platform.os==='windows'?u.getPath(1)+'/7-Zip32/7z.exe':'7z'
     property real cPorc: 0.00
     property string uStdOut: ''
 
@@ -30,7 +30,7 @@ Rectangle{
 
     property string uZipFilePath: ''
     property string uUrl: ''
-    property string uFolder: ''//unik.getPath(3)
+    property string uFolder: ''//u.getPath(3)
     property alias uqpsContainer: xuqpCurl
 
     Item{
@@ -197,19 +197,19 @@ Rectangle{
                 nfr=nfr+'/'+m0[m0.length-1]
                 r.folderRoot='"'+nfr+'"'
             }
-            unik.log('Limpiando '+r.folderRoot)
+            u.log('Limpiando '+r.folderRoot)
             //mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
 
-            if(unik.folderExist('"'+r.folderRoot+'"')){
-                let folderCleaned=unik.deleteFolder(r.folderRoot)
+            if(u.folderExist('"'+r.folderRoot+'"')){
+                let folderCleaned=u.deleteFolder(r.folderRoot)
                 if(folderCleaned){
-                    unik.log('Carpeta ['+r.folderRoot+'] eliminada.')
+                    u.log('Carpeta ['+r.folderRoot+'] eliminada.')
                     downloadGitHub(url, ''+r.folderRoot+'')
                 }else{
                     mkUqpCleanFolder(url, r.folderRoot.replace(/\"/g, ''))
                 }
             }else{
-                unik.log('La carpeta ['+r.folderRoot+'] no existe. Se crearà...')
+                u.log('La carpeta ['+r.folderRoot+'] no existe. Se crearà...')
                 downloadGitHub(url, ''+r.folderRoot+'')
             }
 
@@ -222,33 +222,33 @@ Rectangle{
         if(folder===undefined)folder=r.folderRoot
         r.uUrl=url
         r.uFolder=folder
-        let u=getUrlFromRepositoryToZip(url)
-        let m0=u.split('/')
+        let nUrl=getUrlFromRepositoryToZip(url)
+        let m0=nUrl.split('/')
         if(m0.length<1){
-            unik.log('Hay un error en la dirección URL para descargar desde GitHub.\nUrl: '+url)
+            u.log('Hay un error en la dirección URL para descargar desde GitHub.\nUrl: '+url)
             return
         }else{
             //Formato: https://github.com/nextsigner/zoolv4/archive/refs/heads/main.zip
-            unik.log('downloadGitHub('+url+', '+folder+')...')
+            u.log('downloadGitHub('+url+', '+folder+')...')
             let repName=m0[m0.length-5]
-            if(!unik.folderExist(folder.replace(/\"/g, ''))){
-                unik.mkdir(folder.replace(/\"/g, ''))
+            if(!u.folderExist(folder.replace(/\"/g, ''))){
+                u.mkdir(folder.replace(/\"/g, ''))
             }
-            if(!unik.folderExist(folder.replace(/\"/g, ''))){
-                unik.log('downloadGitHub('+url+', '+folder+'): Carpeta no existente: ['+folder+']')
-                unik.log('Error en la descarga de repositorio GitHub: La carpeta '+folder+' no existe.')
+            if(!u.folderExist(folder.replace(/\"/g, ''))){
+                u.log('downloadGitHub('+url+', '+folder+'): Carpeta no existente: ['+folder+']')
+                u.log('Error en la descarga de repositorio GitHub: La carpeta '+folder+' no existe.')
                 //btnIniciarReintentar.visible=true
                 return
             }
             //btnIniciarReintentar.visible=false
             r.uZipFilePath='"'+folder.replace(/\"/g, '')+'/'+repName+'.zip"'
             r.log('r.uZipFilePath: '+r.uZipFilePath)
-            if(unik.fileExist(uZipFilePath)){
-                //unik.deleteFile(r.uZipFilePath.replace('-main', ''))
-                //unik.deleteFile(r.uZipFilePath)
-                //unik.deleteFile(r.uZipFilePath+'-main')
+            if(u.fileExist(uZipFilePath)){
+                //u.deleteFile(r.uZipFilePath.replace('-main', ''))
+                //u.deleteFile(r.uZipFilePath)
+                //u.deleteFile(r.uZipFilePath+'-main')
             }
-            mkUqpCurl(u, folder, repName+'.zip')
+            mkUqpCurl(nUrl, folder, repName+'.zip')
 
         }
     }
@@ -300,7 +300,7 @@ Rectangle{
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-curl-code-'+idName)
     }
     function mkUqpRepVersion(url, tipo){
-        unik.log('Revisando versión de repositorio '+url)
+        u.log('Revisando versión de repositorio '+url)
         //cleanUqpCurl()
 
         let c=''
@@ -332,7 +332,7 @@ Rectangle{
         let comp=Qt.createQmlObject(cf, xuqpCurl, 'uqp-code-'+idName)
     }
     function mkUqpCurl(url, folderPath, fileName){
-        unik.log('\n\n\n\n mkUqpCurl('+url+', '+folderPath+', '+fileName+')\n\n\n')
+        u.log('\n\n\n\n mkUqpCurl('+url+', '+folderPath+', '+fileName+')\n\n\n')
         cleanUqpCurl()
 
         let c=''
@@ -422,7 +422,7 @@ Rectangle{
     }
     //function mkUqp7Zip(zipFilePath, folder){
     function mkUqp7Zip(url, folderPath, zipFileName){
-        //if(apps.dev)unik.log('-----> mkUqp7Zip('+url+', '+folderPath+', '+zipFileName+')')
+        //if(apps.dev)u.log('-----> mkUqp7Zip('+url+', '+folderPath+', '+zipFileName+')')
         let c=''
 
         c='\n'
@@ -453,9 +453,9 @@ Rectangle{
     }
     //function proc7ZipStdOut(data){
     function proc7ZipStdOut(data, url, folderPath, zipFileName){
-        //unik.log('Descomprimiendo 1: '+url)
-        //unik.log('Descomprimiendo 2: '+folderPath)
-        //unik.log('Descomprimiendo 3: '+folderPath)
+        //u.log('Descomprimiendo 1: '+url)
+        //u.log('Descomprimiendo 2: '+folderPath)
+        //u.log('Descomprimiendo 3: '+folderPath)
         let m0
         let m1
         if(data!=="finished"){
@@ -501,20 +501,20 @@ Rectangle{
             var mainPath=r.uZipFilePath
             mainPath=mainPath.replace('.zip', '-main').replace(/\"/g, '')
             r.log("Carpeta de archivos: \""+mainPath+'\"')
-            unik.deleteFile(r.uZipFilePath)
-            if(unik.fileExist(r.uZipFilePath)){
-                unik.deleteFile(r.uZipFilePath.replace(/\"/g, ''))
+            u.deleteFile(r.uZipFilePath)
+            if(u.fileExist(r.uZipFilePath)){
+                u.deleteFile(r.uZipFilePath.replace(/\"/g, ''))
             }
 
             if(app.ctx==='cfg-git' || app.ctx==='git' ){
-                unik.log('En contexto '+app.ctx+': mainPath='+mainPath)
+                u.log('En contexto '+app.ctx+': mainPath='+mainPath)
                 let mainFilePath=mainPath+'/main.qml'
-                //unik.clearComponentCache()
-                unik.addImportPath(mainPath.replace(/\"/g, '')+'/modules')
-                unik.cd(""+mainPath.replace(/\"/g, ''))
-                unik.log('Cargando desde ZipManager en contexto '+app.ctx+': "'+mainPath.replace(/\"/g, '')+'/main.qml"')
+                //u.clearComponentCache()
+                u.addImportPath(mainPath.replace(/\"/g, '')+'/modules')
+                u.cd(""+mainPath.replace(/\"/g, ''))
+                u.log('Cargando desde ZipManager en contexto '+app.ctx+': "'+mainPath.replace(/\"/g, '')+'/main.qml"')
                 if(!app.dev){
-                    //unik.clearComponentCache()
+                    //u.clearComponentCache()
                 }
                 engine.load('file:///'+mainPath.replace(/\"/g, '')+'/main.qml')
                 if(!apps.dep && !apps.dev){
@@ -530,14 +530,14 @@ Rectangle{
             let aname=(''+presetAppName).toLowerCase()
             let unikeyCfgPath='"'+r.mainFolder+'/'+aname+'.cfg"'
             if(r.setCfg){
-                unik.deleteFile(unikeyCfgPath)
+                u.deleteFile(unikeyCfgPath)
                 let j={}
                 j.args={}
                 j.args.folder=mainPath
                 if(zipManager.dev)zipManager.log('unikeyCfgPath: '+unikeyCfgPath)
                 let aname=(''+presetAppName).toLowerCase()
                 if(zipManager.dev)zipManager.log(aname+'.cfg new data: '+JSON.stringify(j, null, 2))
-                unik.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
+                u.setFile(unikeyCfgPath, JSON.stringify(j, null, 2))
                 if(zipManager.dev)zipManager.log('unikeyCfgPath: '+unikeyCfgPath)
                 if(zipManager.dev)zipManager.log(aname+'.cfg: '+JSON.stringify(j, null, 2))
                 if(r.resetApp){
@@ -546,12 +546,12 @@ Rectangle{
                     //MODO INSTALL
                     if(r.launch){
                         if(app.ctx==='ugit' || app.ctx==='cfg-ugit'){
-                            unik.log('app.ctx: '+app.ctx)
-                            unik.log('Iniciando aplicación en carpeta '+mainPath)
-                            unik.addImportPath(mainPath)
-                            unik.cd('"'+mainPath+'"')
+                            u.log('app.ctx: '+app.ctx)
+                            u.log('Iniciando aplicación en carpeta '+mainPath)
+                            u.addImportPath(mainPath)
+                            u.cd('"'+mainPath+'"')
                             engine.load('"'+mainPath+'/main.qml"')
-                            //unik.runOut('"'+unik.getPath(0)+'" -folder="'+mainPath+'"')
+                            //u.runOut('"'+u.getPath(0)+'" -folder="'+mainPath+'"')
                             if(!apps.dep && !apps.dev){
                                 tClose.restart()
                             }else{
@@ -562,9 +562,9 @@ Rectangle{
                             return
                         }
                         if(apps.dep){
-                            unik.runOut(unik.getPath(0))
+                            u.runOut(u.getPath(0))
                         }else{
-                            unik.run(unik.getPath(0))
+                            u.run(u.getPath(0))
                         }
                         if(!apps.dev){
                             app.close()
@@ -590,9 +590,9 @@ Rectangle{
                     if(r.launch){
                         r.log('<br>r.launch: '+r.launch+'. En modo 2 prueba NO  se lanza mainPath: '+mainPath)
                         if(apps.dep){
-                            unik.runOut('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
+                            u.runOut('"'+u.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
                         }else{
-                            unik.run('"'+unik.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
+                            u.run('"'+u.getPath(0).replace(/\"/g, '')+'" -nocfg -folder="'+mainPath.replace(/\"/g, '')+'"')
                         }
                         if(!apps.dev){
                             app.close()
@@ -610,9 +610,9 @@ Rectangle{
                     if(r.launch){
                         r.log('<br>r.launch: '+r.launch+'. En modo 2 install NO CFG  se lanza mainPath: '+mainPath)
                         if(apps.dep){
-                            unik.runOut(unik.getPath(0)+' -nocfg')
+                            u.runOut(u.getPath(0)+' -nocfg')
                         }else{
-                            unik.run(unik.getPath(0)+' -nocfg')
+                            u.run(u.getPath(0)+' -nocfg')
                         }
                         if(!apps.dev){
                             app.close()
@@ -621,7 +621,7 @@ Rectangle{
                         }
                     }else{
                         r.log('No se lanza...')
-                        //unik.runOut(unik.getPath(0))
+                        //u.runOut(u.getPath(0))
                     }
                 }else{
                     r.log("Se ha descargado todo el repositorio "+r.uUrl)
@@ -651,7 +651,7 @@ Rectangle{
         c='uqpClean'
         let idName=c
 
-        c='        unik.log(logData)\n'
+        c='        u.log(logData)\n'
         let onLogDataCode=c
 
 
