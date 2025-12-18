@@ -6,6 +6,7 @@
 #include "ul.h"
 #include "qmlclipboardadapter.h"
 #include "qmlerrorlogger.h"
+#include "swissephmanager.h"
 
 
 int main(int argc, char *argv[])
@@ -42,6 +43,30 @@ int main(int argc, char *argv[])
     qmlRegisterType<UL>("unik.Unik", 1, 0, "Unik");
     //<--Register Types
     qmlRegisterType<UnikQProcess>("unik.UnikQProcess", 1, 0, "UnikQProcess");
+
+    //-->SwissEph
+    qmlRegisterType<SwissEphManager>("swe", 1, 0, "Swe");
+    /*
+    QString swePath="";
+    swePath.append(qApp->applicationDirPath());
+    swePath.append("/swe");
+
+    SwissEphManager eph;
+    eph.setSwePath(swePath);
+    double pos=eph.getBodiePos(1, 2023, 10, 27, 12, 30, -3);
+    qDebug() << "Longitud eclíptica:" << pos;
+    /*
+    // 1. Obtener Día Juliano para hoy
+    double jd = eph.dateToJulian(2023, 10, 27, 12.0); // 27 de Oct 2023, 12:00 UTC
+
+    // 2. Calcular posición del Sol (SE_SUN = 0)
+    PlanetPosition sunPos = eph.getPlanetPosition(jd, 0);
+
+    qDebug() << "Planeta:" << sunPos.planetName;
+    qDebug() << "Longitud eclíptica:" << sunPos.longitude;
+    qDebug() << "Velocidad:" << sunPos.speedLong;
+    */
+    //<--SwissEph
 
 
     //-->Set Unik Version

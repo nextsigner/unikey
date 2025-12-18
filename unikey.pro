@@ -20,6 +20,7 @@ SOURCES += \
         main.cpp \
         qmlerrorlogger.cpp \
         row.cpp \
+        swissephmanager.cpp \
         ul.cpp \
         unikargsproc.cpp \
         unikqprocess.cpp
@@ -41,6 +42,7 @@ HEADERS += \
     qmlclipboardadapter.h \
     qmlerrorlogger.h \
     row.h \
+    swissephmanager.h \
     ul.h \
     unikargsproc.h \
     unikqprocess.h

@@ -1,1 +1,1 @@
-i7: Se agrega UniKey{id: u} 3
+i7: Se registra swe en main.cpp
