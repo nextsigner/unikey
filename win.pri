@@ -30,3 +30,17 @@ equals(PROYECTO, "unikey") {
 } else {
     message("Valor desconocido para PROYECTO: $$PROYECTO. No se cargara ningun archivo de configuracion especifico.")
 }
+
+# Indicar dónde están los encabezados
+INCLUDEPATH += $$PWD\libs\swiseph
+
+# Incluir todos los archivos fuente de la librería
+# Usamos un comodín para no listar uno por uno
+SOURCES += $$PWD\libs\swisseph\*.c
+
+# Incluir las cabeceras
+HEADERS += $$PWD\libs\swisseph\*.h
+
+# En Windows, a veces es necesario evitar advertencias de funciones antiguas
+win32: DEFINES += _CRT_SECURE_NO_WARNINGS
+

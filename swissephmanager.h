@@ -15,7 +15,13 @@
 extern "C" {
 #endif
 
+#ifdef Q_OS_WIN
+#include "libs/swisseph/swephexp.h"
+#include "libs/swisseph/sweph.h"
+#else
 #include "swephexp.h"
+#endif
+
 
 #ifdef __cplusplus
 }

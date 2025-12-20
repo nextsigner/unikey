@@ -675,7 +675,7 @@ static char *my_makepath(char *d, char *s)
     strcpy (d, s);	/* s is absolute path name */
   }
 # if MSDOS
-  while ((p = strchr(d, '/')) != NULL) *p = '\\';
+  while ((s = strchr(d, '/')) != NULL) *s = '\\';
 # endif
   return (d);
 }
