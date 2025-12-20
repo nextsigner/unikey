@@ -5,6 +5,9 @@
 #include <QObject>
 #include <QString>
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <cmath>
 #include <memory>
 
 // 2. POR ÚLTIMO: Swiss Ephemeris
@@ -34,7 +37,11 @@ public:
     explicit SwissEphManager(QObject *parent = nullptr);
     ~SwissEphManager();
     Q_INVOKABLE void setSwePath(const QString swePath);
-    Q_INVOKABLE double getBodiePos(int bi, int a, int m, int d, int h, int min, int gmt);
+    Q_INVOKABLE QString getBodiePosJson(int bi, int a, int m, int d, int h, int min, int gmt,
+                                        double lon, double lat, double alt);
+    Q_INVOKABLE QString getHousesPos(int a, int m, int d, int h, int min, int gmt,
+                         double lon, double lat, QString hsys);
+    Q_INVOKABLE QVector<int> getSolarReturn(double targetSunLong, int targetYear, int birthMonth, int birthDay, double gmt);
 
     PlanetPosition getPlanetPosition(double julianDay, int planetIndex);
     double dateToJulian(int year, int month, int day, double hour);
