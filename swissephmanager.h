@@ -6,6 +6,7 @@
 #include <QString>
 #include <QDebug>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <cmath>
 #include <memory>
@@ -48,6 +49,9 @@ public:
     Q_INVOKABLE QString getHousesPos(int a, int m, int d, int h, int min, int gmt,
                          double lon, double lat, QString hsys);
     Q_INVOKABLE QVector<int> getSolarReturn(double targetSunLong, int targetYear, int birthMonth, int birthDay, double gmt);
+    Q_INVOKABLE QString getLunarEvents(int year, double gmt);
+    Q_INVOKABLE double findMoonPhase(double startJd, double targetPhase);
+    Q_INVOKABLE QJsonObject jdToDateTimeJson(double jdUT, double gmt);
 
     PlanetPosition getPlanetPosition(double julianDay, int planetIndex);
     double dateToJulian(int year, int month, int day, double hour);

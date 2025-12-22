@@ -239,3 +239,176 @@ PlanetPosition SwissEphManager::getPlanetPosition(double julianDay, int planetIn
 
     return pos;
 }
+
+#include <QJsonArray>
+
+QString SwissEphManager::getLunarEvents(int year, double gmt)
+{
+    QJsonObject root;
+    QJsonArray newMoons;
+    QJsonArray fullMoons;
+    QJsonArray eclipsesLunares;
+    QJsonArray eclipsesSolares;
+
+    double jdStart = swe_julday(year, 1, 1, 0.0, SE_GREG_CAL);
+    double jdEnd = swe_julday(year + 1, 1, 1, 0.0, SE_GREG_CAL);
+    char errorMsg[256];
+    double xx[6];
+
+    // --- 1. CÁLCULO DE FASES ---
+    for (double jd = jdStart; jd < jdEnd; jd += 15.0) {
+
+        // LUNA NUEVA (Sol y Luna en el mismo grado)
+        double jdNew = findMoonPhase(jd, 0.0);
+        if (jdNew >= jdStart && jdNew < jdEnd) {
+            QJsonObject mObj = jdToDateTimeJson(jdNew, gmt);
+            if (newMoons.isEmpty() || newMoons.last().toObject()["m"].toInt() != mObj["m"].toInt()) {
+                swe_calc_ut(jdNew, SE_SUN, SEFLG_SPEED, xx, errorMsg);
+                mObj["gdec"] = xx[0];
+                mObj["is"] = static_cast<int>(xx[0] / 30.0);
+                newMoons.append(mObj);
+            }
+        }
+
+        // LUNA LLENA (Sol y Luna opuestos)
+        double jdFull = findMoonPhase(jd, 180.0);
+        if (jdFull >= jdStart && jdFull < jdEnd) {
+            QJsonObject fObj = jdToDateTimeJson(jdFull, gmt);
+            if (fullMoons.isEmpty() || fullMoons.last().toObject()["m"].toInt() != fObj["m"].toInt()) {
+                // Datos del Sol
+                swe_calc_ut(jdFull, SE_SUN, SEFLG_SPEED, xx, errorMsg);
+                fObj["sun_gdec"] = xx[0];
+                fObj["sun_is"] = static_cast<int>(xx[0] / 30.0);
+                // Datos de la Luna
+                swe_calc_ut(jdFull, SE_MOON, SEFLG_SPEED, xx, errorMsg);
+                fObj["moon_gdec"] = xx[0];
+                fObj["moon_is"] = static_cast<int>(xx[0] / 30.0);
+                fullMoons.append(fObj);
+            }
+        }
+    }
+
+    // --- 2. CÁLCULO DE ECLIPSES LUNARES ---
+    double tret[10];
+    double currentJdLun = jdStart;
+    while (true) {
+        int res = swe_lun_eclipse_when(currentJdLun, SEFLG_JPLEPH, 0, tret, 0, errorMsg);
+        if (res < 0 || tret[0] >= jdEnd) break;
+
+        QJsonObject ecl;
+        ecl["date"] = jdToDateTimeJson(tret[0], gmt);
+
+        // Posiciones durante el máximo del eclipse
+        swe_calc_ut(tret[0], SE_SUN, SEFLG_SPEED, xx, errorMsg);
+        ecl["sun_gdec"] = xx[0];
+        ecl["sun_is"] = static_cast<int>(xx[0] / 30.0);
+        swe_calc_ut(tret[0], SE_MOON, SEFLG_SPEED, xx, errorMsg);
+        ecl["moon_gdec"] = xx[0];
+        ecl["moon_is"] = static_cast<int>(xx[0] / 30.0);
+
+        if (res & SE_ECL_TOTAL) ecl["type"] = "Total";
+        else if (res & SE_ECL_PARTIAL) ecl["type"] = "Parcial";
+        else if (res & SE_ECL_PENUMBRAL) ecl["type"] = "Penumbral";
+
+        eclipsesLunares.append(ecl);
+        currentJdLun = tret[0] + 1.0;
+    }
+
+    // --- 3. CÁLCULO DE ECLIPSES SOLARES ---
+    double currentJdSol = jdStart;
+    while (true) {
+        int res = swe_sol_eclipse_when_glob(currentJdSol, SEFLG_JPLEPH, 0, tret, 0, errorMsg);
+        if (res < 0 || tret[0] >= jdEnd) break;
+
+        QJsonObject eclSol;
+        eclSol["date"] = jdToDateTimeJson(tret[0], gmt);
+
+        // Posición del Sol/Luna (en eclipse solar están juntos)
+        swe_calc_ut(tret[0], SE_SUN, SEFLG_SPEED, xx, errorMsg);
+        eclSol["gdec"] = xx[0];
+        eclSol["is"] = static_cast<int>(xx[0] / 30.0);
+
+        if ((res & SE_ECL_TOTAL) && (res & SE_ECL_ANNULAR)) eclSol["type"] = "Híbrido";
+        else if (res & SE_ECL_TOTAL) eclSol["type"] = "Total";
+        else if (res & SE_ECL_ANNULAR) eclSol["type"] = "Anular";
+        else if (res & SE_ECL_PARTIAL) eclSol["type"] = "Parcial";
+        else eclSol["type"] = "Otro";
+
+        eclipsesSolares.append(eclSol);
+        currentJdSol = tret[0] + 1.0;
+    }
+
+    root["lunas_nuevas"] = newMoons;
+    root["lunas_llenas"] = fullMoons;
+    root["eclipses_lunares"] = eclipsesLunares;
+    root["eclipses_solares"] = eclipsesSolares;
+
+    return QJsonDocument(root).toJson(QJsonDocument::Compact);
+}
+double SwissEphManager::findMoonPhase(double startJd, double targetPhase)
+{
+    double jd = startJd;
+    double results[6];
+    char errorMsg[256];
+    double diff = 1.0;
+
+    // Máximo 10 iteraciones para encontrar el segundo exacto
+    for (int i = 0; i < 10; i++) {
+        // Posición Sol
+        swe_calc_ut(jd, SE_SUN, 0, results, errorMsg);
+        double sunPos = results[0];
+
+        // Posición Luna
+        swe_calc_ut(jd, SE_MOON, 0, results, errorMsg);
+        double moonPos = results[0];
+
+        // Calcular elongación actual
+        double elongation = moonPos - sunPos;
+        double currentDiff = elongation - targetPhase;
+
+        // Normalizar a [-180, 180]
+        while (currentDiff <= -180.0) currentDiff += 360.0;
+        while (currentDiff > 180.0) currentDiff -= 360.0;
+
+        // La Luna se mueve ~12.2° más rápido que el Sol por día
+        double step = currentDiff / 12.19075;
+        jd -= step;
+
+        if (std::abs(step) < 0.00001) break; // Precisión de 1 segundo
+    }
+    return jd;
+}
+
+// Función auxiliar para convertir JD a Objeto JSON legible
+QJsonObject SwissEphManager::jdToDateTimeJson(double jdUT, double gmt)
+{
+    // Convertimos el Día Juliano UT a la hora local usando el GMT
+    double jdLocal = jdUT + (gmt / 24.0);
+
+    int y, m, d;
+    double hDec;
+    // Desglosamos el Día Juliano local
+    swe_revjul(jdLocal, SE_GREG_CAL, &y, &m, &d, &hDec);
+
+    // Calculamos horas y minutos con redondeo de seguridad
+    int hh = static_cast<int>(hDec + 0.00001);
+    int mm = static_cast<int>((hDec - hh) * 60 + 0.5);
+
+    // Ajuste por desborde de minutos
+    if (mm >= 60) {
+        mm = 0;
+        hh++;
+    }
+
+    QJsonObject obj;
+    obj["a"] = y;
+    obj["m"] = m;
+    obj["d"] = d;
+    obj["h"] = hh;
+    obj["min"] = mm;
+    obj["gmt"] = gmt;
+    // Opcionalmente puedes mantener el jd original por si lo necesitas para cálculos
+    // obj["jd"] = jdUT;
+
+    return obj;
+}
