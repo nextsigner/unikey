@@ -1,1 +1,1 @@
-i7: Se agrega función getLunarEvents(...)
+i7: Se concluye 2025 con la verdion 1.12.31.2

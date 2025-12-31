@@ -379,6 +379,90 @@ double SwissEphManager::findMoonPhase(double startJd, double targetPhase)
     return jd;
 }
 
+QJsonObject SwissEphManager::searchAspsBodieFromLong(int di, int mi, int ai,
+                                                               int planeta_num_ignorado, double longitud_objetivo,
+                                                               int df, int mf, int af,
+                                                               double tol,
+                                                               QStringList aaBodiesIndexs)
+{
+    QJsonObject result;
+    char errorMsg[256];
+    double xx[6];
+
+    double jd_inicio = swe_julday(ai, mi, di, 0.0, SE_GREG_CAL);
+    double jd_fin = swe_julday(af, mf, df, 0.0, SE_GREG_CAL);
+    double tjd = jd_inicio;
+
+    // Aspectos (0=Op, 1=Cuad, 2=Trig, 3=Conj, 4=Sext, 5=Semicuad, 6=Quinc)
+    struct Aspect { double angle; int index; };
+    QVector<Aspect> aspects = {
+        {0.0, 3}, {180.0, 0}, {90.0, 1}, {-90.0, 1}, {120.0, 2}, {-120.0, 2},
+        {60.0, 4}, {-60.0, 4}, {45.0, 5}, {-45.0, 5}, {150.0, 6}, {-150.0, 6}
+    };
+
+    bool found = false;
+
+    while (tjd <= jd_fin) {
+        for (const QString& idStr : aaBodiesIndexs) {
+            int idOriginal = idStr.toInt();
+            int idSwissEph = idOriginal;//qAbs(idOriginal);
+            if (idOriginal == -10) {
+                idSwissEph=10;
+            }
+            double longitud_actual = 0;
+
+            if (swe_calc_ut(tjd, idSwissEph, SEFLG_SPEED, xx, errorMsg) >= 0) {
+                if (idOriginal == -10) {
+                    longitud_actual = fmod(xx[0] + 180.0, 360.0);
+                } else {
+                    longitud_actual = xx[0];
+                }
+
+                for (const auto& asp : aspects) {
+                    double lon_deseada = fmod(longitud_objetivo + asp.angle + 360.0, 360.0);
+                    double diff = qAbs(longitud_actual - lon_deseada);
+                    if (diff > 180.0) diff = 360.0 - diff;
+
+                    if (diff <= tol) {
+                        int y, m, d, hh, mm;
+                        double hDec;
+                        swe_revjul(tjd, SE_GREG_CAL, &y, &m, &d, &hDec);
+                        hh = static_cast<int>(hDec);
+                        mm = static_cast<int>((hDec - hh) * 60 + 0.5);
+
+                        result["isData"] = true;
+                        result["a"] = y; result["m"] = m; result["d"] = d;
+                        result["h"] = hh; result["min"] = mm;
+                        result["gb"] = longitud_objetivo;
+                        result["gr"] = longitud_actual;
+                        result["aspIndex"] = asp.index;
+                        result["numAstro"] = idOriginal;
+                        result["tol"] = tol;
+                        result["ai"] = ai; result["mi"] = mi; result["di"] = di;
+                        result["af"] = af; result["mf"] = mf; result["df"] = df;
+
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (found) break;
+        }
+        if (found) break;
+        tjd += tol;
+    }
+
+    if (!found) {
+        result["isData"] = false;
+        result["gb"] = longitud_objetivo;
+        result["tol"] = tol;
+        result["ai"] = ai; result["mi"] = mi; result["di"] = di;
+        result["af"] = af; result["mf"] = mf; result["df"] = df;
+    }
+
+    return result;
+}
+
 // Función auxiliar para convertir JD a Objeto JSON legible
 QJsonObject SwissEphManager::jdToDateTimeJson(double jdUT, double gmt)
 {

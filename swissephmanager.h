@@ -51,6 +51,8 @@ public:
     Q_INVOKABLE QVector<int> getSolarReturn(double targetSunLong, int targetYear, int birthMonth, int birthDay, double gmt);
     Q_INVOKABLE QString getLunarEvents(int year, double gmt);
     Q_INVOKABLE double findMoonPhase(double startJd, double targetPhase);
+    Q_INVOKABLE QJsonObject searchAspsBodieFromLong(int di, int mi, int ai,int planeta_num_ignorado, double longitud_objetivo, int df, int mf, int af, double tol, QStringList aaBodiesIndexs);
+
     Q_INVOKABLE QJsonObject jdToDateTimeJson(double jdUT, double gmt);
 
     PlanetPosition getPlanetPosition(double julianDay, int planetIndex);
