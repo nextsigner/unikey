@@ -28,12 +28,6 @@ extern "C" {
 }
 #endif
 
-#include <QStandardPaths>
-#include <QDir>
-#include <QFile>
-
-
-
 // Estructura para los resultados
 struct PlanetPosition {
     double longitude;
@@ -49,14 +43,11 @@ class SwissEphManager : public QObject
 public:
     explicit SwissEphManager(QObject *parent = nullptr);
     ~SwissEphManager();
-    // Agrega esto en la sección pública o privada:
-    void checkAndCopyEphemerides();
-    void checkAndCopyJsons();
     Q_INVOKABLE void setSwePath(const QString swePath);
     Q_INVOKABLE QString getBodiePosJson(int bi, int a, int m, int d, int h, int min, int gmt,
-                                        double lat, double lon, double alt);
+                                        double lon, double lat, double alt);
     Q_INVOKABLE QString getHousesPos(int a, int m, int d, int h, int min, int gmt,
-                                     double lat, double lon, int alt, QString hsys);
+                         double lon, double lat, QString hsys);
     Q_INVOKABLE QVector<int> getSolarReturn(double targetSunLong, int targetYear, int birthMonth, int birthDay, double gmt);
     Q_INVOKABLE QString getLunarEvents(int year, double gmt);
     Q_INVOKABLE double findMoonPhase(double startJd, double targetPhase);
@@ -66,7 +57,6 @@ public:
 
     PlanetPosition getPlanetPosition(double julianDay, int planetIndex);
     double dateToJulian(int year, int month, int day, double hour);
-
 
 private:
     QString m_ephePath;

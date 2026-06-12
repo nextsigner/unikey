@@ -1,13 +1,5 @@
 #include "swissephmanager.h"
-#include "swissephmanager.h"
 #include <QDebug>
-#include <QStandardPaths>
-#include <QDir>
-#include <QFile>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <cmath>
-
 
 SwissEphManager::SwissEphManager(QObject *parent)
     : QObject(parent)
@@ -15,11 +7,6 @@ SwissEphManager::SwissEphManager(QObject *parent)
     // Configurar la ruta de los archivos de datos (.se1)
     // Swiss Ephemeris espera una cadena de C (char*)
     //swe_set_ephe_path(m_ephePath.toUtf8().data());
-// Al iniciar, verificamos si estamos en Android y preparamos los archivos
-#ifdef Q_OS_ANDROID
-    checkAndCopyEphemerides();
-    checkAndCopyJsons();
-#endif
 }
 
 SwissEphManager::~SwissEphManager()
@@ -28,122 +15,9 @@ SwissEphManager::~SwissEphManager()
     swe_close();
 }
 
-
-void SwissEphManager::checkAndCopyEphemerides()
-{
-    // 1. Ruta interna de la App
-    QString internalPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/ephe";
-    QDir dir(internalPath);
-
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    }
-
-    // 2. Lista de archivos para cubrir 1400 - 2100
-    // SEPL = Planetas, SEMO = Luna, SEAS = Asteroides principales
-    // _12: años 1200 a 1799
-    // _18: años 1800 a 2399
-    QStringList filesToCopy = {
-        // Bloque 1800 - 2100 (y más allá)
-        "sepl_18.se1", "semo_18.se1", "seas_18.se1",
-        // Bloque 1200 - 1799 (para cubrir desde 1400)
-        "sepl_12.se1", "semo_12.se1", "seas_12.se1",
-        // Archivos maestros requeridos siempre
-        "fixstars.cat", "seorbel.txt"
-    };
-
-    foreach (const QString &fileName, filesToCopy) {
-        QString destFile = internalPath + "/" + fileName;
-
-        if (!QFile::exists(destFile)) {
-            // En Android/Qt, los assets se acceden con el prefijo "assets:/"
-            // Asegúrate de que en tu .pro o CMakeLists los archivos se incluyan correctamente
-            QString sourceFile = "assets:/ephe/" + fileName;
-
-            if (QFile::copy(sourceFile, destFile)) {
-                // Dar permisos explicitos de lectura/escritura al dueño
-                QFile::setPermissions(destFile, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
-                qDebug() << "Copiado con éxito:" << fileName;
-            } else {
-                // Si esto falla, verifica que el archivo esté en la carpeta android/assets/ephe
-                // y que esté declarado en tu sistema de construcción.
-                qWarning() << "ERROR: No se encontró en assets o no se pudo copiar:" << fileName;
-            }
-        } else {
-            // Opcional: qDebug() << "Archivo ya existente:" << fileName;
-        }
-    }
-
-    // 3. Configurar la ruta en la librería C
-    // Convertimos a Path nativo para evitar problemas con separadores
-    swe_set_ephe_path(dir.toNativeSeparators(internalPath).toUtf8().data());
-
-    qDebug() << "SwissEph Path configurado en:" << internalPath;
-}
-
-void SwissEphManager::checkAndCopyJsons()
-{
-    QString internalPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/jsons";
-    QDir destDir(internalPath);
-
-    if (!destDir.exists()) {
-        destDir.mkpath(".");
-    }
-
-    // Definimos la carpeta de origen en assets
-    QDir assetsDir("assets:/jsons");
-
-    // Filtramos solo archivos .json
-    QStringList filters;
-    filters << "*.json";
-    QStringList filesToCopy = assetsDir.entryList(filters, QDir::Files);
-    qDebug() << "Lista de jsons:" << filesToCopy;
-
-    foreach (const QString &fileName, filesToCopy) {
-        QString destFile = internalPath + "/" + fileName;
-        QString sourceFile = "assets:/jsons/" + fileName;
-
-        // 1. Si ya existe, lo borramos para asegurar que se actualice
-        if (QFile::exists(destFile)) {
-            QFile::remove(destFile);
-        }
-
-        // 2. Intentamos la copia directa
-        if (QFile::copy(sourceFile, destFile)) {
-            QFile::setPermissions(destFile, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ReadUser);
-            qDebug() << "Copiado con éxito (Directo):" << fileName;
-        }
-        else {
-            // 3. PLAN B: Si falla la copia directa, leemos el stream (más robusto en Android)
-            QFile fileIn(sourceFile);
-            if (fileIn.open(QIODevice::ReadOnly)) {
-                QFile fileOut(destFile);
-                if (fileOut.open(QIODevice::WriteOnly)) {
-                    fileOut.write(fileIn.readAll());
-                    fileOut.close();
-                    QFile::setPermissions(destFile, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ReadUser);
-                    qDebug() << "Copiado con éxito (Stream):" << fileName;
-                } else {
-                    qWarning() << "No se pudo abrir destino para escribir:" << fileOut.errorString();
-                }
-                fileIn.close();
-            } else {
-                qWarning() << "No se pudo abrir origen para leer:" << fileIn.errorString();
-            }
-        }
-    }
-
-}
-
 void SwissEphManager::setSwePath(const QString swePath)
 {
-    // Si pasamos una ruta vacía o "auto" en Android, usamos la interna
-    if((swePath.isEmpty() || swePath == "auto")) {
-        QString internalPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/ephe";
-        swe_set_ephe_path(internalPath.toUtf8().data());
-    } else {
-        swe_set_ephe_path(swePath.toUtf8().data());
-    }
+    swe_set_ephe_path(swePath.toUtf8().data());
 }
 
 #include <QJsonObject>
@@ -202,36 +76,29 @@ QString SwissEphManager::getBodiePosJson(int bi, int a, int m, int d, int h, int
     obj["mdeg"] = rsmin;
     //obj["rsseg"] = rsseg;
     obj["sdeg"] = rsseg;
-
-    // Asignación del estado de retrogradación como booleano puro
-    obj["isRetro"] = (speedLong < 0.0);
+    //obj["retro"] = (speedLong < 0)?1:0;
+    obj["retro"] = (speedLong > 0)?1:0;
 
     QJsonDocument doc(obj);
     return doc.toJson(QJsonDocument::Compact);
 }
 
-    QString SwissEphManager::getHousesPos(int a, int m, int d, int h, int min, int gmt,
-                                      double lat, double lon, int alt, QString hsys)
+QString SwissEphManager::getHousesPos(int a, int m, int d, int h, int min, int gmt,
+                                      double lon, double lat, QString hsys)
 {
     // 1. Cálculo de Tiempo Universal (UT)
     double horaUT = (h + (min / 60.0)) - gmt;
     double jd = swe_julday(a, m, d, horaUT, SE_GREG_CAL);
 
-    // Definir sistema de casas (por defecto Placidus 'P')
-    char sys = hsys.isEmpty() ? 'P' : hsys.toUpper().at(0).toLatin1();
-
-    // ¡CRUCIAL!: Si el sistema de casas es Topocéntrico ('T'),
-    // le configuramos la ubicación exacta (incluyendo la altitud) a la librería.
-    if (sys == 'T') {
-        swe_set_topo(lon, lat, static_cast<double>(alt));
-    }
-
     // 2. Preparar variables para la librería
     double cusps[13]; // La librería usa índices 1 a 12 para las casas
     double ascmc[10]; // Puntos adicionales (Asc, MC, Armmc, etc.)
 
+    // Definir sistema de casas (por defecto Placidus 'P')
+    char sys = hsys.isEmpty() ? 'P' : hsys.toUpper().at(0).toLatin1();
+
     // 3. Calcular las cúspides
-    // Si sys es 'T', usará los datos geográficos que seteamos arriba con swe_set_topo
+    // El segundo parámetro (0) indica que usamos el zodiaco tropical
     int result = swe_houses_ex(jd, 0, lat, lon, sys, cusps, ascmc);
 
     if (result < 0) return "{}";
@@ -260,26 +127,29 @@ QString SwissEphManager::getBodiePosJson(int bi, int a, int m, int d, int h, int
         QJsonObject houseData;
         houseData["gdec"] = gdec;
         houseData["is"] = is;
+        //houseData["rsdeg"] = rsdeg;
         houseData["rsgdeg"] = rsdeg;
-        houseData["gdeg"] = static_cast<int>(gdec);
+        houseData["gdeg"] = static_cast<int>(gdec);;
+        //houseData["rsmin"] = rsmin;
         houseData["mdeg"] = rsmin;
+        //houseData["rsseg"] = rsseg;
         houseData["sdeg"] = rsseg;
 
-        QString nomItem = "h" + QString::number(i);
+        QString nomItem="h";
+        nomItem.append(QString::number(i));
         housesObj[nomItem] = houseData;
     }
 
-    // 5. Agregar puntos principales
+    // 5. Agregar puntos principales (Ascendente y MC) por conveniencia
     root["ph"] = housesObj;
     root["asc"] = ascmc[0];
     root["mc"] = ascmc[1];
     root["vertex"] = ascmc[3];
-    root["alt"] = alt;
-    root["hsys"] = QString(sys); // Añadimos el sistema usado al JSON para control
 
     QJsonDocument doc(root);
     return doc.toJson(QJsonDocument::Compact);
 }
+
 QVector<int> SwissEphManager::getSolarReturn(double targetSunLong, int targetYear, int birthMonth, int birthDay, double gmt)
 {
     // 1. Empezamos la búsqueda 2 días antes del cumpleaños estimado en UT
